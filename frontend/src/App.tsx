@@ -151,10 +151,11 @@ const App: React.FC = () => {
             </div>
           )}
           <a
-            href="https://github.com"
+            href="https://github.com/shambhushekharsinha-engg/VayuSync"
             target="_blank"
             rel="noopener noreferrer"
             className="p-1.5 rounded-lg text-gray-500 hover:text-gray-300 hover:bg-gray-800 transition-colors"
+            title="GitHub Repository"
           >
             <Github className="w-4 h-4" />
           </a>
