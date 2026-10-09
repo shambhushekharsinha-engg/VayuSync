@@ -111,6 +111,11 @@ class SoundEngine {
     } catch { /* silently ignore */ }
   }
 
+  // Atmospheric fly-to whoosh
+  public playWhoosh() {
+    this.playSurgeWhoosh();
+  }
+
   private playBeep(freq: number, duration: number, type: OscillatorType) {
     const ctx = this.getContext();
     if (!ctx) return;

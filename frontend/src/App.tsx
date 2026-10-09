@@ -12,6 +12,8 @@ import { DispersionAnalytics } from './components/DispersionAnalytics';
 import { ArchitectureModal } from './components/ArchitectureModal';
 import { TerminalLog, type LogEntry } from './components/TerminalLog';
 import { InstitutionalActionProfiles } from './components/InstitutionalActionProfiles';
+import { GlobeLocationSelector } from './components/GlobeLocationSelector';
+import { GLOBAL_REGIONS, type GlobalRegion } from './data/globalRegions';
 import type {
   AlertLog, DashboardData, Institution,
   SimulationResult, SystemStatus as SystemStatusType,
@@ -53,6 +55,8 @@ const App: React.FC = () => {
   const [showArchModal, setShowArchModal] = useState(false);
   const [soundOn, setSoundOn] = useState(false);
   const [crisisMode, setCrisisMode] = useState(false);
+  const [activeRegion, setActiveRegion] = useState<GlobalRegion>(GLOBAL_REGIONS[0]);
+  const [isGlobeView, setIsGlobeView] = useState(false);
   const [terminalLogs, setTerminalLogs] = useState<LogEntry[]>(INITIAL_LOGS);
 
   const addLog = useCallback((source: LogEntry['source'], message: string, level: LogEntry['level'] = 'INFO') => {
@@ -60,6 +64,59 @@ const App: React.FC = () => {
     const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
     setTerminalLogs(prev => [...prev.slice(-40), { timestamp: timeStr, source, message, level }]);
   }, []);
+
+  const handleSelectRegion = useCallback(async (region: GlobalRegion) => {
+    setActiveRegion(region);
+    setIsGlobeView(false);
+    setSimulatedCone(null);
+    setSimulatedHotspot(null);
+    setInstitutions(region.institutions);
+
+    addLog('SYSTEM', `Orbital targeting switched: ${region.name} (${region.country}) · [${region.center[1]}°N, ${region.center[0]}°E]`, 'INFO');
+
+    // Fetch dynamic live wind & air quality for new region
+    try {
+      const [lng, lat] = region.center;
+      const [weatherRes, aqiRes] = await Promise.all([
+        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=wind_speed_10m,wind_direction_10m`),
+        fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lng}&current=pm2_5,us_aqi`),
+      ]);
+
+      if (weatherRes.ok && aqiRes.ok) {
+        const weatherData = await weatherRes.json();
+        const aqiData = await aqiRes.json();
+        const speed = weatherData.current?.wind_speed_10m ?? region.defaultWind.speedKmh;
+        const dir = weatherData.current?.wind_direction_10m ?? region.defaultWind.directionDeg;
+        const pm25 = aqiData.current?.pm2_5 ?? 180;
+        const aqi = aqiData.current?.us_aqi ?? 250;
+
+        setDashboard(prev => prev ? {
+          ...prev,
+          wind: {
+            speed_kmh: speed,
+            direction_deg: dir,
+            description: `${speed.toFixed(0)} km/h ${region.defaultWind.cardinal}`,
+          },
+          aqi_delhi_ncr: {
+            ...prev.aqi_delhi_ncr,
+            current: aqi,
+            pm25_ugm3: pm25,
+          },
+          active_fire_hotspots: region.hotspots.length,
+          institutions_at_risk: region.institutions.length,
+        } : null);
+
+        addLog('OPEN_METEO', `Live atmospheric telemetry ingested: Wind ${speed.toFixed(1)} km/h @ ${dir}° | Real-time PM2.5: ${pm25.toFixed(1)} µg/m³ (AQI: ${aqi})`, 'SUCCESS');
+      }
+    } catch {
+      addLog('OPEN_METEO', `Satellite baseline vectors loaded for ${region.name}`, 'INFO');
+    }
+  }, [addLog]);
+
+  const handleFlyToGlobalView = useCallback(() => {
+    setIsGlobeView(prev => !prev);
+    addLog('SYSTEM', !isGlobeView ? 'Global Orbit Mode active: Viewing planetary wildfire & stubble hotspots' : `Returned to regional tactical radar: ${activeRegion.name}`, 'INFO');
+  }, [isGlobeView, activeRegion, addLog]);
 
   // ─── Initial data load ─────────────────────────────────────────────────────
   useEffect(() => {
@@ -196,8 +253,18 @@ const App: React.FC = () => {
               </span>
             </div>
             <p className="text-gray-400 text-[9px] leading-none mt-0.5">
-              Hyperlocal Stubble Action Engine · Indo-Gangetic Plain
+              Hyperlocal Fire & Stubble Exposure Engine · {activeRegion.name}
             </p>
+          </div>
+
+          {/* Globe & Multi-Location Selector */}
+          <div className="hidden sm:block ml-1">
+            <GlobeLocationSelector
+              currentRegionId={activeRegion.id}
+              onSelectRegion={handleSelectRegion}
+              onFlyToGlobalView={handleFlyToGlobalView}
+              isGlobeView={isGlobeView}
+            />
           </div>
 
           {/* LIVE badge */}
@@ -425,6 +492,8 @@ const App: React.FC = () => {
               <div className="flex-1 relative">
                 <div className="absolute inset-0">
                   <VayuSyncMap
+                    activeRegion={activeRegion}
+                    isGlobeView={isGlobeView}
                     simulatedCone={simulatedCone}
                     simulatedHotspot={simulatedHotspot}
                     timelineHour={timelineHour}

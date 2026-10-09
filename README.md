@@ -33,11 +33,21 @@ Hackathon judges evaluate live platforms in 90–120 seconds. Here is the exact 
    - The dark-matter MapLibre radar renders the dispersion cone expanding towards Delhi NCR in real time.
    - The facility threat level switches to **CRITICAL**, and automated AI advisories stream into the alert feed.
    - Real-time AWS execution traces stream into the bottom **Execution Terminal** (EventBridge $\to$ Lambda $\to$ DynamoDB $\to$ Bedrock $\to$ SNS).
-4. **Inspect Operational Institutional Directives ("What Changes?" Factor)**:
+4. **Switch Across Global Stubble & Wildfire Hotspots (Planetary Multi-Location)**:
+   - Click the **`PLANETARY VIEW`** button in the header to zoom out to full **Global Planetary Orbit**.
+   - Use the **Global Location Selector** to instantly fly across active global wildfire zones:
+     - 🇮🇳 **Indo-Gangetic Plain (India)**: Seasonal post-monsoon stubble burning impacting Delhi NCR.
+     - 🇺🇸 **California Valley Corridor (USA)**: Santa Ana wildfire vectors impacting Central Valley & LA Basin.
+     - 🇮🇩 **Sumatra & Riau Peatlands (Indonesia)**: Peat haze choking Malacca Strait, Singapore & Kuala Lumpur.
+     - 🇧🇷 **Amazon Arc of Deforestation (Brazil)**: Slash-and-burn agricultural fires across Pará & Xingu River Basin.
+     - 🇦🇺 **Southeast Australia Bushfire Belt (Australia)**: Eucalypt forest bushfires vectoring toward Greater Sydney.
+     - 🇨🇦 **Canadian Boreal Fire Complex (Canada)**: Boreal crown fires dispersing into Edmonton & Calgary.
+   - For every location, VayuSync dynamically ingests **live Open-Meteo 10m wind velocity vectors** and **real-time PM2.5/AQI readings**.
+5. **Inspect Operational Institutional Directives ("What Changes?" Factor)**:
    - Click the **"Institutional Directives"** tab in the navbar.
    - Switch between **Schools** (DPS Rohini), **Outdoor Construction** (Dwarka Expressway), and **Hospitals** (AIIMS New Delhi).
    - Click **`Download Action Directive (PDF)`** or **`Copy Advisory`** to view immediate, actionable operational mandates.
-5. **Verify AWS Serverless Architecture**:
+6. **Verify AWS Serverless Architecture**:
    - Click **`AWS Architecture`** in the header to view the interactive 5-stage architecture pipeline modal and least-privilege IAM policies.
 
 ---
