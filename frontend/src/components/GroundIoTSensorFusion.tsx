@@ -118,12 +118,12 @@ export const GroundIoTSensorFusion: React.FC = () => {
               <h2 className="text-lg font-black text-white">
                 Ground IoT Mesh & Mobile Bus Sensor Fusion
               </h2>
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-green-500/20 text-green-300 border border-green-500/30">
-                AWS IoT Core · MQTT / TLS 1.3
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                HARDWARE SIMULATION TESTBED · AWS IoT Core Protocol (MQTT)
               </span>
             </div>
             <p className="text-gray-400 text-xs mt-0.5">
-              Micro-sensor ground truth telemetry corroborating NASA FIRMS satellite thermal inversion predictions
+              Simulated micro-sensor fleet (ESP32 / SPS30) benchmarked against CPCB / OpenAQ Delhi ground stations to demonstrate satellite-sensor corroboration.
             </p>
           </div>
         </div>
