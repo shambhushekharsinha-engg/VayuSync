@@ -156,9 +156,17 @@ The plume lateral dispersion bounds form a GeoJSON polygon with 16 boundary vert
 
 ---
 
-## 🎯 Key Capabilities & Innovation
+### 🎛️ 1. Multi-Mode Mission Control Center
+VayuSync elevates the user experience beyond a standard dashboard into an enterprise command hub:
+- **🌐 Mode 1: Tactical Radar (Geospatial Dispersion):** Dark Matter MapLibre canvas with **3D Perspective Tilt (55° oblique view)**, live hotspots, pulsing radar waves, and active wind vectors.
+- **⏳ Interactive 12-Hour Time-Travel Scrubber:** Scrub or auto-play from $T+0\text{h}$ (Ludhiana stubble ignition) to $T+12\text{h}$ (extended regional dispersion). The smoke cone expands dynamically on the map, updating real-time AQI and impacted facilities as the time advances.
+- **🏫 Mode 2: Facility Readiness Matrix:** Real-time surveillance grid of all 8 monitored schools, hospitals, and construction sites with risk tiers, student/bed counts, HEPA integration compliance, and direct Bedrock advisory inspection.
+- **🛡️ Mode 3: Preemptive Action Impact Calculator (ROI):** Interactive policy toggles (e.g., closing outdoor sports, shifting HVAC to HEPA) that calculate live ROI: **14,280 citizens protected**, **1.84 kg particulate inhalation averted**, and **₹48.6 Lakhs emergency healthcare costs avoided**.
+- **📈 Mode 4: Atmospheric Dispersion Analytics:** Detailed 12-hour projected AQI bar curves, thermal radiative power (FRP) breakdown by district, and end-to-end AWS Lambda execution latency breakdown.
+- **🔊 Programmatic Web Audio Synthesizer:** Real-time tactical radar sweeps, alert hazard chimes, and simulation surge audio synthesized via the Web Audio API with zero external media files.
+- **🚨 Crisis DEFCON 1 Mode:** Instant threat-level toggle with ambient red hazard illumination.
 
-### 🔴 1. One-Click Hackathon Live Simulator
+### 🔴 2. One-Click Hackathon Live Simulator
 - A live demo feature built for judges.
 - Clicking **"🔴 SIMULATE PUNJAB FIRE HOTSPOT"** injects a synthetic **1,200 MW** thermal anomaly at Ludhiana, Punjab ($30.90^\circ\text{N}, 75.85^\circ\text{E}$).
 - Evaluates atmospheric wind trajectories ($46.8\text{ km/h NW}\to\text{SE}$).
@@ -166,7 +174,7 @@ The plume lateral dispersion bounds form a GeoJSON polygon with 16 boundary vert
 - Triggers Claude 3 Haiku for institutional advisories.
 - Dispatches alert via Amazon SNS and updates the MapLibre GL UI in **under 2.3 seconds**.
 
-### 🏫 2. Hyperlocal Institutional Action Plans
+### 🏫 3. Hyperlocal Institutional Action Plans & Bedrock Inspector
 Unlike generic AQI alerts ("Air is Unhealthy"), VayuSync outputs tailored operational workflows:
 - **Schools (e.g., DPS R.K. Puram, KV Dwarka):**
   - Cancel outdoor sports & assemblies by `07:30 AM`.
