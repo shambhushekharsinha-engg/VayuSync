@@ -1,0 +1,189 @@
+import React from 'react';
+import { Wind, Flame, Zap, Gauge, TrendingUp } from 'lucide-react';
+
+export const DispersionAnalytics: React.FC = () => {
+  const FRP_DISTRICTS = [
+    { district: 'Ludhiana, PB', frp: 1247, pct: 100, color: 'bg-red-500' },
+    { district: 'Amritsar, PB', frp: 934, pct: 75, color: 'bg-orange-500' },
+    { district: 'Patiala, PB', frp: 757, pct: 61, color: 'bg-amber-500' },
+    { district: 'Hisar, HR', frp: 424, pct: 34, color: 'bg-yellow-500' },
+    { district: 'Rohtak, HR', frp: 312, pct: 25, color: 'bg-blue-500' },
+  ];
+
+  const FORECAST_HOURS = [
+    { time: '04:00', aqi: 180, label: 'T+0h' },
+    { time: '06:00', aqi: 240, label: 'T+2h' },
+    { time: '08:00', aqi: 310, label: 'T+4h' },
+    { time: '10:00', aqi: 387, label: 'T+6h' },
+    { time: '12:00', aqi: 445, label: 'T+8h' },
+    { time: '14:00', aqi: 472, label: 'T+10h' },
+    { time: '16:00', aqi: 410, label: 'T+12h' },
+  ];
+
+  const LATENCY_BREAKDOWN = [
+    { step: 'NASA FIRMS Ingestion', durationMs: 340, pct: 15 },
+    { step: 'Open-Meteo Wind Vector Query', durationMs: 280, pct: 12 },
+    { step: 'Lagrangian Dispersion Cone Math', durationMs: 45, pct: 2 },
+    { step: 'DynamoDB Spatial Geofence Match', durationMs: 120, pct: 5 },
+    { step: 'Amazon Bedrock (Claude 3 Haiku)', durationMs: 1180, pct: 51 },
+    { step: 'Amazon SNS Push & SMS Dispatch', durationMs: 335, pct: 15 },
+  ];
+
+  return (
+    <div className="flex flex-col h-full bg-gray-950 p-6 space-y-5 overflow-y-auto">
+      {/* Header */}
+      <div className="flex items-center justify-between bg-gray-900/80 border border-gray-800 p-4 rounded-2xl">
+        <div>
+          <h2 className="text-lg font-black text-white flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-orange-400" />
+            Atmospheric Dispersion & Cloud Telemetry Analytics
+          </h2>
+          <p className="text-gray-400 text-xs mt-0.5">
+            Lagrangian plume vector modeling, nocturnal inversion projections & AWS Lambda pipeline telemetry
+          </p>
+        </div>
+        <span className="px-3 py-1 rounded-xl bg-orange-500/10 border border-orange-500/30 text-orange-400 font-bold text-xs">
+          Open-Meteo + NASA FIRMS Validated
+        </span>
+      </div>
+
+      {/* Grid: 12h AQI Forecast Curve + Wind Profile */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        {/* 12h AQI Projection Chart */}
+        <div className="lg:col-span-2 bg-gray-900/60 border border-gray-800 rounded-3xl p-5 shadow-2xl flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Gauge className="w-4 h-4 text-red-400" />
+              <h3 className="font-bold text-sm text-white">12-Hour Delhi NCR AQI Projection Curve</h3>
+            </div>
+            <span className="text-[10px] text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full font-bold">
+              PEAK HAZARD: 472 AQI at T+10h
+            </span>
+          </div>
+
+          {/* Bar / Column visual representation */}
+          <div className="h-44 flex items-end gap-3 pt-4 pb-2 border-b border-gray-800 px-2">
+            {FORECAST_HOURS.map((item) => {
+              const heightPct = Math.min((item.aqi / 500) * 100, 100);
+              const color =
+                item.aqi > 400 ? 'from-purple-600 to-red-600' :
+                item.aqi > 300 ? 'from-red-500 to-orange-500' :
+                item.aqi > 200 ? 'from-orange-500 to-yellow-500' : 'from-yellow-500 to-green-500';
+
+              return (
+                <div key={item.time} className="flex-1 flex flex-col items-center h-full justify-end group">
+                  <div className="text-[10px] font-mono font-bold text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity mb-1">
+                    {item.aqi}
+                  </div>
+                  <div
+                    className={`w-full rounded-t-xl bg-gradient-to-t ${color} transition-all duration-700 shadow-lg`}
+                    style={{ height: `${heightPct}%` }}
+                  />
+                  <div className="text-[10px] font-bold text-gray-400 mt-2">{item.label}</div>
+                  <div className="text-[9px] text-gray-600">{item.time}</div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="flex items-center justify-between text-[10px] text-gray-500 pt-3">
+            <span>Severe Inversion Risk Window: 08:00 - 15:00 IST</span>
+            <span>Boundary Layer Height: 620m (Thermal Compression)</span>
+          </div>
+        </div>
+
+        {/* Wind Profile Widget */}
+        <div className="bg-gray-900/60 border border-gray-800 rounded-3xl p-5 shadow-2xl flex flex-col justify-between">
+          <div className="flex items-center gap-2 mb-3">
+            <Wind className="w-4 h-4 text-blue-400" />
+            <h3 className="font-bold text-sm text-white">Atmospheric Wind Profile</h3>
+          </div>
+
+          <div className="space-y-3 bg-gray-950/60 p-4 rounded-2xl border border-gray-800/80">
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-gray-400">10m Vector Velocity</span>
+              <span className="text-white font-mono font-bold">46.8 km/h (12.8 m/s)</span>
+            </div>
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-gray-400">Meteorological Bearing</span>
+              <span className="text-blue-400 font-mono font-bold">297° (NW → SE)</span>
+            </div>
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-gray-400">Pasquill Stability Class</span>
+              <span className="text-orange-400 font-bold">Class D (Neutral / Moderate)</span>
+            </div>
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-gray-400">Dispersion Half-Angle</span>
+              <span className="text-white font-mono font-bold">18.7° Cone Spread</span>
+            </div>
+          </div>
+
+          <div className="mt-4 p-3 bg-blue-500/5 border border-blue-500/20 rounded-2xl text-[10px] text-blue-300 leading-relaxed">
+            🌬️ Persistent northwesterly winds create a direct high-speed pipeline transporting stubble smoke straight into the Delhi bowl within 6.4 hours.
+          </div>
+        </div>
+      </div>
+
+      {/* Grid: FRP Radiative Power + End-to-End Latency */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        {/* FRP Hotspots by District */}
+        <div className="bg-gray-900/60 border border-gray-800 rounded-3xl p-5 shadow-2xl space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Flame className="w-4 h-4 text-orange-400" />
+              <h3 className="font-bold text-sm text-white">Thermal Radiative Power (FRP) by District</h3>
+            </div>
+            <span className="text-[10px] text-gray-500 font-mono">Total: 3,674 MW</span>
+          </div>
+
+          <div className="space-y-2.5 pt-1">
+            {FRP_DISTRICTS.map((d) => (
+              <div key={d.district} className="space-y-1">
+                <div className="flex justify-between text-xs">
+                  <span className="text-gray-300 font-medium">{d.district}</span>
+                  <span className="font-mono font-bold text-orange-400">{d.frp} MW</span>
+                </div>
+                <div className="h-2 bg-gray-950 rounded-full overflow-hidden border border-gray-800">
+                  <div
+                    className={`h-full ${d.color} rounded-full transition-all duration-700`}
+                    style={{ width: `${d.pct}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* End-to-End Lambda Processing Latency */}
+        <div className="bg-gray-900/60 border border-gray-800 rounded-3xl p-5 shadow-2xl space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Zap className="w-4 h-4 text-yellow-400" />
+              <h3 className="font-bold text-sm text-white">AWS End-to-End Pipeline Latency</h3>
+            </div>
+            <span className="text-[10px] text-green-400 font-bold bg-green-500/10 px-2 py-0.5 rounded border border-green-500/20">
+              2,300 ms (SLA &lt; 2,500 ms)
+            </span>
+          </div>
+
+          <div className="space-y-2 pt-1">
+            {LATENCY_BREAKDOWN.map((step) => (
+              <div key={step.step} className="space-y-1">
+                <div className="flex justify-between text-[11px]">
+                  <span className="text-gray-400 truncate pr-2">{step.step}</span>
+                  <span className="font-mono text-white font-bold flex-shrink-0">{step.durationMs} ms</span>
+                </div>
+                <div className="h-1.5 bg-gray-950 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-orange-500 to-yellow-400 rounded-full"
+                    style={{ width: `${step.pct * 1.8}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { CheckCircle, Loader2, AlertTriangle } from 'lucide-react';
 import type { SimulationResult } from '../types';
 import { apiClient } from '../utils/api';
+import { soundEngine } from '../utils/audio';
 
 interface SimulateTriggerProps {
   onSimulationComplete: (result: SimulationResult) => void;
@@ -50,6 +51,7 @@ const SimulateTrigger: React.FC<SimulateTriggerProps> = ({ onSimulationComplete,
       }, delay);
     });
 
+    soundEngine.playSurgeWhoosh();
     try {
       const simResult = await apiClient.simulate({
         hotspot_lat: 30.902,
@@ -60,6 +62,7 @@ const SimulateTrigger: React.FC<SimulateTriggerProps> = ({ onSimulationComplete,
       setTotalMs(simResult.pipeline_performance.total_ms);
       setResult(simResult);
       setSimState('done');
+      soundEngine.playAlertHazard();
       onSimulationComplete(simResult);
     } catch (err) {
       setErrorMsg('Pipeline error — check API connection');
