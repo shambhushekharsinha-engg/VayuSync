@@ -1,0 +1,302 @@
+﻿=== PAGE 1 ===
+VayuSync ΓÇö Hyperlocal Stubble
+Exposure & Institutional Action Engine
+Track: Track 1 εéüAirεéé | Target: Γé╣2,00,000 Track Winner & Amazon Fast-Track Interview
+Shortlist
+Event: Bharat Builds Tour 2026εéÆ Environmental Hacks
+1. Executive Summary & Problem Framing
+1.1 The Visualization Trap εéüWhy 90% of Air Track Projects Fail)
+Most environmental hackathon entries build reactive AQI dashboards. They pull static
+sensor data from government feeds, render red-orange-yellow heatmaps, and display
+historical trend graphs. By the time a central AQI monitor records a hazardous spike of
+450εé¥ PM2.5 in Delhi NCR, the toxic smoke plume has already settled over high-density
+population centers for hours.
+Passive visualization provides zero operational lead time. It forces institutions to react
+after exposure has occurred, rendering interventions like masking or HVAC adjustments
+ineffective against peak toxic inhalation.
+1.2 The Core Problem
+During October and November, agricultural stubble burning across Punjab and Haryana
+releases massive thermal anomalies and particulate plumes. Driven by seasonal
+north-westerly wind vectors, these plumes travel across regional corridors and hit
+vulnerable urban micro-zones in Delhi NCR.
+Vulnerable institutions lack predictive micro-targeting:
+ΓùÅ Schools: Learn about severe air quality spikes during mid-day sports or outdoor
+assemblies, hours after exposure.
+=== PAGE 2 ===
+ΓùÅ Outdoor Workforces: Construction sites and municipal sanitation crews operate
+without automated schedule adjustments or shift rotations prior to plume arrival.
+ΓùÅ Healthcare Facilities: Hospital administrators cannot dynamically scale indoor air
+filtration or prep respiratory wards ahead of surge arrivals.
+1.3 The VayuSync Solution
+VayuSync shifts the paradigm from reactive tracking to preemptive institutional
+automation. Built as an autonomous, event-driven cloud pipeline on AWS, VayuSync
+tracks real-time thermal anomalies from satellite data, calculates downwind smoke
+trajectories using live wind vectors, and automatically triggers targeted operational
+guardrails 6 to 12 hours before toxic smoke reaches specific micro-zones.εéâNASA FIRMS
+Thermal Data] + εéâOpen-Meteo Wind Vectors]
+Γöé
+Γû╝
+εéâAWS Serverless Processing Engine]
+Γöé
+Γû╝
+εéâAmazon Bedrock Reasoning Engine]
+Γöé
+Γû╝
+εéâAutomated Institutional Action Engine εéüSNS / Webhooks)]
+Γö£ΓöÇΓöÇ Schools: Cancel outdoor activities 6 hours ahead
+Γö£ΓöÇΓöÇ Construction: Suspend dust operations before arrival
+ΓööΓöÇΓöÇ Workforces: Automated shift adjustment alerts
+=== PAGE 3 ===
+2. Core Project Goals & Success Metrics
+2.1 Architectural & Operational Goals
+ΓùÅ Goal 1εéÆ Zero-Maintenance Serverless Pipeline
+Deploy a fully serverless, event-driven infrastructure on AWS SAM/CDK with zero
+persistent server management, minimal warm-up latency, and zero cold start
+penalty on critical alert paths.
+ΓùÅ Goal 2εéÆ Hyperlocal Downwind Risk Prediction
+Fuse NASA FIRMS satellite fire hotspot data, Open-Meteo 10m wind
+direction/velocity vectors, and ground-level CPCB sensor streams to compute
+high-resolution dispersion trajectory cones.
+ΓùÅ Goal 3εéÆ Actionable Institutional Guardrails
+Utilize Amazon Bedrock εéüAnthropic Claude 3 Haiku) to evaluate calculated
+exposure vectors against registered institutional thresholds, generating
+deterministic, safety-checked operational directives.
+2.2 Key Performance Indicators εéüKPIsεéé
+Performance Metric Operational Target Validation Method
+End-to-End Processing < 2.5 seconds Timestamp logs from
+Latency EventBridge trigger to SNS
+dispatch
+Alert Dispatch Determinism 100% execution success CloudWatch Logs verification
+for mock WhatsApp/SMS
+hooks
+AWS Cost & Quotas 100% Free Tier Compliant AWS Budgets alarm
+configured at $0.00 threshold
+=== PAGE 4 ===
+Performance Metric Operational Target Validation Method
+Predictive Lead Time 6εéë12 Hours Downwind vector calculation
+ahead of surface sensor
+spikes
+System Availability 99.9% Serverless Uptime AWS Lambda & DynamoDB
+multi-AZ native durability
+3. AWS Cloud Architecture & Data Pipeline
+VayuSync utilizes an event-driven, decoupled AWS serverless architecture designed for
+scale, rapid execution, and complete cost efficiency.
++-------------------------------------------------------+
+| INGESTION LAYER |
+| EventBridge Cron εéü6hεéé Γƒ╢ Lambda Ingestion Engine |
++---------------------------+---------------------------+
+|
+v
++-------------------------------------------------------+
+| STORAGE LAYER |
+| Amazon S3 εéüRaw GeoJSONεéé | DynamoDB εéüHotspots/Users)|
++---------------------------+---------------------------+
+|
+=== PAGE 5 ===
+v
++-------------------------------------------------------+
+| INTELLIGENCE & REASONING LAYER |
+| Lambda Evaluator Γƒ╢ Amazon Bedrock εéüClaude 3 Haiku) |
++---------------------------+---------------------------+
+|
+v
++-------------------------------------------------------+
+| ACTION & DISPATCH LAYER |
+| Amazon SNS εéüEmail/SMSεéé + API Gateway Webhooks |
++---------------------------+---------------------------+
+|
+v
++-------------------------------------------------------+
+| PRESENTATION LAYER |
+| React + Tailwind CSS + MapLibre Real-Time Dashboard |
++-------------------------------------------------------+
+3.1 Data Ingestion Layer
+ΓùÅ Amazon EventBridge: Executes a scheduled rule every 6 hours (and on-demand
+demo triggers) to invoke the ingestion orchestrator.
+=== PAGE 6 ===
+ΓùÅ AWS Lambda (VayuSync-IngestionEngine):
+Γùï Fetches active thermal anomalies from NASA FIRMS εéüVIIRS/MODIS C2 data
+feed for South Asia).
+Γùï Queries Open-Meteo API for real-time and forecasted 10m wind vector
+components εéü$u$-wind, $v$-wind) and boundary layer height across
+Punjab, Haryana, and Delhi NCR coordinates.
+Γùï Standardizes raw multi-source payloads into normalized GeoJSON
+structures.
+3.2 Storage Layer
+ΓùÅ Amazon S3 (vayusync-raw-payloads-2026): Stores raw GeoJSON responses
+from external APIs for historical auditability, model verification, and replay testing.
+ΓùÅ Amazon DynamoDB (VayuSync_Hotspots): Stores processed hotspot records
+with spatial attributes, confidence metrics, estimated PM2.5 mass fluxes, and TTL
+εéüTime-To-Live) set to 48 hours for cost management.
+ΓùÅ Amazon DynamoDB (VayuSync_Institutions): Contains registered vulnerable
+targets (schools, hospitals, outdoor sites) with geofenced coordinates, operational
+hours, contact channels, and risk sensitivity thresholds.
+3.3 Intelligence & Reasoning Layer
+ΓùÅ AWS Lambda (VayuSync-Evaluator Engine):
+Γùï Executes a kinematic lagrangian dispersion algorithm to project 6-hour and
+12-hour downwind risk trajectories (dispersion cones) using wind vectors.
+Γùï Queries VayuSync_Institutions using spatial bounding boxes to identify
+at-risk locations within projected impact zones.
+ΓùÅ Amazon Bedrock εéüAnthropic Claude 3 Haiku):
+Γùï Receives structured JSON input containing calculated arrival times, local
+meteorological metrics, and specific institutional profile data.
+Γùï Generates structured, highly specific, and actionable mitigation advisories
+while enforcing strict system prompts to prevent hallucination or
+unstructured output.
+=== PAGE 7 ===
+3.4 Action & Dispatch Layer
+ΓùÅ Amazon SNS (VayuSync-AlertTopic): Broadcasts critical push notifications via
+SMS and Email to institutional administrators.
+ΓùÅ API Gateway + Lambda (VayuSync-WebhookDispatcher): Fires JSON webhooks
+to simulated automated building management systems εéüBMSεéé to automatically
+switch HVAC units to recirculate mode or trigger automated WhatsApp notification
+flows.
+3.5 Presentation Layer
+ΓùÅ Single Page Application εéüReact + Tailwind CSS + MapLibre GLεééεéÆ Renders real-time
+trajectory cones, active fires, registered institutional assets, and real-time
+execution logs directly from DynamoDB via Amazon API Gateway.
+4. Detailed Feature Specifications & User Stories
+4.1 Feature 1εéÆ Fire Hotspot & Smoke Trajectory Vectoring
+ΓùÅ Description: Processes active thermal hotspots and projects vector-based
+dispersion trajectories based on atmospheric wind patterns.
+ΓùÅ User Story: As an environmental safety director, I want to see calculated smoke
+dispersion paths from farm fires in real time so that I know exactly when
+hazardous air will reach my district.
+ΓùÅ Technical Implementation: Uses Python-based geometry processing in Lambda
+to generate polygon cones along wind vectors εéü$\vec{Vεéå = u\hat{i} + v\hat{j}$εéé,
+weighted by satellite thermal power εéüMWεéé.
+4.2 Feature 2εéÆ Institutional Vulnerability Mapping
+ΓùÅ Description: Geofence registry mapping critical infrastructure and vulnerable
+population density points across Delhi NCR.
+ΓùÅ User Story: As a school principal, I want my campus registered in the system so
+that our facility automatically receives localized risk alerts before ambient air
+reaches dangerous levels.
+=== PAGE 8 ===
+ΓùÅ Technical Implementation: DynamoDB spatial queries using geohash indexes to
+match projected dispersion polygons against registered institutional coordinates.
+4.3 Feature 3εéÆ Autonomous Mitigation Advisory Engine
+ΓùÅ Description: Bedrock-driven reasoning engine that translates trajectory metrics
+into targeted operational actions.
+ΓùÅ User Story: As a construction site manager, I want clear operational instructions
+rather than raw numbers so my team can adjust work shifts safely.
+ΓùÅ Technical Implementation: Enforced JSON schema generation via Amazon
+Bedrock with system-level safety guardrails.
+{
+"institution_id": "SCHεéêDELεéê0492",
+"facility_type": "School",
+"predicted_arrival_utc": "2026εéê10εéê09T08εéÆ30εéÆ00Z",
+"impact_severity": "CRITICAL",
+"recommended_actions": [
+"Cancel all outdoor activities and physical education classes scheduled after 08εéÆ00
+AM.",
+"Switch central ventilation/HVAC systems to indoor air recirculation mode at 07εéÆ30
+AM.",
+"Distribute N95 masks to student transport staff and outdoor security personnel."
+],
+"confidence_score": 0.94
+}
+=== PAGE 9 ===
+4.4 Feature 4εéÆ One-Click Simulated Smoke Surge & Emergency Broadcast
+Demo
+ΓùÅ Description: A dedicated control trigger built into the dashboard interface to
+demonstrate end-to-end cloud execution live in under 3 seconds.
+ΓùÅ User Story: As a hackathon judge, I want to trigger a synthetic fire hotspot so I
+can observe the immediate end-to-end cloud ingestion, AI evaluation, and SMS
+alert delivery.
+ΓùÅ Technical Implementation: Invokes an Amazon API Gateway endpoint that feeds a
+simulated NASA FIRMS thermal anomaly directly into the Lambda evaluator
+pipeline.
+5. 72εéêHour Sprint Execution Plan εéüOct 8 ΓÇô Oct 11, 2026εéé
+OCT 8 εéüDAY 1εéé OCT 9 εéüDAY 2εéé OCT 10 εéüDAY 3εéé OCT 11 εéüDAY
+4εéé
++----------------------------+ +----------------------------+
++----------------------------+ +----------------------------+
+| * AWS Infrastructure Setup | | * Ingestion Microservices | | * Interactive Map Frontend |
+| * 3εéêMin Video Recording |
+| * DynamoDB Table Schemas | | * Bedrock Prompting Pipeline| | * Real-Time Dashboard
+UI | | * README & Architecture |
+| * API Verification | | * Mock Alert Dispatchers | | * End-to-End Edge Testing | | *
+Final Submission Check-in|
++----------------------------+ +----------------------------+
++----------------------------+ +----------------------------+
+=== PAGE 10 ===
+Phase 1εéÆ Infrastructure & Schema Setup εéüDay 1 ΓÇö Oct 8εéé
+ΓùÅ 09εéÆ00 - 12εéÆ00εéÆ Initialize AWS SAM / CDK template project repository; setup IAM
+roles with least-privilege policies for Lambda, Bedrock, DynamoDB, and SNS.
+ΓùÅ 12εéÆ00 - 15εéÆ00εéÆ Validate NASA FIRMS API keys and Open-Meteo wind data
+endpoints using standalone Python scripts.
+ΓùÅ 15εéÆ00 - 18εéÆ00εéÆ Design DynamoDB table structures (VayuSync_Hotspots,
+VayuSync_Institutions, VayuSync_AlertLogs) and establish partition/sort
+keys.
+ΓùÅ 18εéÆ00 - 21εéÆ00εéÆ Deploy core AWS S3 bucket and SNS Topic infrastructure; confirm
+deployment pipeline using AWS CLI.
+Phase 2εéÆ Core Microservices & Intelligence Engine εéüDay 2 ΓÇö Oct 9εéé
+ΓùÅ 09εéÆ00 - 13εéÆ00εéÆ Build VayuSync-IngestionEngine Lambda function; implement
+wind vector calculation logic and trajectory cone polygon generation.
+ΓùÅ 13εéÆ00 - 17εéÆ00εéÆ Develop VayuSync-EvaluatorEngine integration with Amazon
+Bedrock; engineer system prompts to guarantee strict JSON output structures.
+ΓùÅ 17εéÆ00 - 20εéÆ00εéÆ Wire Amazon SNS and webhook notification services; configure
+email/SMS test endpoints and build simulated WhatsApp response mocks.
+ΓùÅ 20εéÆ00 - 22εéÆ00εéÆ Validate end-to-end backend event execution from EventBridge
+triggers to SNS dispatch via CloudWatch logs.
+Phase 3εéÆ Frontend Dashboard & Integration εéüDay 3 ΓÇö Oct 10εéé
+ΓùÅ 09εéÆ00 - 13εéÆ00εéÆ Scaffold React + Tailwind CSS dashboard; integrate MapLibre GL
+map view with custom layers for fire hotspots and trajectory polygons.
+ΓùÅ 13εéÆ00 - 17εéÆ00εéÆ Connect frontend directly to API Gateway endpoints to fetch live
+institutional alert logs, active trajectory cones, and system statuses.
+ΓùÅ 17εéÆ00 - 19εéÆ00εéÆ Build the "One-Click Simulated Smoke Surge" trigger interface on
+the dashboard for live judging execution.
+ΓùÅ 19εéÆ00 - 22εéÆ00εéÆ Conduct end-to-end edge testing, fix latency bottlenecks, verify
+overall system stability, and review project artifacts.
+=== PAGE 11 ===
+Phase 4εéÆ Media, Documentation & Final Submission εéüDay 4 ΓÇö Oct 11εéé
+ΓùÅ 09εéÆ00 - 12εéÆ00εéÆ Script and record the strict 3-minute project demonstration video
+(showing architecture, live trigger, map visualization, and real-time SMS delivery).
+ΓùÅ 12εéÆ00 - 14εéÆ00εéÆ Finalize GitHub Repository documentation: craft README with
+architecture diagrams, deployment instructions, setup guides, and Bedrock prompt
+specs.
+ΓùÅ 14εéÆ00 - 16εéÆ00εéÆ Perform final AWS CloudWatch cleanup, double-check Free Tier
+compliance limits, and complete submission check-in.
+6. Judging Rubric Alignment & Winning Strategy
+6.1 Matrix Alignment
+Judging Criterion VayuSync Strategic Advantage Demonstration Proof Point
+Real-World Impact Moves beyond passive Show automated outdoor
+tracking to trigger automated, recess cancellation for a
+preventative operational registered school district
+changes 6εéë12 hours before before local PM2.5 levels
+smoke reaches high-density spike.
+areas.
+Depth of AWS Integration Fully leverages 6 distinct AWS Live AWS CloudWatch
+cloud services in a clean, telemetry showing
+event-driven serverless EventBridge $\rightarrow$
+architecture. Lambda $\rightarrow$
+Bedrock $\rightarrow$ SNS
+execution flow.
+Demo Excellence Zero slide deck dependence; Trigger synthetic hotspot;
+uses a live, interactive React show live trajectory
+map equipped with a instant generation, Bedrock
+synthetic smoke surge trigger.
+=== PAGE 12 ===
+Judging Criterion VayuSync Strategic Advantage Demonstration Proof Point
+processing, and real-time
+SMS alert in < 3 seconds.
+Code Quality & Architecture Modular AWS SAM/CDK Public GitHub repository
+infrastructure with explicit featuring clean microservice
+IAM policies, clean code separation, setup instructions,
+structure, and complete setup and architecture diagrams.
+guides.
+6.2 The 3εéêMinute Winning Pitch Script Structure
+1. The Hook εéü0εéÆ00 - 0εéÆ35εééεéÆ Show standard red AQI dashboards. "Traditional
+dashboards tell you when your lungs are already full of smoke. VayuSync tells
+institutions what to do 6 hours before the smoke arrives."
+2. The Live Trigger Demo εéü0εéÆ35 - 1εéÆ35εééεéÆ Click "Simulate Punjab Fire Hotspot". Show
+MapLibre dynamically drawing the 6-hour wind vector dispersion cone directly
+targeting North Delhi schools. Show the live phone screen receiving the automated
+SNS SMS alert.
+3. AWS Architecture Walkthrough εéü1εéÆ35 - 2εéÆ20εééεéÆ Highlight the serverless chain:
+EventBridge triggers Lambda ingestion, trajectory polygon calculation, DynamoDB
+spatial matching, and Amazon Bedrock εéüClaude 3 Haiku) generating structured
+operational advisories.
+4. Targeted Impact & Scale εéü2εéÆ20 - 3εéÆ00εééεéÆ Explain how VayuSync costs under
+$1/month to monitor all of Delhi NCR on AWS Free Tier while automating
+preemptive safety protocols across schools, hospitals, and outdoor work sites.

@@ -1,0 +1,348 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Description: >
+  VayuSync — Hyperlocal Stubble Exposure & Institutional Action Engine
+  Bharat Builds 2026 | Track 1: Air | AWS Serverless Hackathon Project
+  Includes Full Cloud Pipeline + S3 & CloudFront Frontend Static Web Hosting
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Architectures: [x86_64]
+    Environment:
+      Variables:
+        HOTSPOTS_TABLE: !Ref HotspotsTable
+        INSTITUTIONS_TABLE: !Ref InstitutionsTable
+        ALERT_LOGS_TABLE: !Ref AlertLogsTable
+        SNS_TOPIC_ARN: !Ref AlertTopic
+        RAW_PAYLOADS_BUCKET: !Ref RawPayloadsBucket
+        EVALUATOR_FUNCTION_NAME: VayuSync-EvaluatorEngine
+        BEDROCK_MODEL_ID: anthropic.claude-3-haiku-20240307-v1:0
+    Layers:
+      - !Ref SharedDependenciesLayer
+  Api:
+    Cors:
+      AllowMethods: "'GET,POST,OPTIONS'"
+      AllowHeaders: "'Content-Type,Authorization,X-Requested-With'"
+      AllowOrigin: "'*'"
+
+Parameters:
+  NasaFirmsApiKey:
+    Type: String
+    Default: ""
+    Description: NASA FIRMS API key for live satellite data (optional; uses mock data if empty)
+  SnsEmailSubscriber:
+    Type: String
+    Default: "admin@vayusync-demo.in"
+    Description: Email address for SNS alert notifications
+
+# ─── Resources ────────────────────────────────────────────────────────────────
+Resources:
+
+  # ─── Lambda Shared Dependencies Layer ───────────────────────────────────────
+  SharedDependenciesLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: VayuSync-Dependencies
+      Description: Shared Python dependencies and geo utils for all VayuSync Lambda functions
+      ContentUri: layer/
+      CompatibleRuntimes:
+        - python3.12
+    Metadata:
+      BuildMethod: python3.12
+
+  # ─── Lambda: IngestionEngine ─────────────────────────────────────────────────
+  IngestionEngine:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: VayuSync-IngestionEngine
+      Description: Fetches NASA FIRMS hotspots + Open-Meteo winds; calculates trajectory cones
+      CodeUri: lambdas/ingestion_engine/
+      Handler: handler.lambda_handler
+      MemorySize: 512
+      Timeout: 60
+      Environment:
+        Variables:
+          NASA_FIRMS_API_KEY: !Ref NasaFirmsApiKey
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref HotspotsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref InstitutionsTable
+        - S3CrudPolicy:
+            BucketName: !Ref RawPayloadsBucket
+        - Statement:
+            - Effect: Allow
+              Action: lambda:InvokeFunction
+              Resource: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:VayuSync-EvaluatorEngine"
+      Events:
+        ScheduledIngestion:
+          Type: Schedule
+          Properties:
+            Name: VayuSync-IngestionSchedule
+            Schedule: rate(6 hours)
+            Description: Trigger VayuSync ingestion pipeline every 6 hours
+            Enabled: true
+
+  # ─── Lambda: EvaluatorEngine ─────────────────────────────────────────────────
+  EvaluatorEngine:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: VayuSync-EvaluatorEngine
+      Description: Trajectory spatial matching + Bedrock advisory generation + SNS dispatch
+      CodeUri: lambdas/evaluator_engine/
+      Handler: handler.lambda_handler
+      MemorySize: 512
+      Timeout: 120
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref HotspotsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref InstitutionsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AlertLogsTable
+        - SNSPublishMessagePolicy:
+            TopicName: !GetAtt AlertTopic.TopicName
+        - Statement:
+            - Effect: Allow
+              Action:
+                - bedrock:InvokeModel
+              Resource: "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-haiku-20240307-v1:0"
+
+  # ─── Lambda: SimulateTrigger ──────────────────────────────────────────────────
+  SimulateTrigger:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: VayuSync-SimulateTrigger
+      Description: "HACKATHON DEMO: One-click synthetic fire hotspot injection + end-to-end pipeline"
+      CodeUri: lambdas/simulate_trigger/
+      Handler: handler.lambda_handler
+      MemorySize: 256
+      Timeout: 30
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref HotspotsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AlertLogsTable
+        - Statement:
+            - Effect: Allow
+              Action: lambda:InvokeFunction
+              Resource: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:VayuSync-EvaluatorEngine"
+        - SNSPublishMessagePolicy:
+            TopicName: !GetAtt AlertTopic.TopicName
+      Events:
+        SimulateAPI:
+          Type: Api
+          Properties:
+            RestApiId: !Ref VayuSyncApi
+            Path: /simulate
+            Method: POST
+
+  # ─── Lambda: DashboardData ────────────────────────────────────────────────────
+  DashboardData:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: VayuSync-DashboardData
+      Description: REST API serving dashboard data (hotspots, alerts, institutions, status)
+      CodeUri: lambdas/dashboard_data/
+      Handler: handler.lambda_handler
+      MemorySize: 256
+      Timeout: 15
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref HotspotsTable
+        - DynamoDBReadPolicy:
+            TableName: !Ref InstitutionsTable
+        - DynamoDBReadPolicy:
+            TableName: !Ref AlertLogsTable
+      Events:
+        DashboardAPI:
+          Type: Api
+          Properties:
+            RestApiId: !Ref VayuSyncApi
+            Path: /dashboard
+            Method: GET
+        AlertsAPI:
+          Type: Api
+          Properties:
+            RestApiId: !Ref VayuSyncApi
+            Path: /alerts
+            Method: GET
+        InstitutionsAPI:
+          Type: Api
+          Properties:
+            RestApiId: !Ref VayuSyncApi
+            Path: /institutions
+            Method: GET
+        HotspotsAPI:
+          Type: Api
+          Properties:
+            RestApiId: !Ref VayuSyncApi
+            Path: /hotspots
+            Method: GET
+        StatusAPI:
+          Type: Api
+          Properties:
+            RestApiId: !Ref VayuSyncApi
+            Path: /status
+            Method: GET
+
+  # ─── API Gateway ─────────────────────────────────────────────────────────────
+  VayuSyncApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: VayuSync-API
+      StageName: prod
+      Description: VayuSync REST API for React dashboard and webhook endpoints
+      Cors:
+        AllowMethods: "'GET,POST,OPTIONS'"
+        AllowHeaders: "'Content-Type,Authorization'"
+        AllowOrigin: "'*'"
+
+  # ─── DynamoDB Tables ──────────────────────────────────────────────────────────
+  HotspotsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: VayuSync_Hotspots
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: hotspot_id
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: S
+      KeySchema:
+        - AttributeName: hotspot_id
+          KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: RANGE
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+      Tags:
+        - Key: Project
+          Value: VayuSync
+        - Key: Track
+          Value: Air
+
+  InstitutionsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: VayuSync_Institutions
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: institution_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: institution_id
+          KeyType: HASH
+      Tags:
+        - Key: Project
+          Value: VayuSync
+
+  AlertLogsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: VayuSync_AlertLogs
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: alert_id
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: S
+      KeySchema:
+        - AttributeName: alert_id
+          KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: RANGE
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+      Tags:
+        - Key: Project
+          Value: VayuSync
+
+  # ─── SNS Alert Topic ──────────────────────────────────────────────────────────
+  AlertTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: VayuSync-AlertTopic
+      DisplayName: VayuSync Air Quality Alert System
+      Subscription:
+        - Protocol: email
+          Endpoint: !Ref SnsEmailSubscriber
+
+  # ─── S3: Raw Payload Archive ──────────────────────────────────────────────────
+  RawPayloadsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "vayusync-raw-payloads-${AWS::AccountId}"
+      LifecycleConfiguration:
+        Rules:
+          - Id: AutoExpire30Days
+            Status: Enabled
+            ExpirationInDays: 30
+      Tags:
+        - Key: Project
+          Value: VayuSync
+
+  # ─── S3: Web Dashboard Static Hosting ─────────────────────────────────────────
+  FrontendWebBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "vayusync-dashboard-${AWS::AccountId}"
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: index.html
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+      Tags:
+        - Key: Project
+          Value: VayuSync
+
+  FrontendWebBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref FrontendWebBucket
+      PolicyDocument:
+        Statement:
+          - Sid: PublicReadForGetBucketObjects
+            Effect: Allow
+            Principal: '*'
+            Action: s3:GetObject
+            Resource: !Sub "arn:aws:s3:::${FrontendWebBucket}/*"
+
+# ─── Outputs ──────────────────────────────────────────────────────────────────
+Outputs:
+  ApiBaseUrl:
+    Description: VayuSync API Gateway base URL
+    Value: !Sub "https://${VayuSyncApi}.execute-api.${AWS::Region}.amazonaws.com/prod"
+    Export:
+      Name: VayuSync-ApiBaseUrl
+
+  SimulateEndpoint:
+    Description: Simulation trigger endpoint (POST)
+    Value: !Sub "https://${VayuSyncApi}.execute-api.${AWS::Region}.amazonaws.com/prod/simulate"
+
+  DashboardEndpoint:
+    Description: Dashboard data endpoint (GET)
+    Value: !Sub "https://${VayuSyncApi}.execute-api.${AWS::Region}.amazonaws.com/prod/dashboard"
+
+  AlertTopicArn:
+    Description: SNS Alert Topic ARN
+    Value: !Ref AlertTopic
+
+  HotspotsTableName:
+    Description: DynamoDB Hotspots table name
+    Value: !Ref HotspotsTable
+
+  InstitutionsTableName:
+    Description: DynamoDB Institutions table name
+    Value: !Ref InstitutionsTable
+
+  FrontendWebsiteURL:
+    Description: Hosted Live Frontend URL
+    Value: !GetAtt FrontendWebBucket.WebsiteURL

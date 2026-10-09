@@ -1,0 +1,43 @@
+# Node.js & Frontend dependencies
+node_modules/
+dist/
+dist.zip
+dist_python.zip
+build.zip
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files
+.env
+.env.local
+.env.production
+.env.development
+!.env.example
+
+# AWS SAM & CloudFormation builds
+.aws-sam/
+samconfig.toml
+
+# Python cache & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+
+# Temporary and local artifacts
+amplify_update.json
+amplify_rules.json
+screenshot_verify.png
+*.tmp
+*.log
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
