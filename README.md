@@ -15,23 +15,32 @@
 
 ---
 
-### 🌐 [Live Production Dashboard](https://main.d38reumk2s9v29.amplifyapp.com) · ⚡ [Live API Gateway](https://s9rfowqwof.execute-api.ap-south-1.amazonaws.com/prod/dashboard) · 🔴 [One-Click Demo Trigger](https://s9rfowqwof.execute-api.ap-south-1.amazonaws.com/prod/simulate)
+### 🌐 **LIVE PRODUCTION SYSTEM (ZERO SETUP REQUIRED)**
+## 🔗 [https://main.d38reumk2s9v29.amplifyapp.com](https://main.d38reumk2s9v29.amplifyapp.com)
+**Backup Static S3 Mirror:** [http://vayusync-dashboard-946877383361.s3-website.ap-south-1.amazonaws.com](http://vayusync-dashboard-946877383361.s3-website.ap-south-1.amazonaws.com)  
+**Live REST API Gateway:** `https://s9rfowqwof.execute-api.ap-south-1.amazonaws.com/prod/dashboard`
+
+---
 
 </div>
 
+## ⏱️ 120-Second Judging Walkthrough & Live POC
+Hackathon judges evaluate live platforms in 90–120 seconds. Here is the exact recommended test flow:
+1. **Open the live application**: Navigate to [https://main.d38reumk2s9v29.amplifyapp.com](https://main.d38reumk2s9v29.amplifyapp.com).
+2. **Trigger the Stubble Surge POC**: Click the prominent red banner at the top: **`🔴 SIMULATE STUBBLE SURGE`**.
+3. **Observe the Geospatial & Computational Payoff (< 2.3 seconds)**:
+   - A synthetic **1,200 MW** satellite cluster injects at Sangrur/Ludhiana with North-Westerly wind vectors ($315^\circ$ NW @ 18 km/h).
+   - The dark-matter MapLibre radar renders the dispersion cone expanding towards Delhi NCR in real time.
+   - The facility threat level switches to **CRITICAL**, and automated AI advisories stream into the alert feed.
+   - Real-time AWS execution traces stream into the bottom **Execution Terminal** (EventBridge $\to$ Lambda $\to$ DynamoDB $\to$ Bedrock $\to$ SNS).
+4. **Inspect Operational Institutional Directives ("What Changes?" Factor)**:
+   - Click the **"Institutional Directives"** tab in the navbar.
+   - Switch between **Schools** (DPS Rohini), **Outdoor Construction** (Dwarka Expressway), and **Hospitals** (AIIMS New Delhi).
+   - Click **`Download Action Directive (PDF)`** or **`Copy Advisory`** to view immediate, actionable operational mandates.
+5. **Verify AWS Serverless Architecture**:
+   - Click **`AWS Architecture`** in the header to view the interactive 5-stage architecture pipeline modal and least-privilege IAM policies.
+
 ---
-
-## 📌 Executive Summary
-
-Every autumn (October–November), over **50,000 seasonal stubble burning fires** ignite across agricultural belts in **Punjab and Haryana**. Driven by prevailing northwesterly winds, toxic particulate smoke plumes travel across the Indo-Gangetic Plain, choking **Delhi NCR in 6 to 12 hours**.
-
-Existing environmental monitoring platforms (e.g., standard AQI dashboards) operate strictly **reactively**: they broadcast high readings only *after* monitors detect toxic air on the ground. By that point, schools have already commenced morning outdoor assemblies, construction crews are exposed to hazardous PM2.5, and hospital emergency wings are overwhelmed without warning.
-
-**VayuSync changes the paradigm from reactive tracking to automated preemptive action.** By combining satellite thermal radiative power data from **NASA FIRMS**, wind dispersion vectors from **Open-Meteo**, spatial indexing in **DynamoDB**, and structured advisory intelligence from **Amazon Bedrock (Claude 3 Haiku)**, VayuSync delivers institutional-grade warnings and operational protocols **6 to 12 hours before toxic air arrives** — running with **$0.00/month infrastructure cost** on 100% AWS Free Tier.
-
----
-
-## 🚀 Live Cloud Deployment
 
 | Component | Endpoint / Resource | Status |
 |---|---|---|

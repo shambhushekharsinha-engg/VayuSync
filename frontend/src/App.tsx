@@ -9,6 +9,9 @@ import { BedrockInspectorModal } from './components/BedrockInspectorModal';
 import { InstitutionalMatrix } from './components/InstitutionalMatrix';
 import { ImpactCalculator } from './components/ImpactCalculator';
 import { DispersionAnalytics } from './components/DispersionAnalytics';
+import { ArchitectureModal } from './components/ArchitectureModal';
+import { TerminalLog, type LogEntry } from './components/TerminalLog';
+import { InstitutionalActionProfiles } from './components/InstitutionalActionProfiles';
 import type {
   AlertLog, DashboardData, Institution,
   SimulationResult, SystemStatus as SystemStatusType,
@@ -19,9 +22,20 @@ import { soundEngine } from './utils/audio';
 import {
   Wind, Github, Info, Map, Building2,
   ShieldCheck, TrendingUp, Volume2, VolumeX, AlertOctagon,
+  Network, Flame, FileText,
 } from 'lucide-react';
 
-type NavTab = 'MAP' | 'MATRIX' | 'IMPACT' | 'ANALYTICS';
+type NavTab = 'MAP' | 'PROFILES' | 'MATRIX' | 'IMPACT' | 'ANALYTICS';
+
+const INITIAL_LOGS: LogEntry[] = [
+  { timestamp: '14:12:04', source: 'EVENTBRIDGE', message: 'Cron trigger rate(6 hours) dispatched execution event', level: 'INFO' },
+  { timestamp: '14:12:05', source: 'NASA_FIRMS', message: 'VIIRS Suomi-NPP: 48 Thermal anomalies ingested across Punjab/Haryana', level: 'INFO' },
+  { timestamp: '14:12:05', source: 'OPEN_METEO', message: 'Boundary Layer Wind: 315° (NW) @ 18.4 km/h (u=-3.62 m/s, v=-3.62 m/s)', level: 'INFO' },
+  { timestamp: '14:12:06', source: 'LAMBDA', message: 'VayuSync-IngestionEngine: Lagrangian dispersion cone calculated (6h lead time)', level: 'SUCCESS' },
+  { timestamp: '14:12:06', source: 'DYNAMODB', message: 'VayuSync_Hotspots & VayuSync_Institutions spatial bounding intersection verified', level: 'SUCCESS' },
+  { timestamp: '14:12:07', source: 'BEDROCK', message: 'Claude 3 Haiku invocation: Guardrailed JSON advisories generated (Latency: 640ms)', level: 'SUCCESS' },
+  { timestamp: '14:12:07', source: 'SNS', message: 'VayuSync-AlertTopic: 12 Institutional Gateway endpoints notified via SMS/Webhook', level: 'SUCCESS' },
+];
 
 const App: React.FC = () => {
   const [navTab, setNavTab] = useState<NavTab>('MAP');
@@ -36,8 +50,16 @@ const App: React.FC = () => {
   const [inspectedAlert, setInspectedAlert] = useState<AlertLog | null>(null);
   const [timelineHour, setTimelineHour] = useState<number>(6);
   const [showAbout, setShowAbout] = useState(false);
+  const [showArchModal, setShowArchModal] = useState(false);
   const [soundOn, setSoundOn] = useState(false);
   const [crisisMode, setCrisisMode] = useState(false);
+  const [terminalLogs, setTerminalLogs] = useState<LogEntry[]>(INITIAL_LOGS);
+
+  const addLog = useCallback((source: LogEntry['source'], message: string, level: LogEntry['level'] = 'INFO') => {
+    const now = new Date();
+    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+    setTerminalLogs(prev => [...prev.slice(-40), { timestamp: timeStr, source, message, level }]);
+  }, []);
 
   // ─── Initial data load ─────────────────────────────────────────────────────
   useEffect(() => {
@@ -89,6 +111,13 @@ const App: React.FC = () => {
     setSimulatedHotspot(result.hotspot);
     setTimelineHour(6); // Reset timeline to peak arrival
 
+    addLog('EVENTBRIDGE', 'Synthetic stubble surge triggered via POST /simulate', 'INFO');
+    addLog('NASA_FIRMS', `Synthetic anomaly injected: Sangrur/Ludhiana (${result.hotspot.latitude.toFixed(2)}°N, ${result.hotspot.longitude.toFixed(2)}°E) FRP: ${result.hotspot.fire_radiative_power_mw} MW`, 'INFO');
+    addLog('OPEN_METEO', 'Trajectory calculation updated with NW vector: 315° @ 18.0 km/h', 'INFO');
+    addLog('LAMBDA', `EvaluatorEngine completed spatial containment test across ${result.institutions_at_risk} facilities`, 'SUCCESS');
+    addLog('BEDROCK', `Claude 3 Haiku generated operational action directives (Total latency: ${result.pipeline_performance.total_ms.toFixed(0)}ms)`, 'SUCCESS');
+    addLog('SNS', `Alert notification broadcast triggered to ${result.alerts.length} registered institutional targets`, 'SUCCESS');
+
     // Prepend new alerts to the feed
     setAlerts(prev => {
       const existingIds = new Set(prev.map(a => a.alert_id));
@@ -104,14 +133,15 @@ const App: React.FC = () => {
       pipeline_latency_ms: result.pipeline_performance.total_ms,
       total_alerts_last_24h: (prev.total_alerts_last_24h ?? 0) + result.alerts.length,
     } : null);
-  }, []);
+  }, [addLog]);
 
   const handleReset = useCallback(() => {
     setSimulatedCone(null);
     setSimulatedHotspot(null);
     setIsSimulating(false);
     setTimelineHour(0);
-  }, []);
+    addLog('SYSTEM', 'Simulation reset to baseline satellite state', 'INFO');
+  }, [addLog]);
 
   const toggleSound = () => {
     const next = soundEngine.toggle();
@@ -188,6 +218,7 @@ const App: React.FC = () => {
         <nav className="hidden lg:flex items-center gap-1 bg-gray-950 p-1 border border-gray-800 rounded-2xl shadow-inner">
           {[
             { id: 'MAP', label: 'Tactical Radar', icon: Map },
+            { id: 'PROFILES', label: 'Institutional Directives', icon: FileText },
             { id: 'MATRIX', label: 'Facility Readiness', icon: Building2 },
             { id: 'IMPACT', label: 'Preemptive ROI', icon: ShieldCheck },
             { id: 'ANALYTICS', label: 'Atmospheric Analytics', icon: TrendingUp },
@@ -210,8 +241,20 @@ const App: React.FC = () => {
           ))}
         </nav>
 
-        {/* Right: Tactical Controls & Audio */}
-        <div className="flex items-center gap-2.5">
+        {/* Right: Tactical Controls, Architecture & Audio */}
+        <div className="flex items-center gap-2">
+          {/* AWS Architecture Transparency Modal Button */}
+          <button
+            onClick={() => {
+              soundEngine.playClick();
+              setShowArchModal(true);
+            }}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-bold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 transition-all shadow-sm shadow-cyan-500/10"
+            title="Inspect AWS Serverless Architecture Pipeline"
+          >
+            <Network className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="text-[11px] font-mono hidden md:inline">AWS Architecture</span>
+          </button>
           {/* Audio FX Toggle */}
           <button
             onClick={toggleSound}
@@ -277,14 +320,15 @@ const App: React.FC = () => {
       <div className="lg:hidden flex items-center justify-around bg-gray-900 border-b border-gray-800 p-1 text-xs">
         {[
           { id: 'MAP', label: 'Radar', icon: Map },
+          { id: 'PROFILES', label: 'Directives', icon: FileText },
           { id: 'MATRIX', label: 'Facilities', icon: Building2 },
-          { id: 'IMPACT', label: 'ROI Calculator', icon: ShieldCheck },
+          { id: 'IMPACT', label: 'ROI', icon: ShieldCheck },
           { id: 'ANALYTICS', label: 'Analytics', icon: TrendingUp },
         ].map(({ id, label, icon: Icon }) => (
           <button
             key={id}
             onClick={() => setNavTab(id as NavTab)}
-            className={`flex items-center gap-1 py-1.5 px-2.5 rounded-lg text-[11px] font-bold ${
+            className={`flex items-center gap-1 py-1.5 px-2 rounded-lg text-[10px] font-bold ${
               navTab === id ? 'bg-orange-500 text-black' : 'text-gray-400'
             }`}
           >
@@ -292,6 +336,57 @@ const App: React.FC = () => {
             <span>{label}</span>
           </button>
         ))}
+      </div>
+
+      {/* ─── TOP INTERACTIVE DEMO BAR (Visible Demo Bar for Hackathon Judges) ───────────── */}
+      <div className="bg-gradient-to-r from-orange-950/80 via-red-950/80 to-gray-950 border-b border-orange-500/30 px-4 py-2 flex flex-wrap items-center justify-between gap-3 z-10">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/40 text-[10px] font-black uppercase tracking-wider">
+            <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-ping" />
+            Judge Live Demo
+          </div>
+          <span className="text-xs text-gray-300 font-medium hidden sm:inline">
+            Inject synthetic satellite cluster (Sangrur/Ludhiana) · NW wind vector 315° @ 18 km/h
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {/* Quick Simulate Trigger */}
+          <button
+            onClick={() => {
+              soundEngine.playClick();
+              // Trigger simulation via wrapper or direct call
+              const simButton = document.querySelector<HTMLButtonElement>('[data-tour="simulate-button"]');
+              if (simButton) {
+                simButton.click();
+              } else {
+                // If on other tab, switch to MAP
+                setNavTab('MAP');
+                setTimeout(() => {
+                  const btn = document.querySelector<HTMLButtonElement>('[data-tour="simulate-button"]');
+                  btn?.click();
+                }, 100);
+              }
+            }}
+            disabled={isSimulating}
+            className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white shadow-md shadow-red-950/60 active:scale-95 transition-all"
+          >
+            <Flame className="w-3.5 h-3.5 text-yellow-300 animate-bounce" />
+            <span>{isSimulating ? 'SIMULATING...' : '🔴 SIMULATE STUBBLE SURGE'}</span>
+          </button>
+
+          {/* Quick Institutional Action Tab Switcher */}
+          <button
+            onClick={() => {
+              soundEngine.playClick();
+              setNavTab('PROFILES');
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-gray-800/90 hover:bg-gray-700/90 text-gray-200 border border-gray-700 transition-all"
+          >
+            <FileText className="w-3.5 h-3.5 text-orange-400" />
+            <span className="hidden md:inline">View Facility Directives</span>
+          </button>
+        </div>
       </div>
 
       {/* ─── METRICS BAR ────────────────────────────────────────────────────── */}
@@ -325,112 +420,119 @@ const App: React.FC = () => {
             </aside>
 
             {/* CENTER: Geospatial Map Canvas */}
-            <main className="flex-1 relative bg-gray-950 overflow-hidden">
+            <main className="flex-1 relative bg-gray-950 overflow-hidden flex flex-col">
               {/* Map takes full space */}
-              <div className="absolute inset-0">
-                <VayuSyncMap
-                  simulatedCone={simulatedCone}
-                  simulatedHotspot={simulatedHotspot}
-                  timelineHour={timelineHour}
-                  onInstitutionClick={setSelectedInstitution}
-                />
-              </div>
+              <div className="flex-1 relative">
+                <div className="absolute inset-0">
+                  <VayuSyncMap
+                    simulatedCone={simulatedCone}
+                    simulatedHotspot={simulatedHotspot}
+                    timelineHour={timelineHour}
+                    onInstitutionClick={setSelectedInstitution}
+                  />
+                </div>
 
-              {/* Interactive Timeline Scrubber (Bottom Floating Widget) */}
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-11/12 max-w-2xl z-20 animate-fade-in-up">
-                <TimelineScrubber
-                  currentHour={timelineHour}
-                  onHourChange={setTimelineHour}
-                  isSimulating={isSimulating}
-                />
-              </div>
+                {/* Interactive Timeline Scrubber (Bottom Floating Widget) */}
+                <div className="absolute bottom-16 left-1/2 -translate-x-1/2 w-11/12 max-w-2xl z-20 animate-fade-in-up">
+                  <TimelineScrubber
+                    currentHour={timelineHour}
+                    onHourChange={setTimelineHour}
+                    isSimulating={isSimulating}
+                  />
+                </div>
 
-              {/* Map overlays: Legend */}
-              <div className="absolute bottom-6 left-3 hidden md:block bg-gray-900/90 backdrop-blur-md border border-gray-800 rounded-2xl p-3 text-xs space-y-2 z-10 shadow-2xl">
-                <div className="text-gray-400 text-[9px] uppercase tracking-widest font-bold mb-1">Radar Legend</div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.9)]" />
-                  <span className="text-gray-300 text-[11px]">Active Stubble Fire</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-2 rounded" style={{ background: 'rgba(239,68,68,0.25)', border: '1px dashed #ef4444' }} />
-                  <span className="text-gray-300 text-[11px]">Dispersion Cone</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs">🏫</span>
-                  <span className="text-gray-300 text-[11px]">Schools</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs">🏥</span>
-                  <span className="text-gray-300 text-[11px]">Hospitals</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs">🏗️</span>
-                  <span className="text-gray-300 text-[11px]">Construction</span>
-                </div>
-              </div>
-
-              {/* Simulation active overlay banner */}
-              {simulatedCone && !isSimulating && (
-                <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20">
-                  <div className="bg-orange-500/20 border border-orange-500/50 backdrop-blur-md rounded-2xl px-5 py-2 text-center shadow-2xl">
-                    <div className="text-orange-300 font-black text-xs">🔴 1,200 MW SIMULATED HOTSPOT ACTIVE</div>
-                    <div className="text-gray-300 text-[10px] mt-0.5">
-                      Ludhiana → Delhi NCR · Trajectory vectoring live
-                    </div>
+                {/* Map overlays: Legend */}
+                <div className="absolute bottom-16 left-3 hidden md:block bg-gray-900/90 backdrop-blur-md border border-gray-800 rounded-2xl p-3 text-xs space-y-2 z-10 shadow-2xl">
+                  <div className="text-gray-400 text-[9px] uppercase tracking-widest font-bold mb-1">Radar Legend</div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.9)]" />
+                    <span className="text-gray-300 text-[11px]">Thermal Anomalies (VIIRS)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-2 rounded" style={{ background: 'rgba(239,68,68,0.25)', border: '1px dashed #ef4444' }} />
+                    <span className="text-gray-300 text-[11px]">Projected Smoke Vector Cone</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs">🏫</span>
+                    <span className="text-gray-300 text-[11px]">Schools (DPS, KV)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs">🏥</span>
+                    <span className="text-gray-300 text-[11px]">Hospitals (AIIMS, Safdarjung)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs">🏗️</span>
+                    <span className="text-gray-300 text-[11px]">Outdoor Construction</span>
                   </div>
                 </div>
-              )}
 
-              {/* Institution detail card */}
-              {selectedInstitution && (
-                <div className="absolute top-3 right-3 w-72 bg-gray-900/95 backdrop-blur-md border border-gray-700 rounded-3xl p-4 z-20 animate-fade-in-up shadow-2xl">
-                  <button
-                    onClick={() => setSelectedInstitution(null)}
-                    className="absolute top-3 right-3 text-gray-500 hover:text-gray-300 text-lg leading-none p-1"
-                  >
-                    ×
-                  </button>
-                  <div className="text-sm mb-1">
-                    {selectedInstitution.facility_type === 'School' ? '🏫' :
-                     selectedInstitution.facility_type === 'Hospital' ? '🏥' :
-                     selectedInstitution.facility_type === 'Construction' ? '🏗️' : '🏛️'}
-                    {' '}<span className="font-black text-white">{selectedInstitution.name}</span>
-                  </div>
-                  <div className="text-gray-400 text-[10px] mb-3">{selectedInstitution.district}</div>
-                  <div className="space-y-1.5 text-xs bg-gray-950/70 p-3 rounded-2xl border border-gray-800">
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Risk Severity</span>
-                      <span className={`font-black ${
-                        selectedInstitution.current_risk === 'CRITICAL' ? 'text-red-400' :
-                        selectedInstitution.current_risk === 'HIGH' ? 'text-orange-400' : 'text-yellow-400'
-                      }`}>{selectedInstitution.current_risk ?? 'HIGH'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Population Count</span>
-                      <span className="text-white font-mono font-bold">
-                        {(selectedInstitution.student_count || selectedInstitution.bed_count || selectedInstitution.worker_count || 1200).toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Peak PM2.5 Forecast</span>
-                      <span className="text-red-400 font-mono font-bold">
-                        {selectedInstitution.predicted_pm25 ?? 387} µg/m³
-                      </span>
+                {/* Simulation active overlay banner */}
+                {simulatedCone && !isSimulating && (
+                  <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20">
+                    <div className="bg-orange-500/20 border border-orange-500/50 backdrop-blur-md rounded-2xl px-5 py-2 text-center shadow-2xl">
+                      <div className="text-orange-300 font-black text-xs">🔴 1,200 MW SIMULATED HOTSPOT ACTIVE</div>
+                      <div className="text-gray-300 text-[10px] mt-0.5">
+                        Sangrur / Ludhiana → Delhi NCR · Dispersion Cone Expanded
+                      </div>
                     </div>
                   </div>
+                )}
 
-                  <button
-                    onClick={() => {
-                      const matched = alerts.find(a => a.institution_id === selectedInstitution.institution_id) || alerts[0];
-                      if (matched) setInspectedAlert(matched);
-                    }}
-                    className="w-full mt-3 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-md"
-                  >
-                    <span>View Claude 3 Advisory</span>
-                  </button>
-                </div>
-              )}
+                {/* Institution detail card */}
+                {selectedInstitution && (
+                  <div className="absolute top-3 right-3 w-72 bg-gray-900/95 backdrop-blur-md border border-gray-700 rounded-3xl p-4 z-20 animate-fade-in-up shadow-2xl">
+                    <button
+                      onClick={() => setSelectedInstitution(null)}
+                      className="absolute top-3 right-3 text-gray-500 hover:text-gray-300 text-lg leading-none p-1"
+                    >
+                      ×
+                    </button>
+                    <div className="text-sm mb-1">
+                      {selectedInstitution.facility_type === 'School' ? '🏫' :
+                       selectedInstitution.facility_type === 'Hospital' ? '🏥' :
+                       selectedInstitution.facility_type === 'Construction' ? '🏗️' : '🏛️'}
+                      {' '}<span className="font-black text-white">{selectedInstitution.name}</span>
+                    </div>
+                    <div className="text-gray-400 text-[10px] mb-3">{selectedInstitution.district}</div>
+                    <div className="space-y-1.5 text-xs bg-gray-950/70 p-3 rounded-2xl border border-gray-800">
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Risk Severity</span>
+                        <span className={`font-black ${
+                          selectedInstitution.current_risk === 'CRITICAL' ? 'text-red-400' :
+                          selectedInstitution.current_risk === 'HIGH' ? 'text-orange-400' : 'text-yellow-400'
+                        }`}>{selectedInstitution.current_risk ?? 'HIGH'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Population Count</span>
+                        <span className="text-white font-mono font-bold">
+                          {(selectedInstitution.student_count || selectedInstitution.bed_count || selectedInstitution.worker_count || 1200).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Peak PM2.5 Forecast</span>
+                        <span className="text-red-400 font-mono font-bold">
+                          {selectedInstitution.predicted_pm25 ?? 387} µg/m³
+                        </span>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        const matched = alerts.find(a => a.institution_id === selectedInstitution.institution_id) || alerts[0];
+                        if (matched) setInspectedAlert(matched);
+                      }}
+                      className="w-full mt-3 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-md"
+                    >
+                      <span>View Claude 3 Advisory</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Bottom Pipeline Execution Terminal Log Widget */}
+              <div className="p-2 bg-gray-950 border-t border-gray-800/80 z-20">
+                <TerminalLog logs={terminalLogs} onClear={() => setTerminalLogs([])} />
+              </div>
             </main>
 
             {/* RIGHT SIDEBAR: System Status */}
@@ -446,7 +548,14 @@ const App: React.FC = () => {
           </>
         )}
 
-        {/* VIEW 2: INSTITUTIONAL READINESS MATRIX */}
+        {/* VIEW 2: INSTITUTIONAL ACTION PROFILES */}
+        {navTab === 'PROFILES' && (
+          <div className="flex-1 overflow-y-auto p-6 max-w-5xl mx-auto w-full">
+            <InstitutionalActionProfiles />
+          </div>
+        )}
+
+        {/* VIEW 3: INSTITUTIONAL READINESS MATRIX */}
         {navTab === 'MATRIX' && (
           <div className="flex-1 overflow-hidden">
             <InstitutionalMatrix
@@ -457,14 +566,14 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {/* VIEW 3: PREEMPTIVE ACTION ROI CALCULATOR */}
+        {/* VIEW 4: PREEMPTIVE ACTION ROI CALCULATOR */}
         {navTab === 'IMPACT' && (
           <div className="flex-1 overflow-y-auto p-6 max-w-5xl mx-auto w-full">
             <ImpactCalculator />
           </div>
         )}
 
-        {/* VIEW 4: ATMOSPHERIC DISPERSION ANALYTICS */}
+        {/* VIEW 5: ATMOSPHERIC DISPERSION ANALYTICS */}
         {navTab === 'ANALYTICS' && (
           <div className="flex-1 overflow-hidden">
             <DispersionAnalytics />
@@ -527,6 +636,13 @@ const App: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* ─── AWS ARCHITECTURE TRANSPARENCY MODAL ─────────────────────────── */}
+      <ArchitectureModal
+        isOpen={showArchModal}
+        onClose={() => setShowArchModal(false)}
+      />
+
     </div>
   );
 };

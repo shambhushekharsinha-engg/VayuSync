@@ -83,6 +83,7 @@ const SimulateTrigger: React.FC<SimulateTriggerProps> = ({ onSimulationComplete,
       {/* ─── Big Red Button ──────────────────────────────────────────────── */}
       {simState === 'idle' && (
         <button
+          data-tour="simulate-button"
           onClick={handleSimulate}
           className="group relative w-full py-4 px-5 rounded-xl font-bold text-white text-sm
                      bg-gradient-to-br from-red-600 to-red-700
