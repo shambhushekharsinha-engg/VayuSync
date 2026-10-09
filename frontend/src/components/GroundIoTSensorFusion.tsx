@@ -123,7 +123,7 @@ export const GroundIoTSensorFusion: React.FC = () => {
               </span>
             </div>
             <p className="text-gray-400 text-xs mt-0.5">
-              Simulated micro-sensor fleet (ESP32 / SPS30) benchmarked against CPCB / OpenAQ Delhi ground stations to demonstrate satellite-sensor corroboration.
+              Illustrative synthetic readings from AWS IoT Core testbed (ESP32 / SPS30 sensor models) demonstrating satellite-ground sensor corroboration architecture.
             </p>
           </div>
         </div>
