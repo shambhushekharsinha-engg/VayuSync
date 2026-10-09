@@ -13,6 +13,8 @@ import { ArchitectureModal } from './components/ArchitectureModal';
 import { TerminalLog, type LogEntry } from './components/TerminalLog';
 import { InstitutionalActionProfiles } from './components/InstitutionalActionProfiles';
 import { GlobeLocationSelector } from './components/GlobeLocationSelector';
+import { CitizenExposureRouteOptimizer } from './components/CitizenExposureRouteOptimizer';
+import { GroundIoTSensorFusion } from './components/GroundIoTSensorFusion';
 import { GLOBAL_REGIONS, type GlobalRegion } from './data/globalRegions';
 import type {
   AlertLog, DashboardData, Institution,
@@ -24,10 +26,10 @@ import { soundEngine } from './utils/audio';
 import {
   Wind, Github, Info, Map, Building2,
   ShieldCheck, TrendingUp, Volume2, VolumeX, AlertOctagon,
-  Network, Flame, FileText,
+  Network, Flame, FileText, Navigation, Radio,
 } from 'lucide-react';
 
-type NavTab = 'MAP' | 'PROFILES' | 'MATRIX' | 'IMPACT' | 'ANALYTICS';
+type NavTab = 'MAP' | 'ROUTING' | 'IOT_MESH' | 'PROFILES' | 'MATRIX' | 'IMPACT' | 'ANALYTICS';
 
 const INITIAL_LOGS: LogEntry[] = [
   { timestamp: '14:12:04', source: 'EVENTBRIDGE', message: 'Cron trigger rate(6 hours) dispatched execution event', level: 'INFO' },
@@ -285,10 +287,12 @@ const App: React.FC = () => {
         <nav className="hidden lg:flex items-center gap-1 bg-gray-950 p-1 border border-gray-800 rounded-2xl shadow-inner">
           {[
             { id: 'MAP', label: 'Tactical Radar', icon: Map },
-            { id: 'PROFILES', label: 'Institutional Directives', icon: FileText },
-            { id: 'MATRIX', label: 'Facility Readiness', icon: Building2 },
+            { id: 'ROUTING', label: 'Aero-Routing', icon: Navigation },
+            { id: 'IOT_MESH', label: 'IoT Sensor Mesh', icon: Radio },
+            { id: 'PROFILES', label: 'Directives', icon: FileText },
+            { id: 'MATRIX', label: 'Facilities', icon: Building2 },
             { id: 'IMPACT', label: 'Preemptive ROI', icon: ShieldCheck },
-            { id: 'ANALYTICS', label: 'Atmospheric Analytics', icon: TrendingUp },
+            { id: 'ANALYTICS', label: 'Analytics', icon: TrendingUp },
           ].map(({ id, label, icon: Icon }) => (
             <button
               key={id}
@@ -384,9 +388,11 @@ const App: React.FC = () => {
       </header>
 
       {/* ─── MOBILE TAB BAR (Only on small screens) ───────────────────────────── */}
-      <div className="lg:hidden flex items-center justify-around bg-gray-900 border-b border-gray-800 p-1 text-xs">
+      <div className="lg:hidden flex items-center justify-around bg-gray-900 border-b border-gray-800 p-1 text-xs overflow-x-auto">
         {[
           { id: 'MAP', label: 'Radar', icon: Map },
+          { id: 'ROUTING', label: 'Routes', icon: Navigation },
+          { id: 'IOT_MESH', label: 'IoT', icon: Radio },
           { id: 'PROFILES', label: 'Directives', icon: FileText },
           { id: 'MATRIX', label: 'Facilities', icon: Building2 },
           { id: 'IMPACT', label: 'ROI', icon: ShieldCheck },
@@ -395,7 +401,7 @@ const App: React.FC = () => {
           <button
             key={id}
             onClick={() => setNavTab(id as NavTab)}
-            className={`flex items-center gap-1 py-1.5 px-2 rounded-lg text-[10px] font-bold ${
+            className={`flex items-center gap-1 py-1.5 px-2 rounded-lg text-[10px] font-bold flex-shrink-0 ${
               navTab === id ? 'bg-orange-500 text-black' : 'text-gray-400'
             }`}
           >
@@ -617,7 +623,21 @@ const App: React.FC = () => {
           </>
         )}
 
-        {/* VIEW 2: INSTITUTIONAL ACTION PROFILES */}
+        {/* VIEW 2: CITIZEN EXPOSURE ROUTE OPTIMIZER (AERO-ROUTING) */}
+        {navTab === 'ROUTING' && (
+          <div className="flex-1 overflow-y-auto p-6 max-w-5xl mx-auto w-full">
+            <CitizenExposureRouteOptimizer />
+          </div>
+        )}
+
+        {/* VIEW 3: GROUND IOT MESH & BUS SENSOR FUSION */}
+        {navTab === 'IOT_MESH' && (
+          <div className="flex-1 overflow-y-auto p-6 max-w-5xl mx-auto w-full">
+            <GroundIoTSensorFusion />
+          </div>
+        )}
+
+        {/* VIEW 4: INSTITUTIONAL ACTION PROFILES */}
         {navTab === 'PROFILES' && (
           <div className="flex-1 overflow-y-auto p-6 max-w-5xl mx-auto w-full">
             <InstitutionalActionProfiles />

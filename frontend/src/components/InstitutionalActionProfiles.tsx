@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { School, Building, HardHat, Download, Copy, Check, ShieldAlert, Sparkles, Clock } from 'lucide-react';
 import { soundEngine } from '../utils/audio';
+import { voiceBroadcast } from '../utils/voiceBroadcast';
 
 type FacilityCategory = 'SCHOOL' | 'CONSTRUCTION' | 'HOSPITAL';
 
@@ -227,8 +228,21 @@ Dispatched via Amazon SNS to ${activeProfile.contactPerson}.
           </div>
         </div>
 
-        {/* Action Buttons: Download PDF and Copy */}
-        <div className="flex items-center gap-2 flex-shrink-0">
+        {/* Action Buttons: Download PDF, Copy, and Audio Voice Broadcast */}
+        <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
+          <button
+            onClick={() => {
+              soundEngine.playClick();
+              const announcementText = `Emergency Public Health Advisory for ${activeProfile.name}. Toxic stubble smoke plume arriving in approximately ${activeProfile.leadTimeHours} hours. Forecast PM2.5 surge is ${activeProfile.expectedPm25} micrograms per cubic meter. Immediate mandatory directive: ${activeProfile.rules[0]}.`;
+              voiceBroadcast.speak(announcementText, 'en-IN');
+            }}
+            className="flex items-center gap-1.5 px-3 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 text-xs font-bold rounded-xl transition-all border border-purple-500/40 active:scale-95"
+            title="Listen to automated voice announcement (Amazon Polly Style)"
+          >
+            <span className="text-sm">🔊</span>
+            <span>Listen Voice Broadcast</span>
+          </button>
+
           <button
             onClick={handleCopy}
             className="flex items-center gap-1.5 px-3 py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-bold rounded-xl transition-all border border-gray-700 active:scale-95"

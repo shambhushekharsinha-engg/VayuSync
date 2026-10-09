@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, CheckCircle2, Bot, Sparkles, Send, ShieldCheck } from 'lucide-react';
 import type { AlertLog } from '../types';
 import { soundEngine } from '../utils/audio';
+import { voiceBroadcast } from '../utils/voiceBroadcast';
 
 interface BedrockInspectorModalProps {
   alert: AlertLog | null;
@@ -158,7 +159,20 @@ export const BedrockInspectorModal: React.FC<BedrockInspectorModalProps> = ({
           </div>
 
           {/* Action buttons */}
-          <div className="flex items-center gap-3 pt-2">
+          <div className="flex flex-wrap items-center gap-2 pt-2">
+            <button
+              onClick={() => {
+                soundEngine.playClick();
+                const text = `VayuSync Emergency Dispatch to administrator of ${alert.institution_name}. Severe stubble smoke arrival advisory. Predicted PM2.5 surge to ${Math.round(alert.predicted_pm25_ugm3)} micrograms per cubic meter. Recommended action: ${alert.recommended_actions?.[0] ?? 'Initiate immediate indoor air filtration'}.`;
+                voiceBroadcast.speak(text, 'en-IN');
+              }}
+              className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 font-bold text-xs transition-all border border-purple-500/40 active:scale-95"
+              title="Broadcast text-to-speech announcement"
+            >
+              <span>🔊</span>
+              <span>Listen Audio</span>
+            </button>
+
             <button
               onClick={handleTestSms}
               className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition-all shadow-lg shadow-orange-500/20 active:scale-95"
