@@ -156,8 +156,8 @@ def calculate_trajectory_cone(
     # Wind vector -> trajectory bearing:
     # A north-westerly wind (u_wind < 0 westerly, v_wind < 0 northerly)
     # carries smoke downwind towards the south-east (bearing ~115-150 deg).
-    # atan2(-u_wind, v_wind) yields the downwind travel bearing clockwise from North.
-    bearing_rad = math.atan2(-u_wind, v_wind)
+    # atan2(u_wind, v_wind) yields the downwind travel bearing clockwise from North.
+    bearing_rad = math.atan2(u_wind, v_wind)
     bearing_deg = (math.degrees(bearing_rad) + 360) % 360  # 0-360, clockwise from N
 
     wind_speed_ms = math.sqrt(u_wind ** 2 + v_wind ** 2)

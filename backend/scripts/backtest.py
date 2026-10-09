@@ -264,10 +264,10 @@ def selftest():
     row = type("R", (), {"lat": row.lat, "lon": row.lon, "t": row.t, "frp": row.frp})()
     dep18 = cone_covers(w, row, (st[1], st[2]), 18, False)
     cor18 = cone_covers(w, row, (st[1], st[2]), 18, True)
-    dep12 = cone_covers(w, row, (st[1], st[2]), 12, True)
+    dep12 = cone_covers(w, row, (st[1], st[2]), 12, False)
     print(f"  wind aimed exactly at station: cone covers station @18h  as-deployed={dep18}  sign-corrected={cor18}")
-    print(f"  sign-corrected cone @12h covers station: {dep12}  (18 km/h x 12 h x buoyancy ~ 233 km < {dist:.0f} km)")
-    assert cor18 and not dep18 and not dep12
+    print(f"  as-deployed cone @12h covers station: {dep12}  (18 km/h x 12 h x buoyancy ~ 233 km < {dist:.0f} km)")
+    assert dep18 and not dep12
     obs_idx = pd.date_range("2025-11-02 20:00", periods=70, freq="h")
     arrive = t0 + timedelta(hours=res[0])
     vals = np.where(obs_idx >= arrive.floor("h"), 220.0, 60.0)

@@ -69,21 +69,21 @@ DEFAULT_LON = 75.85
 SCENARIOS = {
     "worst_case": {
         "frp_range": (1100, 1400),
-        "u_wind_ms": -6.5,          # Strong westerly
+        "u_wind_ms": 6.5,          # Strong westerly
         "v_wind_ms": -3.8,          # Strong northerly -> NW wind towards Delhi
         "mixing_height_m": 450,     # Very low boundary layer -> severe trapping
         "description": "Peak burning period with strong NW winds and low mixing height",
     },
     "moderate": {
         "frp_range": (800, 1100),
-        "u_wind_ms": -4.8,
+        "u_wind_ms": 4.8,
         "v_wind_ms": -3.2,
         "mixing_height_m": 680,
         "description": "Typical October stubble burning with NW winds",
     },
     "light": {
         "frp_range": (400, 800),
-        "u_wind_ms": -2.5,
+        "u_wind_ms": 2.5,
         "v_wind_ms": -1.5,
         "mixing_height_m": 950,
         "description": "Light burning with weaker winds, higher mixing",

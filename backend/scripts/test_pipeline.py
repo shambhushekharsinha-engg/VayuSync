@@ -103,7 +103,7 @@ class TestGeoUtils(unittest.TestCase):
     def test_trajectory_cone_is_valid_geojson(self):
         """Trajectory cone should return a valid GeoJSON Feature."""
         result = self.geo.calculate_trajectory_cone(
-            lat=30.9, lon=75.85, u_wind=-4.8, v_wind=-3.2, thermal_power_mw=1000
+            lat=30.9, lon=75.85, u_wind=4.8, v_wind=-3.2, thermal_power_mw=1000
         )
         self.assertEqual(result["type"], "Feature")
         self.assertEqual(result["geometry"]["type"], "Polygon")
@@ -112,9 +112,9 @@ class TestGeoUtils(unittest.TestCase):
         self.assertGreater(result["properties"]["transport_distance_km"], 0)
 
     def test_trajectory_cone_nw_wind(self):
-        """NW wind (negative u, negative v) should produce SE-facing cone (bearing ~135)."""
+        """NW wind (positive u = eastward, negative v = southward) should produce SE-facing cone (bearing ~135)."""
         result = self.geo.calculate_trajectory_cone(
-            lat=30.9, lon=75.85, u_wind=-4.8, v_wind=-3.2, thermal_power_mw=1000
+            lat=30.9, lon=75.85, u_wind=4.8, v_wind=-3.2, thermal_power_mw=1000
         )
         bearing = result["properties"]["bearing_deg"]
         # NW wind means smoke goes SE; bearing should be roughly 100-170 degrees
@@ -239,7 +239,7 @@ class TestMockData(unittest.TestCase):
 
         # All should have NW winds (negative u, negative v)
         for profile in [punjab, haryana, delhi]:
-            self.assertLess(profile["u_wind_ms"], 0)
+            self.assertGreater(profile["u_wind_ms"], 0)
             self.assertLess(profile["v_wind_ms"], 0)
 
 
@@ -280,7 +280,7 @@ class TestIngestionEngine(unittest.TestCase):
         cone = calculate_trajectory_cone(
             lat=30.9,
             lon=75.85,
-            u_wind=-4.8,
+            u_wind=4.8,
             v_wind=-3.2,
             thermal_power_mw=1185.4,
             hours=6,
@@ -305,7 +305,7 @@ class TestEvaluatorEngine(unittest.TestCase):
         import json
 
         lat, lon, frp = 28.89, 76.59, 1312.0  # Rohtak hotspot
-        cone = calculate_trajectory_cone(lat, lon, -5.6, -2.7, frp)
+        cone = calculate_trajectory_cone(lat, lon, 5.6, -2.7, frp)
         cone_props = cone["properties"]
         bbox = cone_props["bbox"]
 
@@ -318,7 +318,7 @@ class TestEvaluatorEngine(unittest.TestCase):
             "region": "Rohtak, Haryana",
             "instrument": "VIIRS",
             "satellite": "N",
-            "u_wind_ms": str(-5.6),
+            "u_wind_ms": str(5.6),
             "v_wind_ms": str(-2.7),
             "cone_bearing_deg": str(round(cone_props["bearing_deg"], 2)),
             "cone_distance_km": str(round(cone_props["transport_distance_km"], 2)),

@@ -293,7 +293,9 @@ def _evaluate_hotspot_against_institutions(
 
     # Wind profile for PM2.5 estimate
     wind_profile = get_wind_for_region(lat, lon)
-    avg_wind_ms = max(abs(wind_profile.get("u_wind_ms", -4.0)), 0.5)
+    u_val = float(wind_profile.get("u_wind_ms", 4.0))
+    v_val = float(wind_profile.get("v_wind_ms", -6.0))
+    avg_wind_ms = max(math.sqrt(u_val**2 + v_val**2), 0.5)
     mixing_height = wind_profile.get("mixing_height_m", 700.0)
 
     alerts = []

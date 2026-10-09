@@ -302,7 +302,7 @@ MOCK_INSTITUTIONS = [
 #   - Post-monsoon NW/WNW flow (bearing ~300-330 degrees)
 #   - Surface winds 12-28 km/h (3.3-7.8 m/s)
 #   - Low atmospheric mixing height (500-900 m) trapping smoke near surface
-#   - u_wind: westerly component (negative = from west)
+#   - u_wind: eastward component (positive = blowing toward east; a NW wind has u>0, v<0)
 #   - v_wind: northerly component (negative = from north)
 
 MOCK_WIND_PROFILES = {
@@ -312,7 +312,7 @@ MOCK_WIND_PROFILES = {
         "longitude": 75.85,
         # u (eastward): negative -> wind blowing from the west (WNW)
         # v (northward): negative -> wind blowing from the north (NNW)
-        "u_wind_ms": -6.0,          # westerly component
+        "u_wind_ms": 6.0,          # westerly component
         "v_wind_ms": -10.4,         # northerly component
         "wind_speed_kmh": 43.2,
         "wind_bearing_deg": 330.0,  # From NNW (carrying smoke to SSE/Delhi)
@@ -324,7 +324,7 @@ MOCK_WIND_PROFILES = {
     "haryana": {
         "latitude": 28.89,
         "longitude": 76.59,
-        "u_wind_ms": -5.2,
+        "u_wind_ms": 5.2,
         "v_wind_ms": -8.8,
         "wind_speed_kmh": 36.8,
         "wind_bearing_deg": 330.0,
@@ -336,7 +336,7 @@ MOCK_WIND_PROFILES = {
     "delhi": {
         "latitude": 28.65,
         "longitude": 77.22,
-        "u_wind_ms": -4.1,
+        "u_wind_ms": 4.1,
         "v_wind_ms": -6.5,
         "wind_speed_kmh": 27.7,
         "wind_bearing_deg": 330.0,

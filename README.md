@@ -241,40 +241,38 @@ Unlike generic AQI alerts ("Air is Unhealthy"), VayuSync outputs tailored operat
 ### 1. Operational Latency & SLA Telemetry
 *Measurements recorded across live AWS Lambda CloudWatch logs and API Gateway execution traces.*
 
-| KPI Metric | Engineering Target | Measured Performance | Measurement Methodology |
+| KPI Metric | Engineering Target | Observed Performance | Measurement Methodology |
 |---|---|---|---|
-| **Pipeline Latency (`POST /simulate`)** | $< 3,000\text{ ms}$ | **$1,127\text{ ms} - 2,400\text{ ms}$** (median $\approx 1.6\text{s}$) | CloudWatch execution duration from API Gateway entry, Bedrock Claude 3 invocation, to DynamoDB persistence and SNS publish |
+| **Pipeline Latency (`POST /simulate`)** | $< 3,000\text{ ms}$ | **$1,127\text{ ms} - 2,400\text{ ms}$** | Execution duration from API Gateway entry, Bedrock Claude 3 invocation, to DynamoDB persistence and SNS publish |
 | **SNS Multi-Channel Dispatch** | $< 1,000\text{ ms}$ | **$310\text{ ms} - 380\text{ ms}$** | Amazon SNS Topic publish latency over `ap-south-1` network fabric |
 | **Cloud Infrastructure Cost** | Minimal / Low-Cost | **$0.00 Core + Pay-Per-Token** | Lambda, DynamoDB, API Gateway, SNS within AWS Free Tier; Bedrock Claude 3 Haiku billed at ~$0.00025 / 1k tokens (< $0.20 total demo spend) |
 | **Frontend Uptime & Resilience** | $99.9\%$ | **Zero-crash React Error Boundary** | Graceful fallback on API rate-limits or offline states |
 
 ---
 
-### 2. Atmospheric Transport Physics & Lead Time Mechanics
+### 2. Atmospheric Transport Mechanics & Lead Time Calculations
 
-Understanding the operational lead time requires reconciling surface winds with planetary boundary layer transport dynamics:
+Understanding operational lead time requires analyzing downwind distance as a function of wind velocity:
 
 $$\text{Downwind Distance: } D = \frac{V_w \times 3600 \times \Delta t}{1000} \quad [\text{km}]$$
 
-1. **Sub-Regional Inflow (Haryana Hotspots $\to$ Delhi NCR)**:
-   - Distance: $\approx 90\text{ to }130\text{ km}$ (Karnal, Kaithal, Panipat, Sonipat).
-   - At typical 10m surface wind velocities of $18.4\text{ km/h}$ ($5.1\text{ m/s}$), the transport time is:
-     $$\Delta t = \frac{110\text{ km}}{18.4\text{ km/h}} \approx 6.0\text{ hours}$$
-   - **Operational Lead Time**: **5 to 6 hours advance warning** for facility lockdown and HVAC dampener isolation.
+1. **Sub-Regional Haryana Agricultural Clusters ($\approx 90\text{ to }140\text{ km}$ from Delhi)**:
+   - At typical seasonal surface wind velocities of $18\text{ to }25\text{ km/h}$ ($5.0 - 7.0\text{ m/s}$), the 6-hour transport distance covers:
+     $$D_{6\text{h}} \approx 110\text{ to }150\text{ km}$$
+   - **Operational Advance Warning**: **5 to 6 hours** for facility lockdown, school recess suspension, and HVAC dampener isolation.
 
-2. **Long-Range Transboundary Inflow (Punjab Hotspots $\to$ Delhi NCR)**:
-   - Distance: $\approx 260\text{ to }310\text{ km}$ (Ludhiana, Sangrur, Amritsar).
-   - Under conservative 10m surface winds ($18.4\text{ km/h}$), surface plume arrival is **14 to 17 hours**.
-   - **Upper Boundary Layer Transport**: During severe post-monsoon stubble events, thermal buoyancy injects smoke into the low-level transport layer ($850\text{ hPa} - 925\text{ hPa}$, $\approx 1\text{ km}$ altitude), where geostrophic wind speeds frequently exceed $42-48\text{ km/h}$, compressing transboundary arrival to **6 to 8 hours**.
-   - *Screening Model Limitation*: VayuSync's current 2D screening formulation samples Open-Meteo 10m surface wind velocity. Phase 2 assimilates vertical wind profiles ($u, v$ at 850 hPa) to unify both transport regimes.
+2. **Long-Range Transboundary Inflow (Punjab Clusters $\approx 280\text{ km}$ from Delhi)**:
+   - Under conservative 10m surface winds ($18\text{ to }27\text{ km/h}$), surface plume arrival requires **$11\text{ to }16\text{ hours}$**.
+   - *Transport Aloft Hypothesis*: While stubble fires are relatively low-intensity surface burns, agricultural literature frequently investigates whether smoke entrained into the upper boundary layer ($100\text{m}$ to $850\text{ hPa}$) experiences stronger geostrophic transport. This remains a research hypothesis to be evaluated against multi-level wind reanalysis, rather than an operational assumption of our current 10m screening model.
+   - *Screening Model Scope*: VayuSync's current deployment intentionally uses 10m surface winds as a low-latency screening indicator.
 
 ---
 
-### 3. Planned Retrospective Validation Protocol
-To validate dispersion predictions without making unverified historical claims, VayuSync establishes the following reproducible benchmark protocol for future development:
-- **Archive Ingestion**: Pull historical NASA FIRMS VIIRS fire radiative power (FRP) and Open-Meteo historical reanalysis wind fields for peak stubble burning episodes.
-- **Ground Sensor Intercomparison**: Map projected trajectory polygon arrival times against hourly continuous ambient air quality monitoring stations (CAAQMS) operated by the Central Pollution Control Board (CPCB) and OpenAQ (e.g., Anand Vihar, RK Puram, Punjabi Bagh).
-- **Evaluation Metric**: Quantify the arrival time differential ($\Delta t = |t_{\text{projected}} - t_{\text{observed\ spike}}|$) and evaluate true positive alert precision for schools and healthcare facilities.
+### 3. Retrospective Validation Protocol & Self-Test Suite
+
+To support reproducible verification without unbacked historical claims:
+- **Code Mechanics Self-Test**: A standalone script [`backend/scripts/backtest.py`](file:///c:/Vayusync/backend/scripts/backtest.py) provides an automated self-test suite (`python backtest.py --selftest`). It verifies trajectory geometry, sign conventions, and parcel model mathematics on synthetic data.
+- **Planned Retrospective Validation Protocol**: The script is designed to accept historical NASA FIRMS VIIRS fire radiative power (FRP), Open-Meteo ERA5 hourly reanalysis wind fields (10m and 100m), and real CPCB/OpenAQ hourly ground station PM2.5 CSV data to quantitatively evaluate arrival time errors ($\Delta t$) and false alert rates across multi-day burning episodes.
 
 ---
 
