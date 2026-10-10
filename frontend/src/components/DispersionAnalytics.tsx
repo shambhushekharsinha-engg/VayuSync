@@ -1,7 +1,17 @@
 import React from 'react';
 import { Wind, Flame, Zap, Gauge, TrendingUp } from 'lucide-react';
+import type { DashboardData, TrajectoryFeature } from '../types';
+import { degreesToCardinal } from '../utils/mapHelpers';
 
-export const DispersionAnalytics: React.FC = () => {
+interface DispersionAnalyticsProps {
+  wind?: DashboardData['wind'] | null;
+  trajectoryCone?: TrajectoryFeature | null;
+}
+
+export const DispersionAnalytics: React.FC<DispersionAnalyticsProps> = ({
+  wind,
+  trajectoryCone,
+}) => {
   const FRP_DISTRICTS = [
     { district: 'Ludhiana, PB', frp: 1247, pct: 100, color: 'bg-red-500' },
     { district: 'Amritsar, PB', frp: 934, pct: 75, color: 'bg-orange-500' },
@@ -94,32 +104,54 @@ export const DispersionAnalytics: React.FC = () => {
 
         {/* Wind Profile Widget */}
         <div className="bg-gray-900/60 border border-gray-800 rounded-3xl p-5 shadow-2xl flex flex-col justify-between">
-          <div className="flex items-center gap-2 mb-3">
-            <Wind className="w-4 h-4 text-blue-400" />
-            <h3 className="font-bold text-sm text-white">Atmospheric Wind Profile</h3>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Wind className="w-4 h-4 text-blue-400" />
+              <h3 className="font-bold text-sm text-white">Atmospheric Wind Profile</h3>
+            </div>
+            {(wind?.is_illustrative || trajectoryCone?.properties?.is_illustrative || (!wind && !trajectoryCone)) && (
+              <span className="text-[9px] px-2 py-0.5 rounded font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                ILLUSTRATIVE
+              </span>
+            )}
           </div>
 
-          <div className="space-y-3 bg-gray-950/60 p-4 rounded-2xl border border-gray-800/80">
-            <div className="flex justify-between items-center text-xs">
-              <span className="text-gray-400">10m Vector Velocity</span>
-              <span className="text-white font-mono font-bold">46.8 km/h (12.8 m/s)</span>
-            </div>
-            <div className="flex justify-between items-center text-xs">
-              <span className="text-gray-400">Meteorological Bearing</span>
-              <span className="text-blue-400 font-mono font-bold">297° (NW → SE)</span>
-            </div>
-            <div className="flex justify-between items-center text-xs">
-              <span className="text-gray-400">Pasquill Stability Class</span>
-              <span className="text-orange-400 font-bold">Class D (Neutral / Moderate)</span>
-            </div>
-            <div className="flex justify-between items-center text-xs">
-              <span className="text-gray-400">Dispersion Half-Angle</span>
-              <span className="text-white font-mono font-bold">18.7° Cone Spread</span>
-            </div>
-          </div>
+          {(() => {
+            // Priority: active trajectory cone properties -> live dashboard wind -> moderate preset fallback
+            const speedKmh = trajectoryCone?.properties?.wind_speed_kmh ?? wind?.speed_kmh ?? 21.6;
+            const speedMs = trajectoryCone?.properties?.wind_speed_ms ?? (speedKmh / 3.6);
+            const bearingDeg = trajectoryCone?.properties?.bearing_deg ?? (wind?.direction_deg != null ? (wind.direction_deg + 180) % 360 : 154.3);
+            const cardinal = degreesToCardinal(bearingDeg);
+            const halfAngle = trajectoryCone?.properties?.cone_half_angle_deg ?? 15.0;
+
+            return (
+              <div className="space-y-3 bg-gray-950/60 p-4 rounded-2xl border border-gray-800/80">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-gray-400">10m Vector Velocity</span>
+                  <span className="text-white font-mono font-bold">
+                    {speedKmh.toFixed(1)} km/h ({speedMs.toFixed(1)} m/s)
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-gray-400">Plume Transport Bearing</span>
+                  <span className="text-blue-400 font-mono font-bold">
+                    {bearingDeg.toFixed(0)}° ({cardinal} Transport Vector)
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-gray-400">Pasquill Stability Class</span>
+                  <span className="text-orange-400 font-bold">Class D (Neutral / Moderate)</span>
+                </div>
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-gray-400">Dispersion Half-Angle</span>
+                  <span className="text-white font-mono font-bold">{halfAngle.toFixed(1)}° Cone Spread</span>
+                </div>
+              </div>
+            );
+          })()}
 
           <div className="mt-4 p-3 bg-blue-500/5 border border-blue-500/20 rounded-2xl text-[10px] text-blue-300 leading-relaxed">
-            🌬️ Persistent northwesterly winds create a direct high-speed pipeline transporting stubble smoke straight into the Delhi bowl within 6.4 hours.
+            🌬️ Persistent northwesterly winds create a calibrated transport pipeline carrying stubble smoke into the Delhi bowl over a 6–12 h window.
           </div>
         </div>
       </div>

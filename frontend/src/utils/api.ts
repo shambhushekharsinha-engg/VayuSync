@@ -122,9 +122,10 @@ const MOCK_DASHBOARD: DashboardData = {
     pm25_ugm3: 298.4,
   },
   wind: {
-    speed_kmh: 46.8,
-    direction_deg: 297,
-    description: 'NW → SE (Toward Delhi NCR)',
+    speed_kmh: 21.6,
+    direction_deg: 334,
+    description: 'NNW → SSE (Toward Delhi NCR, Bearing 154°)',
+    is_illustrative: true,
   },
 };
 
@@ -320,11 +321,12 @@ export const apiClient = {
           is_simulation: true,
         },
         wind_data: {
-          u_wind_ms: 11.2,
-          v_wind_ms: -5.8,
-          wind_speed_kmh: 46.8,
-          direction_degrees: 297,
-          source: 'Mock (October seasonal analogue)',
+          u_wind_ms: 2.6,
+          v_wind_ms: -5.4,
+          wind_speed_kmh: 21.6,
+          direction_degrees: 334,
+          source: 'Mock (Calibrated moderate preset: 21.6 km/h, 154° transport)',
+          is_illustrative: true,
         },
         trajectory_cone: MAIN_TRAJECTORY_CONE,
         trajectory_cone_12h: MAIN_TRAJECTORY_CONE,

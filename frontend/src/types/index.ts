@@ -19,16 +19,20 @@ export interface TrajectoryFeature {
   type: 'Feature';
   properties: {
     hotspot_id: string;
+    origin_lat?: number;
+    origin_lon?: number;
     bearing_deg: number;
     wind_speed_ms: number;
     wind_speed_kmh: number;
     distance_km: number;
+    transport_distance_km?: number;
     hours: number;
     cone_half_angle_deg: number;
     thermal_power_mw: number;
     district?: string;
     severity?: Severity;
     arrival_hours?: number;
+    is_illustrative?: boolean;
   };
   geometry: {
     type: 'Polygon';
@@ -157,6 +161,7 @@ export interface SimulationResult {
     wind_speed_kmh: number;
     direction_degrees: number;
     source: string;
+    is_illustrative?: boolean;
   };
   trajectory_cone: TrajectoryFeature;
   trajectory_cone_12h: TrajectoryFeature;
@@ -189,30 +194,41 @@ export const MOCK_INSTITUTIONS: Institution[] = [
   { institution_id: 'MUN-DEL-0001', name: 'NDMC North Delhi HQ', facility_type: 'Municipality', latitude: 28.6692, longitude: 77.2090, district: 'North Delhi', personnel_count: 340, current_risk: 'HIGH', has_active_alert: true },
 ];
 
-// Pre-computed trajectory cone from Ludhiana → Delhi (NW winds)
+// Pre-computed trajectory cone from Ludhiana → Delhi (NW winds, moderate preset: 21.6 km/h, 154° bearing)
 export const MAIN_TRAJECTORY_CONE: TrajectoryFeature = {
   type: 'Feature',
   properties: {
     hotspot_id: 'HS001',
-    bearing_deg: 156,
-    wind_speed_ms: 12.8,
-    wind_speed_kmh: 46.1,
-    distance_km: 276.6,
+    origin_lat: 30.9,
+    origin_lon: 75.85,
+    bearing_deg: 154.3,
+    wind_speed_ms: 6.0,
+    wind_speed_kmh: 21.6,
+    distance_km: 139.7,
+    transport_distance_km: 139.7,
     hours: 6,
-    cone_half_angle_deg: 18.7,
-    thermal_power_mw: 1247,
+    cone_half_angle_deg: 15.0,
+    thermal_power_mw: 950,
     district: 'Ludhiana',
-    severity: 'CRITICAL',
+    severity: 'HIGH',
     arrival_hours: 6,
+    is_illustrative: true,
   },
   geometry: {
     type: 'Polygon',
     coordinates: [[
-      [75.852, 30.902],
-      [75.3, 30.1], [74.9, 29.5], [74.7, 28.9], [75.1, 28.3], [75.9, 27.9], [76.4, 27.7],
-      [77.0, 27.6],
-      [77.6, 27.7], [78.1, 27.9], [78.4, 28.3], [78.2, 28.9], [77.8, 29.5], [77.4, 30.1],
-      [75.852, 30.902]
-    ]]
-  }
+      [75.85, 30.9],
+      [76.795, 29.945],
+      [76.721, 29.894],
+      [76.643, 29.847],
+      [76.562, 29.805],
+      [76.478, 29.767],
+      [76.391, 29.734],
+      [76.302, 29.706],
+      [76.211, 29.683],
+      [76.119, 29.666],
+      [75.85, 30.9],
+    ]],
+  },
 };
+

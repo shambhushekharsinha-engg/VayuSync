@@ -11,6 +11,16 @@ interface TimelineScrubberProps {
   trajectoryCone?: TrajectoryFeature | null;
 }
 
+// Preset velocity bounds derived from backend simulation scenarios (light: 15.1 km/h, worst_case: 25.6 km/h)
+const PRESET_SPEEDS = [
+  Math.sqrt(1.8 ** 2 + (-3.8) ** 2) * 3.6, // light: ~15.1 km/h
+  Math.sqrt(2.6 ** 2 + (-5.4) ** 2) * 3.6, // moderate: ~21.6 km/h
+  Math.sqrt(3.5 ** 2 + (-6.2) ** 2) * 3.6, // worst_case: ~25.6 km/h
+];
+const MIN_PRESET_SPEED_KMH = Math.min(...PRESET_SPEEDS).toFixed(1);
+const MAX_PRESET_SPEED_KMH = Math.max(...PRESET_SPEEDS).toFixed(1);
+const PRESET_TRANSPORT_RANGE_LABEL = `${MIN_PRESET_SPEED_KMH}–${MAX_PRESET_SPEED_KMH} km/h`;
+
 const MILESTONES = [
   { hour: 0, label: 'T+0h', title: 'Ignition', desc: 'Ludhiana Active Fire', aqi: 180 },
   { hour: 3, label: 'T+3h', title: 'Plume Transport', desc: 'Entering Haryana Belt', aqi: 260 },
@@ -161,7 +171,7 @@ export const TimelineScrubber: React.FC<TimelineScrubberProps> = ({
             <>
               <span>
                 Modeled Plume Transport:{' '}
-                <strong className="text-gray-200">18.4–26.0 km/h</strong>
+                <strong className="text-gray-200">{PRESET_TRANSPORT_RANGE_LABEL}</strong>
               </span>
               <span className="text-gray-600">|</span>
               <span>

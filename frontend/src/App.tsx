@@ -710,7 +710,10 @@ const App: React.FC = () => {
         {/* VIEW 5: ATMOSPHERIC DISPERSION ANALYTICS */}
         {navTab === 'ANALYTICS' && (
           <div className="flex-1 overflow-hidden">
-            <DispersionAnalytics />
+            <DispersionAnalytics
+              wind={dashboard?.wind}
+              trajectoryCone={simulatedCone || activeRegion.trajectoryCone}
+            />
           </div>
         )}
 
