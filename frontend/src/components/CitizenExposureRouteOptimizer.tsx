@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Navigation, ShieldCheck, ArrowRight, Sparkles, MapPin, Wind, Bike, Car, Footprints } from 'lucide-react';
 import { soundEngine } from '../utils/audio';
+import { degreesToCardinal } from '../utils/mapHelpers';
 
 interface RouteOption {
   id: 'standard' | 'shielded';
@@ -15,7 +16,16 @@ interface RouteOption {
   waypoints: string[];
 }
 
-export const CitizenExposureRouteOptimizer: React.FC = () => {
+interface CitizenExposureRouteOptimizerProps {
+  wind?: {
+    speed_kmh: number;
+    direction_deg: number;
+    description?: string;
+    is_illustrative?: boolean;
+  } | null;
+}
+
+export const CitizenExposureRouteOptimizer: React.FC<CitizenExposureRouteOptimizerProps> = ({ wind }) => {
   const [startPoint, setStartPoint] = useState('Connaught Place (Central Delhi)');
   const [destination, setDestination] = useState('Dwarka Expressway / IGI Aerocity');
   const [commuteMode, setCommuteMode] = useState<'CAR' | 'TWO_WHEELER' | 'WALK'>('TWO_WHEELER');
@@ -73,8 +83,24 @@ export const CitizenExposureRouteOptimizer: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2 bg-gray-950 px-3 py-1.5 rounded-2xl border border-gray-800 text-xs text-gray-300">
-          <Wind className="w-4 h-4 text-blue-400 animate-spin" />
-          <span>Real-time Wind Vector Shielding: <strong>Active (315° NW)</strong></span>
+          <Wind className="w-4 h-4 text-blue-400" />
+          {wind ? (
+            <span>
+              {wind.is_illustrative ? 'Modeled' : 'Dynamic'} Wind Vector Shielding:{' '}
+              <strong className="text-white">
+                {wind.direction_deg}° {degreesToCardinal(wind.direction_deg)} ({wind.speed_kmh.toFixed(0)} km/h)
+              </strong>
+              {wind.is_illustrative && (
+                <span className="ml-1.5 text-[9px] px-1 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/30">
+                  ILLUSTRATIVE
+                </span>
+              )}
+            </span>
+          ) : (
+            <span className="text-gray-400">
+              Wind Vector Shielding: <span className="text-gray-500">Awaiting atmospheric feed</span>
+            </span>
+          )}
         </div>
       </div>
 

@@ -541,6 +541,7 @@ const App: React.FC = () => {
                     currentHour={timelineHour}
                     onHourChange={setTimelineHour}
                     isSimulating={isSimulating}
+                    trajectoryCone={simulatedCone || activeRegion.trajectoryCone}
                   />
                 </div>
 
@@ -654,7 +655,7 @@ const App: React.FC = () => {
         {/* VIEW 2: CITIZEN EXPOSURE ROUTE OPTIMIZER (AERO-ROUTING) */}
         {navTab === 'ROUTING' && (
           <div className="flex-1 overflow-y-auto p-6 max-w-5xl mx-auto w-full">
-            <CitizenExposureRouteOptimizer />
+            <CitizenExposureRouteOptimizer wind={dashboard?.wind} />
           </div>
         )}
 

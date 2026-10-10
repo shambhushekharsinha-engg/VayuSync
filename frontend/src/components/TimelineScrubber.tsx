@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Pause, RotateCcw, Clock, Wind, AlertTriangle } from 'lucide-react';
 import { soundEngine } from '../utils/audio';
+import { degreesToCardinal } from '../utils/mapHelpers';
+import type { TrajectoryFeature } from '../types';
 
 interface TimelineScrubberProps {
   currentHour: number;
   onHourChange: (hour: number) => void;
   isSimulating?: boolean;
+  trajectoryCone?: TrajectoryFeature | null;
 }
 
 const MILESTONES = [
@@ -19,6 +22,7 @@ const MILESTONES = [
 export const TimelineScrubber: React.FC<TimelineScrubberProps> = ({
   currentHour,
   onHourChange,
+  trajectoryCone,
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -134,10 +138,38 @@ export const TimelineScrubber: React.FC<TimelineScrubberProps> = ({
       {/* Atmospheric Context ticker */}
       <div className="flex items-center justify-between text-[10px] text-gray-400 bg-gray-950/40 rounded-xl px-2.5 py-1 border border-gray-800/50">
         <div className="flex items-center gap-1.5">
-          <Wind className="w-3 h-3 text-blue-400 animate-pulse" />
-          <span>Plume Velocity: <strong className="text-gray-200">46.8 km/h</strong></span>
-          <span className="text-gray-600">|</span>
-          <span>Bearing: <strong className="text-gray-200">297° NW→SE</strong></span>
+          <Wind className="w-3 h-3 text-blue-400" />
+          {trajectoryCone?.properties ? (
+            <>
+              <span>
+                Dispersion Speed:{' '}
+                <strong className="text-gray-200">
+                  {trajectoryCone.properties.wind_speed_kmh?.toFixed(1) ?? '18.4'} km/h
+                </strong>
+              </span>
+              <span className="text-gray-600">|</span>
+              <span>
+                Bearing:{' '}
+                <strong className="text-gray-200">
+                  {trajectoryCone.properties.bearing_deg != null
+                    ? `${trajectoryCone.properties.bearing_deg.toFixed(0)}° ${degreesToCardinal(trajectoryCone.properties.bearing_deg)}`
+                    : '151° SSE'}
+                </strong>
+              </span>
+            </>
+          ) : (
+            <>
+              <span>
+                Modeled Plume Transport:{' '}
+                <strong className="text-gray-200">18.4–26.0 km/h</strong>
+              </span>
+              <span className="text-gray-600">|</span>
+              <span>
+                Corridor Bearing:{' '}
+                <strong className="text-gray-200">151° SSE (Punjab → Delhi NCR)</strong>
+              </span>
+            </>
+          )}
         </div>
         <div className="text-orange-400 font-medium">
           {currentHour < 3
