@@ -175,21 +175,29 @@ export const apiClient = {
       high_alerts: raw.alerts?.severity_breakdown?.HIGH ?? raw.high_alerts ?? 0,
       total_alerts_last_24h: raw.alerts?.total_generated ?? raw.total_alerts_last_24h ?? 0,
       avg_lead_time_hours: raw.avg_lead_time_hours ?? (isFallback ? MOCK_DASHBOARD.avg_lead_time_hours : null),
-      last_ingestion_utc: raw.alerts?.last_alert_utc ?? raw.last_ingestion_utc ?? (isFallback ? MOCK_DASHBOARD.last_ingestion_utc : new Date().toISOString()),
+      last_ingestion_utc: raw.alerts?.last_alert_utc ?? raw.last_ingestion_utc ?? (isFallback ? MOCK_DASHBOARD.last_ingestion_utc : null),
       pipeline_latency_ms: raw.pipeline_latency_ms ?? (isFallback ? MOCK_DASHBOARD.pipeline_latency_ms : null),
       aws_cost_today_usd: raw.aws_cost_today_usd ?? (isFallback ? MOCK_DASHBOARD.aws_cost_today_usd : null),
       is_mock_fallback: isFallback,
-      aqi_delhi_ncr: {
-        current: raw.aqi_delhi_ncr?.current ?? (isFallback ? MOCK_DASHBOARD.aqi_delhi_ncr.current : 387),
-        forecast_6h: raw.aqi_delhi_ncr?.forecast_6h ?? (isFallback ? MOCK_DASHBOARD.aqi_delhi_ncr.forecast_6h : 445),
-        category: raw.aqi_delhi_ncr?.category ?? (isFallback ? MOCK_DASHBOARD.aqi_delhi_ncr.category : 'Very Unhealthy'),
-        pm25_ugm3: raw.aqi_delhi_ncr?.pm25_ugm3 ?? (isFallback ? MOCK_DASHBOARD.aqi_delhi_ncr.pm25_ugm3 : 298.4),
-      },
-      wind: {
-        speed_kmh: raw.wind?.speed_kmh ?? (isFallback ? MOCK_DASHBOARD.wind.speed_kmh : 18.4),
-        direction_deg: raw.wind?.direction_deg ?? (isFallback ? MOCK_DASHBOARD.wind.direction_deg : 315),
-        description: raw.wind?.description ?? (isFallback ? MOCK_DASHBOARD.wind.description : 'NW → SE (Toward Delhi NCR)'),
-      },
+      aqi_delhi_ncr: raw.aqi_delhi_ncr ? {
+        current: Number(raw.aqi_delhi_ncr.current),
+        forecast_6h: Number(raw.aqi_delhi_ncr.forecast_6h),
+        category: String(raw.aqi_delhi_ncr.category),
+        pm25_ugm3: Number(raw.aqi_delhi_ncr.pm25_ugm3),
+        is_illustrative: false,
+      } : (isFallback ? {
+        ...MOCK_DASHBOARD.aqi_delhi_ncr!,
+        is_illustrative: true,
+      } : null),
+      wind: raw.wind ? {
+        speed_kmh: Number(raw.wind.speed_kmh),
+        direction_deg: Number(raw.wind.direction_deg),
+        description: String(raw.wind.description),
+        is_illustrative: false,
+      } : (isFallback ? {
+        ...MOCK_DASHBOARD.wind!,
+        is_illustrative: true,
+      } : null),
     };
   },
 

@@ -88,21 +88,23 @@ export interface DashboardData {
   high_alerts: number;
   total_alerts_last_24h: number;
   avg_lead_time_hours?: number | null;
-  last_ingestion_utc: string;
+  last_ingestion_utc?: string | null;
   pipeline_latency_ms?: number | null;
   aws_cost_today_usd?: number | null;
   is_mock_fallback?: boolean;
-  aqi_delhi_ncr: {
+  aqi_delhi_ncr?: {
     current: number;
-    forecast_6h: number;
-    category: string;
+    forecast_6h?: number;
+    category?: string;
     pm25_ugm3: number;
-  };
-  wind: {
+    is_illustrative?: boolean;
+  } | null;
+  wind?: {
     speed_kmh: number;
     direction_deg: number;
     description: string;
-  };
+    is_illustrative?: boolean;
+  } | null;
 }
 
 export interface SystemStatus {

@@ -26,7 +26,17 @@ const LiveClock: React.FC = () => {
 };
 
 // AQI gauge visual
-const AQIGauge: React.FC<{ aqi: number; category: string; pm25: number }> = ({ aqi, category, pm25 }) => {
+const AQIGauge: React.FC<{ aqi?: number | null; category?: string | null; pm25?: number | null; isIllustrative?: boolean }> = ({ aqi, category, pm25, isIllustrative }) => {
+  if (aqi == null) {
+    return (
+      <div className="bg-gray-950/60 border border-gray-800 rounded-xl p-3.5 text-center">
+        <div className="text-gray-400 text-xs font-medium mb-1">AQI · Delhi NCR</div>
+        <div className="text-gray-500 font-black text-2xl">—</div>
+        <div className="text-gray-600 text-[10px] mt-1">Requires active ground station feed</div>
+      </div>
+    );
+  }
+
   const pct = Math.min(aqi / 500, 1);
   const color =
     aqi <= 100 ? '#22c55e' :
@@ -38,15 +48,22 @@ const AQIGauge: React.FC<{ aqi: number; category: string; pm25: number }> = ({ a
     <div className="bg-gray-950/60 border border-gray-800 rounded-xl p-3.5 space-y-2.5">
       <div className="flex items-center justify-between">
         <span className="text-gray-400 text-xs font-medium">AQI · Delhi NCR</span>
-        <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: `${color}20`, color, border: `1px solid ${color}40` }}>
-          {category}
-        </span>
+        <div className="flex items-center gap-1.5">
+          {isIllustrative && (
+            <span className="text-[9px] px-1 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/30">
+              ILLUSTRATIVE
+            </span>
+          )}
+          <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: `${color}20`, color, border: `1px solid ${color}40` }}>
+            {category ?? 'Unknown'}
+          </span>
+        </div>
       </div>
 
       {/* Big AQI number */}
       <div className="text-center">
         <div className="font-black text-4xl" style={{ color }}>{aqi}</div>
-        <div className="text-gray-500 text-[10px] mt-0.5">PM2.5: {pm25.toFixed(1)} µg/m³</div>
+        <div className="text-gray-500 text-[10px] mt-0.5">PM2.5: {pm25 != null ? pm25.toFixed(1) : '—'} µg/m³</div>
       </div>
 
       {/* Bar gauge */}
@@ -135,9 +152,10 @@ const SystemStatus: React.FC<SystemStatusProps> = ({ status, dashboard }) => {
 
       {/* AQI widget */}
       <AQIGauge
-        aqi={dashboard?.aqi_delhi_ncr?.current ?? 387}
-        category={dashboard?.aqi_delhi_ncr?.category ?? 'Very Unhealthy'}
-        pm25={dashboard?.aqi_delhi_ncr?.pm25_ugm3 ?? 298.4}
+        aqi={dashboard?.aqi_delhi_ncr?.current}
+        category={dashboard?.aqi_delhi_ncr?.category}
+        pm25={dashboard?.aqi_delhi_ncr?.pm25_ugm3}
+        isIllustrative={dashboard?.aqi_delhi_ncr?.is_illustrative}
       />
 
       {/* Wind info */}
@@ -145,20 +163,33 @@ const SystemStatus: React.FC<SystemStatusProps> = ({ status, dashboard }) => {
         <div className="flex items-center gap-2 mb-2">
           <span className="text-blue-400 text-sm">🌬️</span>
           <span className="text-gray-400 text-xs font-medium">Wind Profile</span>
+          {dashboard?.wind?.is_illustrative && (
+            <span className="ml-auto text-[9px] px-1 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/30">
+              ILLUSTRATIVE BASELINE
+            </span>
+          )}
         </div>
-        <div className="grid grid-cols-2 gap-2 text-xs">
-          <div>
-            <div className="text-gray-500 text-[9px]">Speed</div>
-            <div className="text-white font-bold">{(dashboard?.wind?.speed_kmh ?? 46.8).toFixed(1)} km/h</div>
+        {dashboard?.wind ? (
+          <>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <div className="text-gray-500 text-[9px]">Speed</div>
+                <div className="text-white font-bold">{dashboard.wind.speed_kmh.toFixed(1)} km/h</div>
+              </div>
+              <div>
+                <div className="text-gray-500 text-[9px]">Direction</div>
+                <div className="text-white font-bold">{dashboard.wind.direction_deg}° NW</div>
+              </div>
+            </div>
+            <div className="mt-2 text-[10px] text-blue-400/70 bg-blue-500/5 rounded p-1.5 border border-blue-500/10">
+              {dashboard.wind.description}
+            </div>
+          </>
+        ) : (
+          <div className="text-center py-2 text-gray-500 text-xs">
+            Requires active Open-Meteo wind field
           </div>
-          <div>
-            <div className="text-gray-500 text-[9px]">Direction</div>
-            <div className="text-white font-bold">{dashboard?.wind?.direction_deg ?? 297}° NW</div>
-          </div>
-        </div>
-        <div className="mt-2 text-[10px] text-blue-400/70 bg-blue-500/5 rounded p-1.5 border border-blue-500/10">
-          {dashboard?.wind?.description ?? 'NW → SE (Toward Delhi NCR)'}
-        </div>
+        )}
       </div>
 
       {/* Pipeline latency */}
