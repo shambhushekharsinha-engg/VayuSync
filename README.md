@@ -271,7 +271,7 @@ $$\text{Downwind Distance: } D = \frac{V_w \times 3600 \times \Delta t}{1000} \q
 ### 3. Retrospective Validation Protocol & Self-Test Suite
 
 To support reproducible verification without unbacked historical claims:
-- **Code Mechanics Self-Test**: A standalone script [`backend/scripts/backtest.py`](file:///c:/Vayusync/backend/scripts/backtest.py) provides an automated self-test suite (`python backtest.py --selftest`). It verifies trajectory geometry, sign conventions, and parcel model mathematics on synthetic data.
+- **Code Mechanics Self-Test**: A standalone script [`backend/scripts/backtest.py`](backend/scripts/backtest.py) provides an automated self-test suite (`python backend/scripts/backtest.py --selftest`). It verifies trajectory geometry, sign conventions, and parcel model mathematics on synthetic data.
 - **Planned Retrospective Validation Protocol**: The script is designed to accept historical NASA FIRMS VIIRS fire radiative power (FRP), Open-Meteo ERA5 hourly reanalysis wind fields (10m and 100m), and real CPCB/OpenAQ hourly ground station PM2.5 CSV data to quantitatively evaluate arrival time errors ($\Delta t$) and false alert rates across multi-day burning episodes.
 
 ---

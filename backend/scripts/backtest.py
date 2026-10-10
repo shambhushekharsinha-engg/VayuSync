@@ -10,11 +10,10 @@ Inputs (all real, all archived; nothing here is simulated except --selftest):
   * Open-Meteo ERA5 archive winds (10 m and 100 m, no key needed)
   * Hourly PM2.5 observations     (--obs-csv you download; CPCB CCR portal or OpenAQ)
 
-Three predictors are compared against the observed PM2.5 onset:
-  A. cone, as deployed   : ingestion's u/v -> geo_utils.calculate_trajectory_cone
-  A'. cone, sign-corrected: same, with the u sign that geo_utils' bearing formula expects
-  B. time-stepped parcel trajectories using hourly 10 m winds
-  C. time-stepped parcel trajectories using hourly 100 m winds
+Predictors compared against the observed PM2.5 onset:
+  A. cone      : ingestion's u/v -> geo_utils.calculate_trajectory_cone (the production code path)
+  B. parcel10m : time-stepped parcel trajectories using hourly 10 m winds
+  C. parcel100m: same, using hourly 100 m winds
 
 Rules are fixed in code BEFORE you look at results (see observed_onset). Do not
 tune them per event. Run several dates, including ones with no stubble signal,
@@ -174,12 +173,10 @@ def parcel_arrival(w, lat, lon, t0, station, radius_km, level, max_h=48.0, dt_h=
     return None
 
 
-def cone_covers(w, row, station, hours, sign_corrected):
+def cone_covers(w, row, station, hours):
     ws, wd = w.wind_at(row.lat, row.lon, row.t.floor("h"), 10)
     u = -ws * math.sin(math.radians(wd))   # exactly what ingestion_engine/handler.py computes
     v = -ws * math.cos(math.radians(wd))
-    if sign_corrected:
-        u = -u                              # geo_utils uses atan2(-u, v); this compensates
     cone = calculate_trajectory_cone(row.lat, row.lon, u, v, float(row.frp), hours=hours)
     return point_in_polygon(station[0], station[1], cone["geometry"]["coordinates"][0])
 
@@ -201,9 +198,8 @@ def run(fires, w, station, radius_km, obs):
                 "obs_onset_utc": str(on["onset"]), "obs_peak_utc": str(on["peak_time"]), "obs_peak": on["peak"]})
 
     for hrs in (6, 12, 24):
-        for tag, fixed in (("deployed", False), ("corrected", True)):
-            hit = np.array([cone_covers(w, r, st, hrs, fixed) for r in fires.itertuples()])
-            out[f"cone_{tag}_{hrs}h_frp_covering_station"] = float(fires["frp"][hit].sum() / fires["frp"].sum())
+        hit = np.array([cone_covers(w, r, st, hrs) for r in fires.itertuples()])
+        out[f"cone_{hrs}h_frp_covering_station"] = float(fires["frp"][hit].sum() / fires["frp"].sum())
 
     for level in (10, 100):
         arr = []
@@ -262,12 +258,17 @@ def selftest():
     assert res and abs(res[0] - expect_h) < 1.0
     row = fires.iloc[0]
     row = type("R", (), {"lat": row.lat, "lon": row.lon, "t": row.t, "frp": row.frp})()
-    dep18 = cone_covers(w, row, (st[1], st[2]), 18, False)
-    cor18 = cone_covers(w, row, (st[1], st[2]), 18, True)
-    dep12 = cone_covers(w, row, (st[1], st[2]), 12, False)
-    print(f"  wind aimed exactly at station: cone covers station @18h  as-deployed={dep18}  sign-corrected={cor18}")
-    print(f"  as-deployed cone @12h covers station: {dep12}  (18 km/h x 12 h x buoyancy ~ 233 km < {dist:.0f} km)")
-    assert dep18 and not dep12
+    c18 = cone_covers(w, row, (st[1], st[2]), 18)
+    c12 = cone_covers(w, row, (st[1], st[2]), 12)
+    print(f"  wind aimed exactly at station: cone covers station @18h={c18}  @12h={c12}  (18 km/h x 12 h x buoyancy ~ 233 km < {dist:.0f} km)")
+    assert c18 and not c12
+    # direction regression test: a NW wind (from 315 deg) must send smoke SE, never SW
+    wnw = Winds(w.lats, w.lons, w.times, full(5.0), full(315.0), full(5.0), full(315.0))
+    r2 = type("R", (), {"lat": 30.9, "lon": 75.85, "t": t0, "frp": 100.0})()
+    _ws, _wd = wnw.wind_at(30.9, 75.85, t0, 10)
+    cone = calculate_trajectory_cone(30.9, 75.85, -_ws * math.sin(math.radians(_wd)), -_ws * math.cos(math.radians(_wd)), 100.0, hours=6)
+    print(f"  NW wind bearing = {cone['properties']['bearing_deg']} deg (expect 135)")
+    assert abs(cone["properties"]["bearing_deg"] - 135.0) < 1.0
     obs_idx = pd.date_range("2025-11-02 20:00", periods=70, freq="h")
     arrive = t0 + timedelta(hours=res[0])
     vals = np.where(obs_idx >= arrive.floor("h"), 220.0, 60.0)

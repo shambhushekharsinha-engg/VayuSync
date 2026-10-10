@@ -31,6 +31,7 @@ Bedrock output schema enforced via system prompt:
 
 import json
 import logging
+import math
 import os
 import uuid
 from datetime import datetime, timezone, timedelta
@@ -374,7 +375,8 @@ def _evaluate_hotspot_against_institutions(
             ),
             "recommended_actions": json.dumps(advisory.get("recommended_actions", [])),
             "confidence_score": str(advisory.get("confidence_score", 0.75)),
-            "bedrock_model": BEDROCK_MODEL_ID,
+            "advisory_source": advisory.get("advisory_source", "rule_fallback"),
+            "bedrock_model": BEDROCK_MODEL_ID if advisory.get("advisory_source") == "bedrock" else "rule_fallback",
             "ttl_epoch": ttl_epoch,
         }
 
@@ -513,6 +515,7 @@ Generate the advisory JSON now."""
         content = response_body.get("content", [{}])[0].get("text", "").strip()
 
         advisory = json.loads(content)
+        advisory["advisory_source"] = "bedrock"
 
         logger.info(
             "Bedrock advisory for %s: severity=%s, PM2.5=%.1f, confidence=%.2f",
@@ -588,6 +591,7 @@ def _build_fallback_advisory(
         "predicted_pm25_ugm3": pm25_estimate,
         "recommended_actions": actions,
         "confidence_score": 0.72,  # Lower confidence for rule-based fallback
+        "advisory_source": "rule_fallback",
     }
 
 

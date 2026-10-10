@@ -137,20 +137,20 @@ export const BedrockInspectorModal: React.FC<BedrockInspectorModalProps> = ({
           {/* Model execution telemetry */}
           <div className="bg-gray-950 p-3 rounded-xl border border-gray-800 font-mono text-[10px] text-gray-400 space-y-1">
             <div className="text-purple-400 font-bold flex items-center justify-between">
-              <span>Claude 3 Haiku Execution Breakdown</span>
-              <span className="text-green-400">STATUS: 200 OK</span>
+              <span>{alert.advisory_source === 'rule_fallback' ? 'Deterministic Rule Engine (Bedrock Standby)' : 'Claude 3 Haiku Execution Breakdown'}</span>
+              <span className={alert.advisory_source === 'rule_fallback' ? 'text-amber-400 font-bold' : 'text-green-400'}>
+                {alert.advisory_source === 'rule_fallback' ? 'SOURCE: RULE-BASED FALLBACK' : 'STATUS: 200 OK'}
+              </span>
             </div>
             <div className="flex justify-between">
-              <span>Foundation Model:</span>
-              <span className="text-gray-200">anthropic.claude-3-haiku-20240307-v1:0</span>
+              <span>Engine / Model:</span>
+              <span className="text-gray-200">{alert.bedrock_model ?? (alert.advisory_source === 'rule_fallback' ? 'Deterministic Facility Matrix' : 'anthropic.claude-3-haiku-20240307-v1:0')}</span>
             </div>
             <div className="flex justify-between">
-              <span>Inference Latency:</span>
-              <span className="text-yellow-400 font-bold">1,180 ms</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Token Count (Input / Output):</span>
-              <span className="text-gray-200">248 in / 134 out (~$0.00028)</span>
+              <span>{alert.advisory_source === 'rule_fallback' ? 'Fallback Trigger:' : 'Inference Latency:'}</span>
+              <span className={alert.advisory_source === 'rule_fallback' ? 'text-amber-400 font-bold' : 'text-yellow-400 font-bold'}>
+                {alert.advisory_source === 'rule_fallback' ? 'AWS Account Bedrock Inactive / Cold Verification' : '1,180 ms'}
+              </span>
             </div>
             <div className="flex justify-between">
               <span>Output Formatting:</span>

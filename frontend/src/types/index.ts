@@ -71,6 +71,8 @@ export interface AlertLog {
   predicted_pm25_ugm3: number;
   recommended_actions: string[];
   confidence_score: number;
+  advisory_source?: 'bedrock' | 'rule_fallback';
+  bedrock_model?: string;
   dispatch_status?: string;
   sms_delivered?: boolean;
   email_delivered?: boolean;
