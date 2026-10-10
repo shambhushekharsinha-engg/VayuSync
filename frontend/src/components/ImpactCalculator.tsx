@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Users, HeartPulse, IndianRupee, Shield, Check, Sparkles } from 'lucide-react';
 import { soundEngine } from '../utils/audio';
+import { ShinyText, TrueFocus, WindWaveBackground } from './reactbits';
 
 interface ActionItem {
   id: string;
@@ -78,29 +79,47 @@ export const ImpactCalculator: React.FC = () => {
   ).toFixed(1);
 
   return (
-    <div className="bg-gray-900/90 backdrop-blur-md border border-gray-800 rounded-3xl p-5 shadow-2xl space-y-4">
+    <div className="relative overflow-hidden bg-gray-900/90 backdrop-blur-md border border-gray-800 rounded-3xl p-5 shadow-2xl space-y-4">
+      {/* React Bits WindWaveBackground laminar boundary effect */}
+      <WindWaveBackground waveCount={3} speed={0.012} amplitude={20} className="opacity-40" />
+
       {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-gray-800">
+      <div className="relative z-10 flex flex-wrap items-center justify-between pb-3 border-b border-gray-800 gap-3">
         <div className="flex items-center gap-2.5">
           <div className="p-2 bg-green-500/10 border border-green-500/30 rounded-xl">
             <Shield className="w-5 h-5 text-green-400" />
           </div>
           <div>
             <h3 className="font-black text-sm text-white flex items-center gap-1.5">
-              Preemptive Action Impact Calculator
+              <span>Preemptive Action Impact Calculator</span>
+              <ShinyText
+                text="· Real-Time ROI"
+                speed={4}
+                className="text-[10px] text-green-400 font-bold"
+              />
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-500/20 text-green-300 font-bold">
                 ROI SIMULATOR
               </span>
             </h3>
-            <p className="text-gray-400 text-[10px]">
+            <p className="text-gray-400 text-[10px] mt-0.5">
               Quantifying citizen protection & healthcare cost avoidance across Delhi NCR
             </p>
           </div>
         </div>
 
-        <div className="text-[10px] text-gray-500 flex items-center gap-1">
-          <Sparkles className="w-3 h-3 text-amber-400" />
-          Interactive Judged Matrix
+        <div className="flex items-center gap-2">
+          {/* React Bits TrueFocus headline component */}
+          <TrueFocus
+            sentence="CITIZEN PROTECTION COST AVERTED"
+            blurAmount={2}
+            borderColor="#22c55e"
+            glowColor="rgba(34, 197, 94, 0.3)"
+            className="text-[9px] font-mono hidden xl:flex"
+          />
+          <div className="text-[10px] text-gray-500 flex items-center gap-1">
+            <Sparkles className="w-3 h-3 text-amber-400" />
+            Interactive Matrix
+          </div>
         </div>
       </div>
 

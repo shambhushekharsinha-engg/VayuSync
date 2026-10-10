@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, Server, Database, Bot, Radio, Cpu, ArrowRight, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { soundEngine } from '../utils/audio';
+import { AtmosphericParticles, ShinyText } from './reactbits';
 
 interface ArchitectureModalProps {
   isOpen: boolean;
@@ -72,11 +73,14 @@ export const ArchitectureModal: React.FC<ArchitectureModalProps> = ({ isOpen, on
         className="bg-gray-900 border border-gray-700 rounded-3xl max-w-4xl w-full p-6 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* React Bits Atmospheric Particles background effect */}
+        <AtmosphericParticles particleCount={25} speed={0.4} className="opacity-40" />
+
         {/* Glow backdrop */}
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
 
         {/* Header */}
-        <div className="flex items-start justify-between pb-4 border-b border-gray-800 flex-shrink-0">
+        <div className="flex items-start justify-between pb-4 border-b border-gray-800 flex-shrink-0 relative z-10">
           <div>
             <div className="flex items-center gap-2.5">
               <span className="p-2 bg-orange-500/10 border border-orange-500/30 rounded-xl text-orange-400">
@@ -84,7 +88,12 @@ export const ArchitectureModal: React.FC<ArchitectureModalProps> = ({ isOpen, on
               </span>
               <div>
                 <h3 className="font-black text-lg text-white flex items-center gap-2">
-                  AWS Serverless Pipeline Architecture
+                  <span>AWS Serverless Pipeline Architecture</span>
+                  <ShinyText
+                    text="· Event-Driven"
+                    speed={3}
+                    className="text-xs text-orange-400 font-bold hidden sm:inline-block"
+                  />
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-500/20 text-green-300 font-bold border border-green-500/30">
                     100% Free Tier Compliant
                   </span>

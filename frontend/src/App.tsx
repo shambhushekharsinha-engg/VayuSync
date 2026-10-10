@@ -24,6 +24,7 @@ import type {
 import { apiClient } from './utils/api';
 import { soundEngine } from './utils/audio';
 import { degreesToCardinal } from './utils/mapHelpers';
+import { ShinyText, DecryptedText } from './components/reactbits';
 import {
   Wind, Github, Info, Map, Building2,
   ShieldCheck, TrendingUp, Volume2, VolumeX, AlertOctagon,
@@ -273,15 +274,30 @@ const App: React.FC = () => {
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <h1 className="font-black text-base text-white tracking-tight leading-none">
-                Vayu<span className="text-orange-400">Sync</span>
+              <h1 className="font-black text-base text-white tracking-tight leading-none flex items-center">
+                <span>Vayu</span>
+                <span className="text-orange-400">Sync</span>
+                <ShinyText
+                  text="· Hyperlocal"
+                  speed={4}
+                  className="ml-1.5 text-[10px] text-orange-200/90 font-bold hidden md:inline-block"
+                  shimmerColor="#fed7aa"
+                />
               </h1>
               <span className="text-[9px] px-1.5 py-0.2 rounded font-bold bg-orange-500/20 text-orange-300 border border-orange-500/30">
                 PROD
               </span>
             </div>
-            <p className="text-gray-400 text-[9px] leading-none mt-0.5">
-              Hyperlocal Fire & Stubble Exposure Engine · {activeRegion.name}
+            <p className="text-gray-400 text-[9px] leading-none mt-0.5 flex items-center gap-1">
+              <span>Hyperlocal Fire & Stubble Exposure Engine ·</span>
+              <DecryptedText
+                text={activeRegion.name}
+                speed={30}
+                maxIterations={8}
+                className="text-cyan-300 font-semibold"
+                encryptedClassName="text-orange-400 font-mono"
+                animateOn="mount"
+              />
             </p>
           </div>
 
