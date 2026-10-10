@@ -12,7 +12,7 @@ Pipeline
    to find candidate institutions within the geographic extent.
 3. Run point-in-polygon test to confirm the institution is truly inside the cone.
 4. Estimate PM2.5 concentration at the institution using Gaussian plume model.
-5. Call Amazon Bedrock (Claude 3 Haiku) for an actionable mitigation advisory
+5. Call Amazon Bedrock (Configured Claude LLM) for an actionable mitigation advisory
    in strict JSON format.
 6. Write the alert record to VayuSync_AlertLogs DynamoDB table.
 7. Publish alert summary to SNS topic (triggers SMS/email/webhook fan-out).
@@ -434,7 +434,7 @@ def _classify_severity(pm25_ugm3: float) -> str:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# AMAZON BEDROCK -- CLAUDE 3 HAIKU
+# AMAZON BEDROCK -- CLAUDE INFERENCE
 # ─────────────────────────────────────────────────────────────────────────────
 
 BEDROCK_SYSTEM_PROMPT = """You are VayuSync's AI advisory engine for smoke pollution emergencies in India.
@@ -481,7 +481,7 @@ def _call_bedrock_advisory(
     arrival_utc: datetime,
 ) -> dict:
     """
-    Call Amazon Bedrock (Claude 3 Haiku) to generate a structured mitigation advisory.
+    Call Amazon Bedrock (Configured Claude LLM) to generate a structured mitigation advisory.
 
     Returns the parsed JSON advisory dict, or a rule-based fallback if Bedrock fails.
     """

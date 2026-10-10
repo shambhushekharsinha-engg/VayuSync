@@ -468,7 +468,7 @@ const App: React.FC = () => {
             Judge Live Demo
           </div>
           <span className="text-xs text-gray-300 font-medium hidden sm:inline">
-            Inject synthetic satellite cluster (Sangrur/Ludhiana) · NW transport corridor 151°–155° @ 15–26 km/h
+            Inject synthetic satellite cluster (Sangrur/Ludhiana) · Transport corridor to SSE (151°–155°) from NNW winds @ 15–26 km/h
           </span>
         </div>
 

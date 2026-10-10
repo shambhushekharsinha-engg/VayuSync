@@ -205,7 +205,7 @@ VayuSync elevates the user experience beyond a standard dashboard into an enterp
 - Clicking **"🔴 SIMULATE PUNJAB FIRE HOTSPOT"** injects a synthetic **1,050–1,200 MW** thermal anomaly at Ludhiana, Punjab ($30.90^\circ\text{N}, 75.85^\circ\text{E}$).
 - Evaluates atmospheric wind trajectories (*Illustrative Demo Scenario*: wind vector calibrated along the historical North-Westerly autumn transport corridor toward Delhi NCR: $151^\circ$ bearing @ $7.2\text{ m/s}$ / $26\text{ km/h}$).
 - Identifies schools, hospitals, and construction sites in the multi-horizon path (evaluating both 6h and 12h cones).
-- Triggers Amazon Bedrock Claude LLM for institutional advisories (with deterministic fallback matrix when Bedrock is in verification or standby).
+- Triggers Amazon Bedrock Claude LLM for institutional advisories (operating with deterministic rule-based fallback pending AWS paid access verification).
 - Dispatches alert via Amazon SNS and updates the MapLibre GL UI in **under 2.3 seconds**.
 
 ### 🏫 3. Hyperlocal Institutional Action Plans & Bedrock Inspector
