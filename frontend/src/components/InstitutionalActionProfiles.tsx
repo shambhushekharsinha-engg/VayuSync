@@ -95,7 +95,7 @@ Protocol Code: ${activeProfile.protocolCode}
 MANDATORY OPERATIONAL DIRECTIVES:
 ${activeProfile.rules.map((r, i) => `${i + 1}. ${r}`).join('\n')}
 
-Issued autonomously by VayuSync AI Engine via Amazon Bedrock (Claude 3 Haiku).
+Issued autonomously by VayuSync AI Engine (Amazon Bedrock Claude LLM / Deterministic Facility Matrix).
 Dispatched via Amazon SNS to ${activeProfile.contactPerson}.
 =====================================================
 `.trim();
@@ -152,7 +152,7 @@ Dispatched via Amazon SNS to ${activeProfile.contactPerson}.
   </ol>
 
   <div class="footer">
-    Authorized by VayuSync AI Evaluation Core (Powered by Amazon Bedrock Claude 3 Haiku).<br/>
+    Authorized by VayuSync AI Evaluation Core (Amazon Bedrock Claude LLM / Deterministic Facility Matrix).<br/>
     Dispatched via Amazon SNS to: ${activeProfile.contactPerson} · Bharat Builds 2026 Environmental Hacks.
   </div>
 </body>
@@ -268,7 +268,7 @@ Dispatched via Amazon SNS to ${activeProfile.contactPerson}.
         <div className="text-[10px] uppercase tracking-wider text-gray-400 font-bold px-1 flex items-center justify-between">
           <span>Actionable Protocol Directives ({activeProfile.protocolCode}):</span>
           <span className="text-purple-400 font-mono text-[9px] flex items-center gap-1">
-            <Sparkles className="w-3 h-3" /> Claude 3 Haiku Guardrailed
+            <Sparkles className="w-3 h-3" /> AI Guardrailed Directive
           </span>
         </div>
 

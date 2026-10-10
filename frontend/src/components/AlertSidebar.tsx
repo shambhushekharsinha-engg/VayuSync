@@ -78,7 +78,7 @@ const AlertCard: React.FC<{
               onInspect();
             }}
             className="flex items-center gap-1 text-[10px] text-purple-400 hover:text-purple-300 font-bold bg-purple-500/10 hover:bg-purple-500/20 px-2 py-0.5 rounded-lg border border-purple-500/20 transition-all"
-            title="Inspect Claude 3 Haiku Prompt & Telemetry"
+            title="Inspect AI Advisory Protocol & Telemetry"
           >
             <Sparkles className="w-3 h-3" />
             <span>AI Protocol</span>

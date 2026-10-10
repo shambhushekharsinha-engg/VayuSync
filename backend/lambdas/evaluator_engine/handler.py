@@ -56,9 +56,10 @@ logger = logging.getLogger("vayusync.evaluator_engine")
 
 # ── AWS Clients ───────────────────────────────────────────────────────────────
 _region = os.environ.get("AWS_REGION", "ap-south-1")
+_bedrock_region = os.environ.get("BEDROCK_REGION", "us-east-1")
 dynamodb = boto3.resource("dynamodb", region_name=_region)
 sns_client = boto3.client("sns", region_name=_region)
-bedrock_client = boto3.client("bedrock-runtime", region_name=_region)
+bedrock_client = boto3.client("bedrock-runtime", region_name=_bedrock_region)
 
 # ── Environment Variables ─────────────────────────────────────────────────────
 HOTSPOTS_TABLE = os.environ.get("HOTSPOTS_TABLE", "VayuSync_Hotspots")

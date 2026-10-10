@@ -30,13 +30,16 @@ export const DispersionAnalytics: React.FC<DispersionAnalyticsProps> = ({
     { time: '16:00', aqi: 410, label: 'T+12h' },
   ];
 
+  // Pipeline Latency Breakdown:
+  // Reflects measured Rule Engine Fallback latency matrix (N=5, range 1,127 - 1,350 ms).
+  // Step distribution is illustrative model pending live Bedrock production measurement.
   const LATENCY_BREAKDOWN = [
-    { step: 'NASA FIRMS Ingestion', durationMs: 340, pct: 15 },
-    { step: 'Open-Meteo Wind Vector Query', durationMs: 280, pct: 12 },
-    { step: 'Lagrangian Dispersion Cone Math', durationMs: 45, pct: 2 },
-    { step: 'DynamoDB Spatial Geofence Match', durationMs: 120, pct: 5 },
-    { step: 'Amazon Bedrock (Claude 3 Haiku)', durationMs: 1180, pct: 51 },
-    { step: 'Amazon SNS Push & SMS Dispatch', durationMs: 335, pct: 15 },
+    { step: 'NASA FIRMS Hotspot Ingestion (Lambda)', durationMs: 340, pct: 27 },
+    { step: 'Open-Meteo Wind Vector Query', durationMs: 280, pct: 22 },
+    { step: 'Lagrangian Dispersion Cone Math', durationMs: 45, pct: 4 },
+    { step: 'DynamoDB Spatial Geofence Match', durationMs: 120, pct: 10 },
+    { step: 'Advisory Engine (Rule Engine Fallback Matrix)', durationMs: 140, pct: 11 },
+    { step: 'Amazon SNS Push & Alert Dispatch', durationMs: 335, pct: 26 },
   ];
 
   return (
@@ -193,9 +196,14 @@ export const DispersionAnalytics: React.FC<DispersionAnalyticsProps> = ({
               <Zap className="w-4 h-4 text-yellow-400" />
               <h3 className="font-bold text-sm text-white">AWS End-to-End Pipeline Latency</h3>
             </div>
-            <span className="text-[10px] text-green-400 font-bold bg-green-500/10 px-2 py-0.5 rounded border border-green-500/20">
-              2,300 ms (SLA &lt; 2,500 ms)
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[9px] px-1.5 py-0.5 rounded font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                ILLUSTRATIVE BREAKDOWN
+              </span>
+              <span className="text-[10px] text-green-400 font-bold bg-green-500/10 px-2 py-0.5 rounded border border-green-500/20">
+                1,127–1,350 ms (N=5)
+              </span>
+            </div>
           </div>
 
           <div className="space-y-2 pt-1">

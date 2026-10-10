@@ -19,6 +19,7 @@ Globals:
         RAW_PAYLOADS_BUCKET: !Ref RawPayloadsBucket
         EVALUATOR_FUNCTION_NAME: VayuSync-EvaluatorEngine
         BEDROCK_MODEL_ID: !Ref BedrockModelId
+        BEDROCK_REGION: !Ref BedrockRegion
     Layers:
       - !Ref SharedDependenciesLayer
   Api:
@@ -40,6 +41,10 @@ Parameters:
     Type: String
     Default: "us.anthropic.claude-3-5-haiku-20241022-v1:0"
     Description: Amazon Bedrock Foundation Model ID or Cross-Region Inference Profile ID
+  BedrockRegion:
+    Type: String
+    Default: "us-east-1"
+    Description: AWS region for Bedrock Runtime client invocations (e.g. us-east-1 for us. inference profiles)
 
 # ─── Resources ────────────────────────────────────────────────────────────────
 Resources:

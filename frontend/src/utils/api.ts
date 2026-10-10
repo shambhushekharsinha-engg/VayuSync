@@ -135,7 +135,7 @@ const MOCK_STATUS: SystemStatus = {
   services: {
     lambda_ingestion: { status: 'HEALTHY', uptime_percent: 99.9 },
     lambda_evaluator: { status: 'HEALTHY', uptime_percent: 99.9 },
-    amazon_bedrock: { status: 'HEALTHY', model: 'Claude 3 Haiku', region: 'us-east-1' },
+    amazon_bedrock: { status: 'HEALTHY', model: 'Bedrock Claude / Rule Fallback', region: 'ap-south-1' },
     dynamodb: { status: 'HEALTHY', tables: ['VayuSync_Hotspots', 'VayuSync_Institutions', 'VayuSync_AlertLogs'] },
     sns_topic: { status: 'HEALTHY', subscriptions: 2 },
     eventbridge: { status: 'HEALTHY', schedule: 'rate(6 hours)' },
@@ -278,7 +278,7 @@ export const apiClient = {
         },
         amazon_bedrock: {
           status: 'HEALTHY',
-          model: raw.pipeline?.evaluator_engine?.bedrock_model ?? 'Claude 3 Haiku',
+          model: raw.pipeline?.evaluator_engine?.bedrock_model ?? 'Bedrock Claude / Rule Fallback',
           region: raw.pipeline?.evaluator_engine?.bedrock_region ?? 'ap-south-1',
         },
         dynamodb: {
@@ -340,7 +340,7 @@ export const apiClient = {
             { step: 'Open-Meteo Wind Vectors Fetched', duration_ms: 280 },
             { step: 'Trajectory Cone Calculated', duration_ms: 45 },
             { step: 'DynamoDB Spatial Query', duration_ms: 120 },
-            { step: 'Bedrock Advisory Generated (Claude 3 Haiku)', duration_ms: 1180 },
+            { step: 'Advisory Engine Directives Generated', duration_ms: 220 },
             { step: 'SNS Alert Dispatched', duration_ms: 335 },
           ],
         },

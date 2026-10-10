@@ -46,10 +46,10 @@ export const ArchitectureModal: React.FC<ArchitectureModalProps> = ({ isOpen, on
       step: '04',
       service: 'Amazon Bedrock',
       type: 'Generative AI Advisory',
-      desc: 'Invokes Claude 3 Haiku with strict RFC-8259 JSON schema enforcement. Produces role-tailored institutional action directives.',
+      desc: 'Generates structured RFC-8259 JSON institutional action directives with deterministic rule fallback support.',
       icon: Bot,
       color: 'from-purple-500/20 to-pink-500/20 border-purple-500/40 text-purple-400',
-      badge: 'Claude 3 Haiku',
+      badge: 'Claude LLM / Rule Fallback',
       detail: 'Zero-Hallucination Schema',
     },
     {

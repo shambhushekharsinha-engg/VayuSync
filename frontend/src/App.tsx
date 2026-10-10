@@ -39,7 +39,7 @@ const INITIAL_LOGS: LogEntry[] = [
   { timestamp: '14:12:05', source: 'OPEN_METEO', message: 'Boundary Layer Wind: 315° (NW) @ 18.4 km/h (u=-3.62 m/s, v=-3.62 m/s)', level: 'INFO' },
   { timestamp: '14:12:06', source: 'LAMBDA', message: 'VayuSync-IngestionEngine: Lagrangian dispersion cone calculated (6h lead time)', level: 'SUCCESS' },
   { timestamp: '14:12:06', source: 'DYNAMODB', message: 'VayuSync_Hotspots & VayuSync_Institutions spatial bounding intersection verified', level: 'SUCCESS' },
-  { timestamp: '14:12:07', source: 'BEDROCK', message: 'Claude 3 Haiku invocation: Guardrailed JSON advisories generated (Latency: 640ms)', level: 'SUCCESS' },
+  { timestamp: '14:12:07', source: 'BEDROCK', message: 'Advisory Engine: Deterministic rule fallback active (Bedrock Claude standby)', level: 'INFO' },
   { timestamp: '14:12:07', source: 'SNS', message: 'VayuSync-AlertTopic: 12 Institutional Gateway endpoints notified via SMS/Webhook', level: 'SUCCESS' },
 ];
 
@@ -197,11 +197,16 @@ const App: React.FC = () => {
     setSimulatedHotspot(result.hotspot);
     setTimelineHour(6); // Reset timeline to peak arrival
 
+    const windKmh = result.wind_data.wind_speed_kmh?.toFixed(1) ?? '21.6';
+    const windDir = result.wind_data.direction_degrees ?? 334;
+    const isRuleFallback = result.alerts.some(a => a.advisory_source === 'rule_fallback') || result.alerts.length === 0;
+    const advisoryEngineLabel = isRuleFallback ? 'Deterministic Rule Engine (Bedrock Standby)' : (result.alerts[0]?.bedrock_model ?? 'Bedrock Claude LLM');
+
     addLog('EVENTBRIDGE', 'Synthetic stubble surge triggered via POST /simulate', 'INFO');
     addLog('NASA_FIRMS', `Synthetic anomaly injected: Sangrur/Ludhiana (${result.hotspot.latitude.toFixed(2)}°N, ${result.hotspot.longitude.toFixed(2)}°E) FRP: ${result.hotspot.fire_radiative_power_mw} MW`, 'INFO');
-    addLog('OPEN_METEO', 'Trajectory calculation updated with NW vector: 315° @ 18.0 km/h', 'INFO');
+    addLog('OPEN_METEO', `Trajectory calculation updated with transport vector: ${windDir}° @ ${windKmh} km/h`, 'INFO');
     addLog('LAMBDA', `EvaluatorEngine completed spatial containment test across ${result.institutions_at_risk} facilities`, 'SUCCESS');
-    addLog('BEDROCK', `Claude 3 Haiku generated operational action directives (Total latency: ${result.pipeline_performance.total_ms.toFixed(0)}ms)`, 'SUCCESS');
+    addLog('BEDROCK', `${advisoryEngineLabel} generated operational directives (Total latency: ${result.pipeline_performance.total_ms.toFixed(0)}ms)`, 'SUCCESS');
     addLog('SNS', `Alert notification broadcast triggered to ${result.alerts.length} registered institutional targets`, 'SUCCESS');
 
     // Prepend new alerts to the feed
@@ -751,7 +756,7 @@ const App: React.FC = () => {
               {[
                 { icon: '🛰️', label: 'NASA FIRMS', desc: 'Live VIIRS thermal hotspots' },
                 { icon: '🌊', label: 'Open-Meteo', desc: 'Real-time 10m wind vectors' },
-                { icon: '🤖', label: 'Amazon Bedrock', desc: 'Claude 3 Haiku advisories' },
+                { icon: '🤖', label: 'Amazon Bedrock', desc: 'Hybrid Claude LLM / Rule Engine' },
                 { icon: '📱', label: 'Amazon SNS', desc: 'SMS + email dispatch' },
               ].map(({ icon, label, desc }) => (
                 <div key={label} className="bg-gray-950/80 rounded-2xl p-3 border border-gray-800">
