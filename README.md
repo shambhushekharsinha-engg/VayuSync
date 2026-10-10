@@ -74,7 +74,7 @@ Hackathon judges evaluate live platforms in 90–120 seconds. Here is the exact 
 | **Wind Vectors** | **Live Meteorological API** | Open-Meteo High-Resolution 10m eastward ($u$) and northward ($v$) wind velocity | Historical seasonal baseline ($315^\circ$ NW @ 18.4 km/h) if upstream rate-limited |
 | **Institutions** | **Geocoded Master Registry** | 8 representative high-density facilities in Delhi NCR (Schools, Hospitals, Metro Construction) | DynamoDB Seed Cache (`VayuSync_Institutions`) |
 | **Ground Sensors** | **Hardware Testbed Simulation** | AWS IoT Core MQTT-emulated sensor array (ESP32 / SPS30 models) | Illustrative synthetic readings for real-time telemetry testing |
-| **AI Action Directives** | **Live Bedrock Invocation** | Amazon Bedrock (`anthropic.claude-3-haiku-20240307-v1:0` in `ap-south-1`) with strict JSON schema | Deterministic fallback rule-engine advisory if Bedrock quota reached |
+| **AI Action Directives** | **Hybrid AI / Rule Engine** | Amazon Bedrock (Claude 3 Haiku) when active; automatic transparent fallback to deterministic facility-specific mitigation rules when Bedrock is in account verification/standby | Active advisory source (`bedrock` vs `rule_fallback`) explicitly recorded on each alert record and surfaced in UI Bedrock Inspector |
 | **Alert Dispatch** | **Live Cloud Notification** | Amazon SNS (`VayuSync-AlertTopic`) verified SMS & Email dispatch to institutional endpoints | Synchronous JSON HTTP response to dashboard client |
 
 > **Transparency Note**: The dashboard surfaces explicit data provenance badges on primary simulation and telemetry entities (`FIRMS Live`, `Simulated`, `IoT Testbed`) ensuring judges and operators can distinguish live satellite feeds from scenario triggers.
@@ -298,6 +298,7 @@ c:\Vayusync/
 │   └── scripts/
 │       ├── seed_dynamo.py             # DynamoDB initial seeder script
 │       ├── test_pipeline.py           # Automated 34-test backend verification suite
+│       ├── test_handlers_smoke.py     # Lambda handler import & entrypoint smoke test
 │       └── backtest.py                # Retrospective back-test harness (FIRMS + ERA5 + CPCB)
 ├── frontend/
 │   ├── package.json                   # React 18, Vite, Tailwind, MapLibre GL

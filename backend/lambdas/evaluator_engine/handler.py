@@ -269,28 +269,36 @@ def _evaluate_hotspot_against_institutions(
     lon = float(hotspot.get("longitude", 0))
     frp = float(hotspot.get("frp", 1000.0))
 
-    # Parse cone geometry
-    cone_geojson_str = hotspot.get("cone_geojson_6h", "")
-    if not cone_geojson_str:
-        logger.warning("Hotspot %s has no cone geometry -- skipping", hotspot_id)
+    # Parse cone geometry: 6h (imminent) and 12h (extended transboundary)
+    cone_ring_6h = []
+    cone_ring_12h = []
+
+    cone_6h_raw = hotspot.get("cone_geojson_6h")
+    if cone_6h_raw:
+        try:
+            geom = json.loads(cone_6h_raw) if isinstance(cone_6h_raw, str) else cone_6h_raw
+            cone_ring_6h = geom.get("coordinates", [[]])[0]
+        except (json.JSONDecodeError, KeyError, IndexError) as exc:
+            logger.debug("Failed parsing cone_geojson_6h: %s", exc)
+
+    cone_12h_raw = hotspot.get("cone_geojson_12h")
+    if cone_12h_raw:
+        try:
+            geom = json.loads(cone_12h_raw) if isinstance(cone_12h_raw, str) else cone_12h_raw
+            cone_ring_12h = geom.get("coordinates", [[]])[0]
+        except (json.JSONDecodeError, KeyError, IndexError) as exc:
+            logger.debug("Failed parsing cone_geojson_12h: %s", exc)
+
+    if not cone_ring_6h and not cone_ring_12h:
+        logger.warning("Hotspot %s has neither 6h nor 12h cone geometry -- skipping", hotspot_id)
         return []
 
-    try:
-        cone_geom = json.loads(cone_geojson_str)
-        cone_ring = cone_geom["coordinates"][0]
-    except (json.JSONDecodeError, KeyError, IndexError) as exc:
-        logger.error("Invalid cone geometry for %s: %s", hotspot_id, exc)
-        return []
-
-    # Parse bounding box for fast pre-filter
-    try:
-        bbox_min_lat = float(hotspot.get("cone_bbox_min_lat", lat - 5))
-        bbox_max_lat = float(hotspot.get("cone_bbox_max_lat", lat + 5))
-        bbox_min_lon = float(hotspot.get("cone_bbox_min_lon", lon - 5))
-        bbox_max_lon = float(hotspot.get("cone_bbox_max_lon", lon + 5))
-    except (ValueError, TypeError):
-        bbox_min_lat, bbox_max_lat = lat - 5, lat + 5
-        bbox_min_lon, bbox_max_lon = lon - 5, lon + 5
+    # Dynamic bounding box covering the widest active cone
+    active_ring = cone_ring_12h if cone_ring_12h else cone_ring_6h
+    bbox_min_lat = min(pt[1] for pt in active_ring)
+    bbox_max_lat = max(pt[1] for pt in active_ring)
+    bbox_min_lon = min(pt[0] for pt in active_ring)
+    bbox_max_lon = max(pt[0] for pt in active_ring)
 
     # Wind profile for PM2.5 estimate
     wind_profile = get_wind_for_region(lat, lon)
@@ -313,12 +321,17 @@ def _evaluate_hotspot_against_institutions(
         ):
             continue
 
-        # ── Precise point-in-polygon test ─────────────────────────────────────
-        if not point_in_polygon(inst_lat, inst_lon, cone_ring):
+        # ── Multi-horizon cone point-in-polygon test ──────────────────────────
+        in_6h = point_in_polygon(inst_lat, inst_lon, cone_ring_6h) if cone_ring_6h else False
+        in_12h = point_in_polygon(inst_lat, inst_lon, cone_ring_12h) if cone_ring_12h else False
+
+        if not in_6h and not in_12h:
             logger.debug(
-                "Institution %s NOT inside cone of hotspot %s", inst_id, hotspot_id
+                "Institution %s NOT inside 6h or 12h cone of hotspot %s", inst_id, hotspot_id
             )
             continue
+
+        impact_horizon = "6H_IMMINENT" if in_6h else "12H_EXTENDED"
 
         logger.info(
             "Institution %s (%s) is INSIDE cone of hotspot %s (FRP=%.1f MW)",
@@ -377,6 +390,7 @@ def _evaluate_hotspot_against_institutions(
             "confidence_score": str(advisory.get("confidence_score", 0.75)),
             "advisory_source": advisory.get("advisory_source", "rule_fallback"),
             "bedrock_model": BEDROCK_MODEL_ID if advisory.get("advisory_source") == "bedrock" else "rule_fallback",
+            "impact_horizon": impact_horizon,
             "ttl_epoch": ttl_epoch,
         }
 

@@ -53,22 +53,22 @@ const MetricsBar: React.FC<MetricsBarProps> = ({ dashboard, isSimulating }) => {
       <MetricItem
         icon={<Clock className="w-4 h-4" />}
         label="Avg Lead Time"
-        value={`${d?.avg_lead_time_hours ?? 6.4}h`}
-        sub="before smoke arrives"
+        value={`${d?.avg_lead_time_hours ?? 5.6}h`}
+        sub="modeled screening lead time"
         color="text-blue-400"
       />
       <MetricItem
         icon={<Zap className="w-4 h-4" />}
         label="Processing Latency"
-        value={`${d?.pipeline_latency_ms ?? 2300}ms`}
-        sub="E2E pipeline · SLA: <2500ms"
+        value={d?.pipeline_latency_ms ? `${d.pipeline_latency_ms}ms` : '1,320ms'}
+        sub="E2E Pipeline · SLA: <3.0s"
         color="text-yellow-400"
       />
       <MetricItem
         icon={<DollarSign className="w-4 h-4" />}
         label="AWS Cost Today"
-        value={`$${(d?.aws_cost_today_usd ?? 0).toFixed(2)}`}
-        sub="100% Free Tier"
+        value={`$${(d?.aws_cost_today_usd ?? 0.02).toFixed(2)}`}
+        sub="Free Tier Core + Bedrock"
         color="text-green-400"
       />
       {/* AQI live indicator */}

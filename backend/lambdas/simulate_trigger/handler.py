@@ -61,32 +61,32 @@ EVALUATOR_FUNCTION_NAME = os.environ.get(
     "EVALUATOR_FUNCTION_NAME", "VayuSync-EvaluatorEngine"
 )
 
-# ── Default location: Ludhiana, Punjab (dense paddy stubble region) ───────────
+# ── Default location: Ludhiana, Punjab (dense paddy stubble region, transboundary corridor to Delhi) ──
 DEFAULT_LAT = 30.9
 DEFAULT_LON = 75.85
 
-# ── Scenario presets ──────────────────────────────────────────────────────────
+# ── Scenario presets (calibrated along the 151°-155° NW-to-Delhi transport vector) ────────────
 SCENARIOS = {
     "worst_case": {
         "frp_range": (1100, 1400),
-        "u_wind_ms": 6.5,          # Strong westerly
-        "v_wind_ms": -3.8,          # Strong northerly -> NW wind towards Delhi
-        "mixing_height_m": 450,     # Very low boundary layer -> severe trapping
-        "description": "Peak burning period with strong NW winds and low mixing height",
+        "u_wind_ms": 3.5,           # Eastward vector component
+        "v_wind_ms": -6.2,          # Southward vector component -> Bearing 150.6° directly toward Delhi NCR
+        "mixing_height_m": 450,     # Low boundary layer inversion -> severe trapping
+        "description": "Peak burning period with strong NW winds funneling smoke directly into Delhi NCR corridor",
     },
     "moderate": {
         "frp_range": (800, 1100),
-        "u_wind_ms": 4.8,
-        "v_wind_ms": -3.2,
+        "u_wind_ms": 2.6,
+        "v_wind_ms": -5.4,          # Bearing 154.3° directly toward Delhi NCR
         "mixing_height_m": 680,
-        "description": "Typical October stubble burning with NW winds",
+        "description": "Typical seasonal NW stubble plume corridor directed toward Delhi NCR",
     },
     "light": {
         "frp_range": (400, 800),
-        "u_wind_ms": 2.5,
-        "v_wind_ms": -1.5,
+        "u_wind_ms": 1.8,
+        "v_wind_ms": -3.8,          # Bearing 154.7°
         "mixing_height_m": 950,
-        "description": "Light burning with weaker winds, higher mixing",
+        "description": "Moderate agricultural burning with steady NW transport vector",
     },
 }
 
@@ -313,9 +313,9 @@ def _region_from_coords(lat: float, lon: float) -> str:
     elif lat > 30.0:
         return "Patiala, Punjab"
     elif lat > 29.5:
-        return "Ambala, Haryana"
+        return "Karnal, Haryana"
     elif lat > 29.0:
-        return "Hisar, Haryana"
+        return "Panipat, Haryana"
     elif lat > 28.5:
         return "Rohtak, Haryana"
     else:
@@ -504,6 +504,9 @@ def _serialize_alert(alert: dict) -> dict:
             else alert.get("recommended_actions", [])
         ),
         "confidence_score": float(alert.get("confidence_score", 0)),
+        "advisory_source": alert.get("advisory_source", "rule_fallback"),
+        "bedrock_model": alert.get("bedrock_model", "rule_fallback"),
+        "impact_horizon": alert.get("impact_horizon", "6H_IMMINENT"),
     }
 
 
