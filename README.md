@@ -243,7 +243,7 @@ Unlike generic AQI alerts ("Air is Unhealthy"), VayuSync outputs tailored operat
 
 | KPI Metric | Engineering Target | Observed Performance | Measurement Methodology |
 |---|---|---|---|
-| **Pipeline Latency (`POST /simulate`)** | $< 3,000\text{ ms}$ | **$1,127\text{ ms} - 1,350\text{ ms}$ (Fallback matrix, $N=5$, $p95 \approx 1,340\text{ ms}$)**<br>*(Live Claude 3 Haiku latency not yet measured pending account model activation)* | Execution duration from API Gateway entry, advisory generation, to DynamoDB persistence and SNS publish |
+| **Pipeline Latency (`POST /simulate`)** | $< 3,000\text{ ms}$ | **$1,127\text{ ms} - 1,350\text{ ms}$ (Fallback matrix, $N=5$, range $1,127 - 1,350\text{ ms}$)**<br>*(Live Claude 3 Haiku latency not yet measured pending account model activation)* | Execution duration from API Gateway entry, advisory generation, to DynamoDB persistence and SNS publish |
 | **SNS Multi-Channel Dispatch** | $< 1,000\text{ ms}$ | **$310\text{ ms} - 380\text{ ms}$** | Amazon SNS Topic publish latency over `ap-south-1` network fabric |
 | **Cloud Infrastructure Cost** | Minimal / Low-Cost | **$0.00 Core + Pay-Per-Token** | Lambda, DynamoDB, API Gateway, SNS within AWS Free Tier; Bedrock Claude 3 Haiku billed at ~$0.00025 / 1k tokens (< $0.20 total demo spend) |
 | **Frontend Uptime & Resilience** | $99.9\%$ | **Zero-crash React Error Boundary** | Graceful fallback on API rate-limits or offline states |

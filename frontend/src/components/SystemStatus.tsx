@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Activity, CheckCircle, XCircle, Zap } from 'lucide-react';
 import type { SystemStatus as SystemStatusType, DashboardData } from '../types';
+import { degreesToCardinal } from '../utils/mapHelpers';
 
 interface SystemStatusProps {
   status: SystemStatusType | null;
@@ -178,7 +179,9 @@ const SystemStatus: React.FC<SystemStatusProps> = ({ status, dashboard }) => {
               </div>
               <div>
                 <div className="text-gray-500 text-[9px]">Direction</div>
-                <div className="text-white font-bold">{dashboard.wind.direction_deg}° NW</div>
+                <div className="text-white font-bold">
+                  {dashboard.wind.direction_deg}° {degreesToCardinal(dashboard.wind.direction_deg)}
+                </div>
               </div>
             </div>
             <div className="mt-2 text-[10px] text-blue-400/70 bg-blue-500/5 rounded p-1.5 border border-blue-500/10">

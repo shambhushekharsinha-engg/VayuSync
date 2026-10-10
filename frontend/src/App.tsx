@@ -23,6 +23,7 @@ import type {
 } from './types';
 import { apiClient } from './utils/api';
 import { soundEngine } from './utils/audio';
+import { degreesToCardinal } from './utils/mapHelpers';
 import {
   Wind, Github, Info, Map, Building2,
   ShieldCheck, TrendingUp, Volume2, VolumeX, AlertOctagon,
@@ -84,34 +85,59 @@ const App: React.FC = () => {
         fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lng}&current=pm2_5,us_aqi`),
       ]);
 
-      if (weatherRes.ok && aqiRes.ok) {
-        const weatherData = await weatherRes.json();
-        const aqiData = await aqiRes.json();
-        const speed = weatherData.current?.wind_speed_10m ?? region.defaultWind.speedKmh;
-        const dir = weatherData.current?.wind_direction_10m ?? region.defaultWind.directionDeg;
-        const pm25 = aqiData.current?.pm2_5 ?? 180;
-        const aqi = aqiData.current?.us_aqi ?? 250;
+      const weatherData = weatherRes.ok ? await weatherRes.json() : null;
+      const aqiData = aqiRes.ok ? await aqiRes.json() : null;
 
-        setDashboard(prev => prev ? {
-          ...prev,
-          wind: {
-            speed_kmh: speed,
-            direction_deg: dir,
-            description: `${speed.toFixed(0)} km/h ${region.defaultWind.cardinal}`,
-          },
-          aqi_delhi_ncr: {
-            ...prev.aqi_delhi_ncr,
-            current: aqi,
-            pm25_ugm3: pm25,
-          },
-          active_fire_hotspots: region.hotspots.length,
-          institutions_at_risk: region.institutions.length,
-        } : null);
+      const hasLiveWind = weatherData?.current?.wind_speed_10m != null && weatherData?.current?.wind_direction_10m != null;
+      const hasLiveAqi = aqiData?.current?.us_aqi != null && aqiData?.current?.pm2_5 != null;
 
-        addLog('OPEN_METEO', `Live atmospheric telemetry ingested: Wind ${speed.toFixed(1)} km/h @ ${dir}° | Real-time PM2.5: ${pm25.toFixed(1)} µg/m³ (AQI: ${aqi})`, 'SUCCESS');
+      const speed = hasLiveWind ? Number(weatherData.current.wind_speed_10m) : region.defaultWind.speedKmh;
+      const dir = hasLiveWind ? Number(weatherData.current.wind_direction_10m) : region.defaultWind.directionDeg;
+      const cardinal = degreesToCardinal(dir);
+
+      setDashboard(prev => prev ? {
+        ...prev,
+        wind: {
+          speed_kmh: speed,
+          direction_deg: dir,
+          description: `${speed.toFixed(0)} km/h ${cardinal}`,
+          is_illustrative: !hasLiveWind,
+        },
+        aqi_delhi_ncr: hasLiveAqi ? {
+          current: Number(aqiData.current.us_aqi),
+          pm25_ugm3: Number(aqiData.current.pm2_5),
+          category: aqiData.current.us_aqi <= 100 ? 'Moderate' : (aqiData.current.us_aqi <= 200 ? 'Unhealthy' : 'Very Unhealthy'),
+          is_illustrative: false,
+        } : (prev.aqi_delhi_ncr ? {
+          ...prev.aqi_delhi_ncr,
+          is_illustrative: true,
+        } : null),
+        active_fire_hotspots: region.hotspots.length,
+        institutions_at_risk: region.institutions.length,
+      } : null);
+
+      if (hasLiveWind || hasLiveAqi) {
+        addLog('OPEN_METEO', `Live atmospheric telemetry ingested: Wind ${speed.toFixed(1)} km/h @ ${dir}° (${cardinal}) | AQI: ${hasLiveAqi ? aqiData.current.us_aqi : 'satellite model'}`, 'SUCCESS');
+      } else {
+        addLog('OPEN_METEO', `Satellite baseline vectors loaded for ${region.name} (Illustrative mode)`, 'INFO');
       }
     } catch {
-      addLog('OPEN_METEO', `Satellite baseline vectors loaded for ${region.name}`, 'INFO');
+      setDashboard(prev => prev ? {
+        ...prev,
+        wind: {
+          speed_kmh: region.defaultWind.speedKmh,
+          direction_deg: region.defaultWind.directionDeg,
+          description: `${region.defaultWind.speedKmh.toFixed(0)} km/h ${degreesToCardinal(region.defaultWind.directionDeg)}`,
+          is_illustrative: true,
+        },
+        aqi_delhi_ncr: prev.aqi_delhi_ncr ? {
+          ...prev.aqi_delhi_ncr,
+          is_illustrative: true,
+        } : null,
+        active_fire_hotspots: region.hotspots.length,
+        institutions_at_risk: region.institutions.length,
+      } : null);
+      addLog('OPEN_METEO', `Illustrative baseline vectors loaded for ${region.name}`, 'INFO');
     }
   }, [addLog]);
 
@@ -358,7 +384,9 @@ const App: React.FC = () => {
           {dashboard?.wind && (
             <div className="hidden xl:flex items-center gap-1.5 text-xs text-gray-400 bg-gray-950 px-2.5 py-1 rounded-xl border border-gray-800">
               <Wind className="w-3.5 h-3.5 text-blue-400" />
-              <span>{dashboard.wind.speed_kmh.toFixed(0)} km/h NW</span>
+              <span>
+                {dashboard.wind.speed_kmh.toFixed(0)} km/h {degreesToCardinal(dashboard.wind.direction_deg)}
+              </span>
             </div>
           )}
 

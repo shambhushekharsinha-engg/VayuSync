@@ -86,3 +86,15 @@ export function frpToColor(frp: number): string {
   if (frp > 400) return '#d97706';  // amber-600
   return '#ca8a04'; // yellow-600
 }
+
+export function degreesToCardinal(deg: number): string {
+  const normalized = ((deg % 360) + 360) % 360;
+  const directions = [
+    'N', 'NNE', 'NE', 'ENE',
+    'E', 'ESE', 'SE', 'SSE',
+    'S', 'SSW', 'SW', 'WSW',
+    'W', 'WNW', 'NW', 'NNW',
+  ];
+  const index = Math.round(normalized / 22.5) % 16;
+  return directions[index];
+}
