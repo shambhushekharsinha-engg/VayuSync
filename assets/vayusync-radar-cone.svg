@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <!-- Dark Tech Radial BG -->
+    <radialGradient id="techBg" cx="50%" cy="50%" r="65%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="70%" stop-color="#020617"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </radialGradient>
+
+    <!-- Dispersion Gradient -->
+    <linearGradient id="plumeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ef4444" stop-opacity="0.9"/>
+      <stop offset="35%" stop-color="#f97316" stop-opacity="0.6"/>
+      <stop offset="75%" stop-color="#38bdf8" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#0284c7" stop-opacity="0.05"/>
+    </linearGradient>
+
+    <!-- Radar Sweep Glow -->
+    <filter id="radarGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="500" height="500" rx="100" fill="url(#techBg)"/>
+  <rect width="496" height="496" x="2" y="2" rx="98" fill="none" stroke="#1e293b" stroke-width="2"/>
+
+  <!-- Radar Grid System -->
+  <circle cx="250" cy="250" r="190" fill="none" stroke="#334155" stroke-width="1.5" stroke-opacity="0.4"/>
+  <circle cx="250" cy="250" r="135" fill="none" stroke="#334155" stroke-width="1.5" stroke-opacity="0.4"/>
+  <circle cx="250" cy="250" r="80" fill="none" stroke="#334155" stroke-width="1.5" stroke-opacity="0.5"/>
+  <line x1="250" y1="50" x2="250" y2="450" stroke="#334155" stroke-width="1" stroke-opacity="0.3" stroke-dasharray="4 6"/>
+  <line x1="50" y1="250" x2="450" y2="250" stroke="#334155" stroke-width="1" stroke-opacity="0.3" stroke-dasharray="4 6"/>
+
+  <!-- Range Angle Ticks -->
+  <line x1="120" y1="120" x2="380" y2="380" stroke="#38bdf8" stroke-width="1" stroke-opacity="0.25" stroke-dasharray="3 5"/>
+
+  <!-- 12-Hour Dispersion Cone Polygons -->
+  <path d="M 180 180 L 370 270 A 190 190 0 0 1 310 370 Z" fill="url(#plumeGrad)"/>
+  <path d="M 180 180 L 370 270" stroke="#f97316" stroke-width="2" stroke-opacity="0.7"/>
+  <path d="M 180 180 L 310 370" stroke="#f97316" stroke-width="2" stroke-opacity="0.7"/>
+
+  <!-- Plume Shockwave Wavefronts -->
+  <path d="M 240 220 Q 280 250 255 285" fill="none" stroke="#fbbf24" stroke-width="3" stroke-linecap="round" stroke-opacity="0.8"/>
+  <path d="M 290 240 Q 345 285 305 330" fill="none" stroke="#f97316" stroke-width="3" stroke-linecap="round" stroke-opacity="0.7"/>
+  <path d="M 335 260 Q 395 315 350 365" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-opacity="0.6"/>
+
+  <!-- Source Origin Hotspot: Ludhiana / Punjab -->
+  <circle cx="180" cy="180" r="16" fill="#ef4444" fill-opacity="0.3" filter="url(#radarGlow)"/>
+  <circle cx="180" cy="180" r="9" fill="#f97316"/>
+  <circle cx="180" cy="180" r="4.5" fill="#fef08a"/>
+
+  <!-- Downwind Receptor Targets: Delhi NCR Institutions -->
+  <!-- Target 1: Hospital (Red Alert) -->
+  <circle cx="310" cy="285" r="7" fill="#ef4444" filter="url(#radarGlow)"/>
+  <circle cx="310" cy="285" r="3" fill="#ffffff"/>
+
+  <!-- Target 2: School (High Alert) -->
+  <circle cx="280" cy="315" r="6.5" fill="#f59e0b"/>
+  <circle cx="280" cy="315" r="2.5" fill="#ffffff"/>
+
+  <!-- Target 3: Construction Site (Critical Alert) -->
+  <circle cx="340" cy="330" r="6" fill="#38bdf8"/>
+  <circle cx="340" cy="330" r="2" fill="#ffffff"/>
+
+  <!-- Compass Cardinal Letters -->
+  <text x="250" y="42" font-family="system-ui, sans-serif" font-size="14" font-weight="900" fill="#38bdf8" text-anchor="middle" letter-spacing="1">N</text>
+  <text x="465" y="255" font-family="system-ui, sans-serif" font-size="14" font-weight="900" fill="#64748b" text-anchor="middle">E</text>
+  <text x="250" y="475" font-family="system-ui, sans-serif" font-size="14" font-weight="900" fill="#64748b" text-anchor="middle">S</text>
+  <text x="35" y="255" font-family="system-ui, sans-serif" font-size="14" font-weight="900" fill="#64748b" text-anchor="middle">W</text>
+</svg>

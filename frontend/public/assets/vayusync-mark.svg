@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <!-- Background Radial Gradient -->
+    <radialGradient id="bgGlow" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#1e1b4b" stop-opacity="0.8"/>
+      <stop offset="60%" stop-color="#090d16" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#030712" stop-opacity="1"/>
+    </radialGradient>
+
+    <!-- Flame Core Gradient (Warm Ember to Radiant Gold) -->
+    <linearGradient id="fireGrad" x1="0%" y1="100%" x2="50%" y2="0%">
+      <stop offset="0%" stop-color="#dc2626"/>
+      <stop offset="35%" stop-color="#ea580c"/>
+      <stop offset="70%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#fef08a"/>
+    </linearGradient>
+
+    <!-- Wind & Atmosphere Gradient (Atmospheric Cyan / Azure Stream) -->
+    <linearGradient id="windStreamGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#0ea5e9"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+
+    <linearGradient id="windStreamLight" x1="0%" y1="50%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#a5f3fc" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.4"/>
+    </linearGradient>
+
+    <!-- Neon Glow Filter -->
+    <filter id="coreGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="18" result="blur2"/>
+      <feMerge>
+        <feMergeNode in="blur2"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Dark Shield Base Background -->
+  <rect width="500" height="500" rx="100" fill="url(#bgGlow)"/>
+  <rect width="496" height="496" x="2" y="2" rx="98" fill="none" stroke="#1f2937" stroke-width="2" stroke-opacity="0.6"/>
+
+  <!-- Orbital Radar Rings (Geospatial Dispersion Rings) -->
+  <circle cx="250" cy="250" r="180" fill="none" stroke="#38bdf8" stroke-width="1.5" stroke-opacity="0.15" stroke-dasharray="6 8"/>
+  <circle cx="250" cy="250" r="140" fill="none" stroke="#f97316" stroke-width="1.5" stroke-opacity="0.2" stroke-dasharray="4 6"/>
+  <circle cx="250" cy="250" r="215" fill="none" stroke="#0ea5e9" stroke-width="1" stroke-opacity="0.1"/>
+
+  <!-- Dispersion Trajectory Cone (Subtle Field Shading) -->
+  <path d="M 175 140 Q 250 250 355 350 A 180 180 0 0 1 185 390 Z" fill="#ea580c" fill-opacity="0.08"/>
+
+  <!-- ── VAYU (Atmospheric Wind Currents / Vortices) ── -->
+  <!-- Stream 1: Outer Upper Sweep -->
+  <path d="M 100 240 C 120 150, 210 110, 290 125 C 360 140, 395 195, 380 245 C 370 275, 335 295, 295 285 C 240 270, 235 205, 295 185"
+        fill="none" stroke="url(#windStreamGrad)" stroke-width="14" stroke-linecap="round" filter="url(#softGlow)"/>
+
+  <!-- Stream 2: Inner Aerodynamic Flow -->
+  <path d="M 125 295 C 145 220, 220 180, 285 200 C 330 215, 345 260, 315 295 C 280 330, 205 340, 160 300 C 130 270, 135 220, 180 175"
+        fill="none" stroke="url(#windStreamLight)" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- ── SYNC / AGNI (Central Thermal Energy Core & Sensor Beacon) ── -->
+  <!-- Main Fire Radiative Plume -->
+  <path d="M 250 360 C 220 360, 195 330, 205 290 C 215 250, 250 210, 250 170 C 255 210, 305 245, 300 295 C 295 335, 275 360, 250 360 Z"
+        fill="url(#fireGrad)" filter="url(#coreGlow)"/>
+
+  <!-- Inner Radiant Flame Kernel -->
+  <path d="M 250 350 C 235 350, 222 332, 228 308 C 235 280, 250 250, 250 220 C 253 250, 275 278, 272 310 C 270 334, 262 350, 250 350 Z"
+        fill="#fef08a" opacity="0.95"/>
+
+  <!-- Synchronization / Sensor Node Constellation Dots -->
+  <circle cx="250" cy="170" r="5" fill="#fef08a" filter="url(#coreGlow)"/>
+  <circle cx="290" cy="125" r="4" fill="#38bdf8"/>
+  <circle cx="380" cy="245" r="4" fill="#38bdf8"/>
+  <circle cx="100" cy="240" r="3.5" fill="#38bdf8"/>
+  <circle cx="205" cy="290" r="3" fill="#ea580c"/>
+
+  <!-- Atmospheric Vector Directional Marker (Compass / Arrowhead Apex) -->
+  <polygon points="295,120 305,128 290,132" fill="#38bdf8"/>
+</svg>

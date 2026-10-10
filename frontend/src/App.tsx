@@ -241,8 +241,8 @@ const App: React.FC = () => {
       <header className="flex-shrink-0 flex items-center justify-between px-4 py-2.5 bg-gray-900/90 backdrop-blur-md border-b border-gray-800 z-20">
         {/* Left: Brand Identity */}
         <div className="flex items-center gap-3">
-          <div className="relative">
-            <div className="text-2xl">🌬️</div>
+          <div className="relative flex-shrink-0">
+            <img src="/assets/vayusync-icon.svg" alt="VayuSync Logo" className="w-8 h-8 rounded-lg shadow-md shadow-orange-950/40" />
             <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-green-400 rounded-full animate-pulse" />
           </div>
           <div>
