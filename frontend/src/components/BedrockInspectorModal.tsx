@@ -46,7 +46,7 @@ export const BedrockInspectorModal: React.FC<BedrockInspectorModalProps> = ({
               <div className="flex items-center gap-2">
                 <h3 className="font-black text-lg text-white">Amazon Bedrock Advisory Engine</h3>
                 <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                  Claude 3 Haiku
+                  {alert.advisory_source === 'rule_fallback' ? 'Rule Engine Standby' : (alert.bedrock_model ?? 'Bedrock LLM')}
                 </span>
               </div>
               <p className="text-gray-400 text-xs mt-0.5">
@@ -137,14 +137,14 @@ export const BedrockInspectorModal: React.FC<BedrockInspectorModalProps> = ({
           {/* Model execution telemetry */}
           <div className="bg-gray-950 p-3 rounded-xl border border-gray-800 font-mono text-[10px] text-gray-400 space-y-1">
             <div className="text-purple-400 font-bold flex items-center justify-between">
-              <span>{alert.advisory_source === 'rule_fallback' ? 'Deterministic Rule Engine (Bedrock Standby)' : 'Claude 3 Haiku Execution Breakdown'}</span>
+              <span>{alert.advisory_source === 'rule_fallback' ? 'Deterministic Rule Engine (Bedrock Standby)' : 'Bedrock LLM Execution Breakdown'}</span>
               <span className={alert.advisory_source === 'rule_fallback' ? 'text-amber-400 font-bold' : 'text-green-400'}>
                 {alert.advisory_source === 'rule_fallback' ? 'SOURCE: RULE-BASED FALLBACK' : 'STATUS: 200 OK'}
               </span>
             </div>
             <div className="flex justify-between">
               <span>Engine / Model:</span>
-              <span className="text-gray-200">{alert.bedrock_model ?? (alert.advisory_source === 'rule_fallback' ? 'Deterministic Facility Matrix' : 'anthropic.claude-3-haiku-20240307-v1:0')}</span>
+              <span className="text-gray-200">{alert.bedrock_model ?? (alert.advisory_source === 'rule_fallback' ? 'Deterministic Facility Matrix' : 'Amazon Bedrock Model')}</span>
             </div>
             <div className="flex justify-between">
               <span>{alert.advisory_source === 'rule_fallback' ? 'Fallback Trigger:' : 'Inference Latency:'}</span>

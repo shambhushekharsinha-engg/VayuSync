@@ -247,7 +247,7 @@ const SystemStatus: React.FC<SystemStatusProps> = ({ status, dashboard }) => {
           <ServiceRow label="Lambda — EvaluatorEngine" detail="99.9%" healthy={svcs?.lambda_evaluator?.status !== 'DOWN'} />
           <ServiceRow
             label="Advisory Engine"
-            detail={svcs?.amazon_bedrock?.status === 'HEALTHY' && svcs.amazon_bedrock.model !== 'rule_fallback' ? 'Claude 3 Haiku' : 'Rule Fallback (Free Tier)'}
+            detail={svcs?.amazon_bedrock?.status === 'HEALTHY' && svcs.amazon_bedrock.model !== 'rule_fallback' ? (svcs?.amazon_bedrock?.model ?? 'Bedrock Claude') : 'Rule Fallback (Free Tier)'}
             healthy={true}
           />
           <ServiceRow label="DynamoDB (3 tables)" detail="On-Demand" healthy={svcs?.dynamodb?.status !== 'DOWN'} />

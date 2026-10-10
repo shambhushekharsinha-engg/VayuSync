@@ -18,7 +18,7 @@ Globals:
         SNS_TOPIC_ARN: !Ref AlertTopic
         RAW_PAYLOADS_BUCKET: !Ref RawPayloadsBucket
         EVALUATOR_FUNCTION_NAME: VayuSync-EvaluatorEngine
-        BEDROCK_MODEL_ID: anthropic.claude-3-haiku-20240307-v1:0
+        BEDROCK_MODEL_ID: !Ref BedrockModelId
     Layers:
       - !Ref SharedDependenciesLayer
   Api:
@@ -36,6 +36,10 @@ Parameters:
     Type: String
     Default: "admin@vayusync-demo.in"
     Description: Email address for SNS alert notifications
+  BedrockModelId:
+    Type: String
+    Default: "us.anthropic.claude-3-5-haiku-20241022-v1:0"
+    Description: Amazon Bedrock Foundation Model ID or Cross-Region Inference Profile ID
 
 # ─── Resources ────────────────────────────────────────────────────────────────
 Resources:
@@ -108,7 +112,9 @@ Resources:
             - Effect: Allow
               Action:
                 - bedrock:InvokeModel
-              Resource: "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-haiku-20240307-v1:0"
+              Resource:
+                - !Sub "arn:aws:bedrock:*::foundation-model/*"
+                - !Sub "arn:aws:bedrock:*:${AWS::AccountId}:inference-profile/*"
 
   # ─── Lambda: SimulateTrigger ──────────────────────────────────────────────────
   SimulateTrigger:

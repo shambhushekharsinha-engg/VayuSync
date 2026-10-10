@@ -74,7 +74,7 @@ Hackathon judges evaluate live platforms in 90–120 seconds. Here is the exact 
 | **Wind Vectors** | **Live Meteorological API** | Open-Meteo High-Resolution 10m eastward ($u$) and northward ($v$) wind velocity | Historical seasonal baseline ($315^\circ$ NW @ 18.4 km/h) if upstream rate-limited |
 | **Institutions** | **Geocoded Master Registry** | 8 representative high-density facilities in Delhi NCR (Schools, Hospitals, Metro Construction) | DynamoDB Seed Cache (`VayuSync_Institutions`) |
 | **Ground Sensors** | **Hardware Testbed Simulation** | AWS IoT Core MQTT-emulated sensor array (ESP32 / SPS30 models) | Illustrative synthetic readings for real-time telemetry testing |
-| **AI Action Directives** | **Hybrid AI / Rule Engine** | Amazon Bedrock (Claude 3 Haiku) when active; automatic transparent fallback to deterministic facility-specific mitigation rules when Bedrock is in account verification/standby | Active advisory source (`bedrock` vs `rule_fallback`) explicitly recorded on each alert record and surfaced in UI Bedrock Inspector |
+| **AI Action Directives** | **Hybrid AI / Rule Engine** | Amazon Bedrock (Anthropic Claude foundation models via configurable `BEDROCK_MODEL_ID` or inference profiles) when active; automatic transparent fallback to deterministic facility-specific mitigation rules when Bedrock is in account verification/standby | Active advisory source (`bedrock` vs `rule_fallback`) explicitly recorded on each alert record and surfaced in UI Bedrock Inspector |
 | **Alert Dispatch** | **Live Cloud Notification** | Amazon SNS (`VayuSync-AlertTopic`) verified SMS & Email dispatch to institutional endpoints | Synchronous JSON HTTP response to dashboard client |
 
 > **Transparency Note**: The dashboard surfaces explicit data provenance badges on primary simulation and telemetry entities (`FIRMS Live`, `Simulated`, `IoT Testbed`) ensuring judges and operators can distinguish live satellite feeds from scenario triggers.
@@ -103,7 +103,7 @@ sequenceDiagram
     L1->>DDB: Persist active hotspots into VayuSync_Hotspots
     L1->>L2: Asynchronously invoke EvaluatorEngine
     L2->>DDB: Query VayuSync_Institutions within trajectory polygon
-    L2->>AI: Invoke Claude 3 Haiku with strict JSON advisory schema
+    L2->>AI: Invoke Bedrock Claude LLM with strict JSON advisory schema
     AI-->>L2: Structured institutional actions & PM2.5 forecast
     L2->>DDB: Log alerts into VayuSync_AlertLogs
     L2->>SNS: Publish urgent SMS & email alerts
@@ -205,7 +205,7 @@ VayuSync elevates the user experience beyond a standard dashboard into an enterp
 - Clicking **"🔴 SIMULATE PUNJAB FIRE HOTSPOT"** injects a synthetic **1,050–1,200 MW** thermal anomaly at Ludhiana, Punjab ($30.90^\circ\text{N}, 75.85^\circ\text{E}$).
 - Evaluates atmospheric wind trajectories (*Illustrative Demo Scenario*: wind vector calibrated along the historical North-Westerly autumn transport corridor toward Delhi NCR: $151^\circ$ bearing @ $7.2\text{ m/s}$ / $26\text{ km/h}$).
 - Identifies schools, hospitals, and construction sites in the multi-horizon path (evaluating both 6h and 12h cones).
-- Triggers Claude 3 Haiku for institutional advisories (with deterministic fallback matrix if Bedrock model access is in verification).
+- Triggers Amazon Bedrock Claude LLM for institutional advisories (with deterministic fallback matrix when Bedrock is in verification or standby).
 - Dispatches alert via Amazon SNS and updates the MapLibre GL UI in **under 2.3 seconds**.
 
 ### 🏫 3. Hyperlocal Institutional Action Plans & Bedrock Inspector
@@ -232,7 +232,7 @@ Unlike generic AQI alerts ("Air is Unhealthy"), VayuSync outputs tailored operat
 | **Amazon S3** | Raw GeoJSON archives with 30-day TTL | 5 GB standard storage | **$0.00** |
 | **Amazon SNS** | Urgent SMS + Email subscriber batches | 1,000,000 publishes / month | **$0.00** |
 | **Amazon API Gateway**| REST requests (< 20,000 / month) | 1,000,000 calls / month | **$0.00** |
-| **Amazon Bedrock** | Claude 3 Haiku on-demand token calls | ~$0.00025 per advisory | **<$0.10** |
+| **Amazon Bedrock** | Anthropic Claude LLM on-demand token calls | ~$0.00025 per advisory | **<$0.10** |
 
 ---
 

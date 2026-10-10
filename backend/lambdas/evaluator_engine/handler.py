@@ -67,7 +67,11 @@ ALERT_LOGS_TABLE = os.environ.get("ALERT_LOGS_TABLE", "VayuSync_AlertLogs")
 SNS_TOPIC_ARN = os.environ.get("SNS_TOPIC_ARN", "")
 
 # ── Bedrock Model ─────────────────────────────────────────────────────────────
-BEDROCK_MODEL_ID = "anthropic.claude-3-haiku-20240307-v1:0"
+# Configured via environment variable BEDROCK_MODEL_ID.
+# Modern Bedrock cross-region inference profile default: us.anthropic.claude-3-5-haiku-20241022-v1:0
+BEDROCK_MODEL_ID = os.environ.get(
+    "BEDROCK_MODEL_ID", "us.anthropic.claude-3-5-haiku-20241022-v1:0"
+)
 BEDROCK_MAX_TOKENS = 1024
 BEDROCK_TEMPERATURE = 0.1  # Low temperature for deterministic, structured output
 
