@@ -400,6 +400,102 @@ class TestEvaluatorEngine(unittest.TestCase):
                 self.assertGreater(advisory["confidence_score"], 0)
                 self.assertLessEqual(advisory["confidence_score"], 1.0)
 
+    def test_bedrock_advisory_latency_instrumentation(self):
+        """Mocks invoke_model and asserts bedrock_latency_ms is measured, recorded, and stored."""
+        import io
+        from mock_data import get_institution_by_id
+
+        mock_institution = get_institution_by_id("INST-SCH-001")
+        mock_hotspot = {
+            "hotspot_id": "HS-TEST-001",
+            "latitude": "30.9",
+            "longitude": "75.85",
+            "frp": "1000.0",
+            "cone_bearing_deg": "154.0",
+            "cone_distance_km": "200.0",
+        }
+        mock_bedrock_response_payload = {
+            "content": [{
+                "text": json.dumps({
+                    "institution_id": "INST-SCH-001",
+                    "facility_type": "School",
+                    "predicted_arrival_utc": datetime.now(timezone.utc).isoformat(),
+                    "impact_severity": "HIGH",
+                    "predicted_pm25_ugm3": 180.5,
+                    "recommended_actions": [
+                        "Cancel outdoor athletic training",
+                        "Direct students to indoor classrooms",
+                        "Send advisory to parents via SMS",
+                    ],
+                    "confidence_score": 0.92,
+                })
+            }]
+        }
+
+        with patch.dict(os.environ, {"SNS_TOPIC_ARN": ""}):
+            with patch("boto3.resource") as mock_resource, patch("boto3.client") as mock_client:
+                # Setup mock bedrock-runtime client
+                mock_bedrock = MagicMock()
+
+                def mock_invoke(*args, **kwargs):
+                    return {"body": io.BytesIO(json.dumps(mock_bedrock_response_payload).encode("utf-8"))}
+
+                mock_bedrock.invoke_model.side_effect = mock_invoke
+
+                def client_factory(service_name, **kwargs):
+                    if service_name == "bedrock-runtime":
+                        return mock_bedrock
+                    return MagicMock()
+
+                mock_client.side_effect = client_factory
+
+                # Load handler
+                eval_handler = load_handler_module("evaluator_engine")
+                eval_handler.bedrock_client = mock_bedrock
+
+                arrival = datetime.now(timezone.utc) + timedelta(hours=4)
+                advisory = eval_handler._call_bedrock_advisory(
+                    hotspot=mock_hotspot,
+                    institution=mock_institution,
+                    pm25_estimate=180.5,
+                    severity="HIGH",
+                    distance_km=150.0,
+                    arrival_utc=arrival,
+                )
+
+                # Assert invoke_model was called and latency was recorded
+                mock_bedrock.invoke_model.assert_called_once()
+                self.assertEqual(advisory.get("advisory_source"), "bedrock")
+                self.assertIn("bedrock_latency_ms", advisory)
+                self.assertIsInstance(advisory["bedrock_latency_ms"], float)
+                self.assertGreaterEqual(advisory["bedrock_latency_ms"], 0.0)
+
+                # Verify alert_record assembly stores bedrock_latency_ms
+                mock_table = MagicMock()
+                mock_resource.return_value.Table.return_value = mock_table
+                eval_handler.dynamodb = mock_resource.return_value
+
+                eval_ts = datetime.now(timezone.utc)
+                cone_geojson = {
+                    "type": "Polygon",
+                    "coordinates": [[
+                        [75.0, 31.0], [77.5, 31.0], [77.5, 28.0], [75.0, 28.0], [75.0, 31.0]
+                    ]]
+                }
+                eval_hotspot = dict(mock_hotspot)
+                eval_hotspot["cone_geojson_6h"] = json.dumps(cone_geojson)
+                eval_hotspot["cone_bbox"] = json.dumps([28.0, 75.0, 31.0, 77.5])
+
+                alerts = eval_handler._evaluate_hotspot_against_institutions(
+                    eval_hotspot, [mock_institution], eval_ts
+                )
+
+                self.assertGreaterEqual(len(alerts), 1)
+                stored_alert = alerts[0]
+                self.assertEqual(stored_alert.get("advisory_source"), "bedrock")
+                self.assertIn("bedrock_latency_ms", stored_alert)
+                self.assertEqual(str(advisory["bedrock_latency_ms"]), stored_alert["bedrock_latency_ms"])
+
 
 # =============================================================================
 # INTEGRATION TESTS: Simulate Trigger (Mocked AWS)

@@ -151,9 +151,7 @@ export const BedrockInspectorModal: React.FC<BedrockInspectorModalProps> = ({
               <span className={alert.advisory_source === 'rule_fallback' ? 'text-amber-400 font-bold' : 'text-yellow-400 font-bold'}>
                 {alert.advisory_source === 'rule_fallback'
                   ? 'AWS Account Bedrock Inactive / Cold Verification'
-                  : (alert.bedrock_latency_ms != null
-                      ? `${alert.bedrock_latency_ms} ms`
-                      : (alert.pipeline_latency_ms != null ? `${alert.pipeline_latency_ms} ms` : 'Unmeasured'))}
+                  : (alert.bedrock_latency_ms != null ? `${alert.bedrock_latency_ms} ms` : 'Unmeasured')}
               </span>
             </div>
             <div className="flex justify-between">
