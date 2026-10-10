@@ -33,6 +33,7 @@ import json
 import logging
 import math
 import os
+import time
 import uuid
 from datetime import datetime, timezone, timedelta
 
@@ -398,6 +399,8 @@ def _evaluate_hotspot_against_institutions(
             "impact_horizon": impact_horizon,
             "ttl_epoch": ttl_epoch,
         }
+        if "bedrock_latency_ms" in advisory:
+            alert_record["bedrock_latency_ms"] = str(advisory["bedrock_latency_ms"])
 
         # ── Store in DynamoDB ─────────────────────────────────────────────────
         _store_alert(alert_record)
@@ -523,22 +526,26 @@ Generate the advisory JSON now."""
     }
 
     try:
+        t0 = time.perf_counter()
         response = bedrock_client.invoke_model(
             modelId=BEDROCK_MODEL_ID,
             body=json.dumps(bedrock_request),
             contentType="application/json",
             accept="application/json",
         )
+        latency_ms = round((time.perf_counter() - t0) * 1000.0, 1)
 
         response_body = json.loads(response["body"].read())
         content = response_body.get("content", [{}])[0].get("text", "").strip()
 
         advisory = json.loads(content)
         advisory["advisory_source"] = "bedrock"
+        advisory["bedrock_latency_ms"] = latency_ms
 
         logger.info(
-            "Bedrock advisory for %s: severity=%s, PM2.5=%.1f, confidence=%.2f",
+            "Bedrock advisory for %s (%.1f ms): severity=%s, PM2.5=%.1f, confidence=%.2f",
             institution.get("institution_id"),
+            latency_ms,
             advisory.get("impact_severity"),
             advisory.get("predicted_pm25_ugm3", 0),
             advisory.get("confidence_score", 0),

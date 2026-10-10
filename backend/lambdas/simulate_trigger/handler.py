@@ -506,6 +506,11 @@ def _serialize_alert(alert: dict) -> dict:
         "confidence_score": float(alert.get("confidence_score", 0)),
         "advisory_source": alert.get("advisory_source", "rule_fallback"),
         "bedrock_model": alert.get("bedrock_model", "rule_fallback"),
+        "bedrock_latency_ms": (
+            float(alert["bedrock_latency_ms"])
+            if alert.get("bedrock_latency_ms") is not None
+            else None
+        ),
         "impact_horizon": alert.get("impact_horizon", "6H_IMMINENT"),
     }
 

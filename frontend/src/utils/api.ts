@@ -219,6 +219,9 @@ export const apiClient = {
         ? a.recommended_actions
         : (typeof a.recommended_actions === 'string' ? [a.recommended_actions] : []),
       confidence_score: Number(a.confidence_score ?? 0.95),
+      advisory_source: a.advisory_source || (a.source === 'bedrock' ? 'bedrock' : 'rule_fallback'),
+      bedrock_model: a.bedrock_model,
+      bedrock_latency_ms: a.bedrock_latency_ms != null ? Number(a.bedrock_latency_ms) : null,
       dispatch_status: a.dispatch_status || 'DELIVERED',
       sms_delivered: Boolean(a.sms_delivered ?? true),
       email_delivered: Boolean(a.email_delivered),

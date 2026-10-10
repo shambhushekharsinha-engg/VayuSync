@@ -598,6 +598,13 @@ def _serialize_alert_full(alert: dict) -> dict:
         "distance_km": _safe_float(alert.get("distance_km")),
         "recommended_actions": actions,
         "confidence_score": _safe_float(alert.get("confidence_score")),
+        "advisory_source": alert.get("advisory_source", "rule_fallback"),
+        "bedrock_model": alert.get("bedrock_model", "rule_fallback"),
+        "bedrock_latency_ms": (
+            _safe_float(alert.get("bedrock_latency_ms"))
+            if alert.get("bedrock_latency_ms") is not None
+            else None
+        ),
         "sns_message_id": alert.get("sns_message_id"),
         "sms_delivered": alert.get("sms_delivered"),
         "email_delivered": alert.get("email_delivered"),

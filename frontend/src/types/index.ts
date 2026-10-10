@@ -77,6 +77,7 @@ export interface AlertLog {
   confidence_score: number;
   advisory_source?: 'bedrock' | 'rule_fallback';
   bedrock_model?: string;
+  bedrock_latency_ms?: number | null;
   pipeline_latency_ms?: number | null;
   dispatch_status?: string;
   sms_delivered?: boolean;
