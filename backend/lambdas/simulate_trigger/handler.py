@@ -40,7 +40,7 @@ from botocore.exceptions import ClientError
 
 from geo_utils import calculate_trajectory_cone, latlon_to_geohash, haversine_distance
 from geo_utils import point_in_polygon, estimate_pm25_at_institution
-from mock_data import MOCK_INSTITUTIONS, get_wind_for_region
+from mock_data import MOCK_INSTITUTIONS
 
 # ── Logging ───────────────────────────────────────────────────────────────────
 log_level = os.environ.get("LOG_LEVEL", "INFO")

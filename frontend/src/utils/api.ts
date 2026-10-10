@@ -151,49 +151,50 @@ const MOCK_STATUS: SystemStatus = {
 
 // ─── API Client functions (with mock fallback) ────────────────────────────────
 
-async function safeGet<T>(path: string, mockData: T): Promise<T> {
-  if (!BASE_URL) return mockData;
+async function safeGet<T>(path: string, mockData: T): Promise<{ data: T; isFallback: boolean }> {
+  if (!BASE_URL) return { data: mockData, isFallback: true };
   try {
     const { data } = await api.get<T>(path);
-    return data;
+    return { data, isFallback: false };
   } catch {
-    console.warn(`API GET ${path} failed — using mock data`);
-    return mockData;
+    console.warn(`API GET ${path} failed — using mock fallback data`);
+    return { data: mockData, isFallback: true };
   }
 }
 
 export const apiClient = {
   getDashboard: async (): Promise<DashboardData> => {
-    const raw = await safeGet<any>('/dashboard', MOCK_DASHBOARD);
+    const { data: raw, isFallback } = await safeGet<any>('/dashboard', MOCK_DASHBOARD);
     return {
       timestamp: raw.generated_at || raw.timestamp || new Date().toISOString(),
       system_status: raw.pipeline_status || raw.system_status || 'OPERATIONAL',
-      active_fire_hotspots: raw.hotspots?.active_count ?? raw.active_fire_hotspots ?? MOCK_DASHBOARD.active_fire_hotspots,
-      hotspot_states: raw.hotspots?.regions ?? raw.hotspot_states ?? MOCK_DASHBOARD.hotspot_states,
-      institutions_at_risk: raw.institutions?.currently_at_risk ?? raw.institutions_at_risk ?? MOCK_DASHBOARD.institutions_at_risk,
-      critical_alerts: raw.alerts?.severity_breakdown?.CRITICAL ?? raw.critical_alerts ?? MOCK_DASHBOARD.critical_alerts,
-      high_alerts: raw.alerts?.severity_breakdown?.HIGH ?? raw.high_alerts ?? MOCK_DASHBOARD.high_alerts,
-      total_alerts_last_24h: raw.alerts?.total_generated ?? raw.total_alerts_last_24h ?? MOCK_DASHBOARD.total_alerts_last_24h,
-      avg_lead_time_hours: raw.avg_lead_time_hours ?? MOCK_DASHBOARD.avg_lead_time_hours,
-      last_ingestion_utc: raw.alerts?.last_alert_utc ?? raw.last_ingestion_utc ?? MOCK_DASHBOARD.last_ingestion_utc,
-      pipeline_latency_ms: raw.pipeline_latency_ms ?? MOCK_DASHBOARD.pipeline_latency_ms,
-      aws_cost_today_usd: raw.aws_cost_today_usd ?? MOCK_DASHBOARD.aws_cost_today_usd,
+      active_fire_hotspots: raw.hotspots?.active_count ?? raw.active_fire_hotspots ?? 0,
+      hotspot_states: raw.hotspots?.regions ?? raw.hotspot_states ?? ['Punjab', 'Haryana'],
+      institutions_at_risk: raw.institutions?.currently_at_risk ?? raw.institutions_at_risk ?? 0,
+      critical_alerts: raw.alerts?.severity_breakdown?.CRITICAL ?? raw.critical_alerts ?? 0,
+      high_alerts: raw.alerts?.severity_breakdown?.HIGH ?? raw.high_alerts ?? 0,
+      total_alerts_last_24h: raw.alerts?.total_generated ?? raw.total_alerts_last_24h ?? 0,
+      avg_lead_time_hours: raw.avg_lead_time_hours ?? (isFallback ? MOCK_DASHBOARD.avg_lead_time_hours : null),
+      last_ingestion_utc: raw.alerts?.last_alert_utc ?? raw.last_ingestion_utc ?? (isFallback ? MOCK_DASHBOARD.last_ingestion_utc : new Date().toISOString()),
+      pipeline_latency_ms: raw.pipeline_latency_ms ?? (isFallback ? MOCK_DASHBOARD.pipeline_latency_ms : null),
+      aws_cost_today_usd: raw.aws_cost_today_usd ?? (isFallback ? MOCK_DASHBOARD.aws_cost_today_usd : null),
+      is_mock_fallback: isFallback,
       aqi_delhi_ncr: {
-        current: raw.aqi_delhi_ncr?.current ?? MOCK_DASHBOARD.aqi_delhi_ncr.current,
-        forecast_6h: raw.aqi_delhi_ncr?.forecast_6h ?? MOCK_DASHBOARD.aqi_delhi_ncr.forecast_6h,
-        category: raw.aqi_delhi_ncr?.category ?? MOCK_DASHBOARD.aqi_delhi_ncr.category,
-        pm25_ugm3: raw.aqi_delhi_ncr?.pm25_ugm3 ?? MOCK_DASHBOARD.aqi_delhi_ncr.pm25_ugm3,
+        current: raw.aqi_delhi_ncr?.current ?? (isFallback ? MOCK_DASHBOARD.aqi_delhi_ncr.current : 387),
+        forecast_6h: raw.aqi_delhi_ncr?.forecast_6h ?? (isFallback ? MOCK_DASHBOARD.aqi_delhi_ncr.forecast_6h : 445),
+        category: raw.aqi_delhi_ncr?.category ?? (isFallback ? MOCK_DASHBOARD.aqi_delhi_ncr.category : 'Very Unhealthy'),
+        pm25_ugm3: raw.aqi_delhi_ncr?.pm25_ugm3 ?? (isFallback ? MOCK_DASHBOARD.aqi_delhi_ncr.pm25_ugm3 : 298.4),
       },
       wind: {
-        speed_kmh: raw.wind?.speed_kmh ?? MOCK_DASHBOARD.wind.speed_kmh,
-        direction_deg: raw.wind?.direction_deg ?? MOCK_DASHBOARD.wind.direction_deg,
-        description: raw.wind?.description ?? MOCK_DASHBOARD.wind.description,
+        speed_kmh: raw.wind?.speed_kmh ?? (isFallback ? MOCK_DASHBOARD.wind.speed_kmh : 18.4),
+        direction_deg: raw.wind?.direction_deg ?? (isFallback ? MOCK_DASHBOARD.wind.direction_deg : 315),
+        description: raw.wind?.description ?? (isFallback ? MOCK_DASHBOARD.wind.description : 'NW → SE (Toward Delhi NCR)'),
       },
     };
   },
 
   getAlerts: async (limit = 20): Promise<{ count: number; alerts: AlertLog[] }> => {
-    const raw = await safeGet<any>(`/alerts?limit=${limit}`, { count: MOCK_ALERTS.length, alerts: MOCK_ALERTS });
+    const { data: raw } = await safeGet<any>(`/alerts?limit=${limit}`, { count: MOCK_ALERTS.length, alerts: MOCK_ALERTS });
     const list = Array.isArray(raw?.alerts) ? raw.alerts : (Array.isArray(raw) ? raw : MOCK_ALERTS);
     const normalized: AlertLog[] = list.map((a: any) => ({
       alert_id: a.alert_id || `ALT-${Math.random().toString(36).substring(2, 9)}`,
@@ -217,7 +218,7 @@ export const apiClient = {
   },
 
   getInstitutions: async (): Promise<{ count: number; institutions: Institution[] }> => {
-    const raw = await safeGet<any>('/institutions', { count: MOCK_INSTITUTIONS.length, institutions: MOCK_INSTITUTIONS });
+    const { data: raw } = await safeGet<any>('/institutions', { count: MOCK_INSTITUTIONS.length, institutions: MOCK_INSTITUTIONS });
     const list = Array.isArray(raw?.institutions) ? raw.institutions : (Array.isArray(raw) ? raw : MOCK_INSTITUTIONS);
     const normalized: Institution[] = list.map((i: any) => ({
       institution_id: i.institution_id,
@@ -238,18 +239,20 @@ export const apiClient = {
     return { count: normalized.length, institutions: normalized };
   },
 
-  getHotspots: (): Promise<{ hotspot_count: number; features: { properties: FireHotspot; geometry: { type: 'Point'; coordinates: number[] }; trajectory_6h?: object }[] }> =>
-    safeGet('/hotspots', {
+  getHotspots: async (): Promise<{ hotspot_count: number; features: { properties: FireHotspot; geometry: { type: 'Point'; coordinates: number[] }; trajectory_6h?: object }[] }> => {
+    const { data } = await safeGet('/hotspots', {
       hotspot_count: MOCK_HOTSPOTS.length,
       features: MOCK_HOTSPOTS.map(h => ({
         properties: h,
         geometry: { type: 'Point' as const, coordinates: [h.longitude, h.latitude] },
         trajectory_6h: MAIN_TRAJECTORY_CONE,
       })),
-    }),
+    });
+    return data;
+  },
 
   getStatus: async (): Promise<SystemStatus> => {
-    const raw = await safeGet<any>('/status', MOCK_STATUS);
+    const { data: raw } = await safeGet<any>('/status', MOCK_STATUS);
     return {
       timestamp: raw.generated_at || raw.timestamp || new Date().toISOString(),
       overall: raw.overall_status || raw.overall || 'OPERATIONAL',

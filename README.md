@@ -32,7 +32,7 @@ Hackathon judges evaluate live platforms in 90–120 seconds. Here is the exact 
    - A synthetic **1,200 MW** satellite cluster injects at Sangrur/Ludhiana with North-Westerly wind vectors ($315^\circ$ NW @ 18.4 km/h).
    - The dark-matter MapLibre radar renders the dispersion cone expanding towards Delhi NCR in real time.
    - The facility threat level switches to **CRITICAL**, and automated AI advisories stream into the alert feed.
-   - Real-time AWS execution traces stream into the bottom **Execution Terminal** (EventBridge $\to$ Lambda $\to$ DynamoDB $\to$ Bedrock $\to$ SNS).
+   - Real-time AWS execution traces stream into the bottom **Execution Terminal** (EventBridge $\to$ Lambda $\to$ DynamoDB $\to$ Bedrock/Rule Fallback $\to$ SNS).
 4. **Switch Across Global Stubble & Wildfire Hotspots (Planetary Multi-Location)**:
    - Click the **`PLANETARY VIEW`** button in the header to zoom out to full **Global Planetary Orbit**.
    - Use the **Global Location Selector** to instantly fly across active global wildfire zones:
@@ -202,10 +202,10 @@ VayuSync elevates the user experience beyond a standard dashboard into an enterp
 
 ### 🔴 2. One-Click Hackathon Live Simulator
 - A live demo feature built for judges.
-- Clicking **"🔴 SIMULATE STUBBLE SURGE"** injects a synthetic **1,200 MW** thermal anomaly at Ludhiana, Punjab ($30.90^\circ\text{N}, 75.85^\circ\text{E}$).
-- Evaluates atmospheric wind trajectories ($18.4\text{ km/h NW}\to\text{SE}$ boundary layer vector).
-- Identifies schools, hospitals, and construction sites in the path.
-- Triggers Claude 3 Haiku for institutional advisories.
+- Clicking **"🔴 SIMULATE PUNJAB FIRE HOTSPOT"** injects a synthetic **1,050–1,200 MW** thermal anomaly at Ludhiana, Punjab ($30.90^\circ\text{N}, 75.85^\circ\text{E}$).
+- Evaluates atmospheric wind trajectories (*Illustrative Demo Scenario*: wind vector calibrated along the historical North-Westerly autumn transport corridor toward Delhi NCR: $151^\circ$ bearing @ $7.2\text{ m/s}$ / $26\text{ km/h}$).
+- Identifies schools, hospitals, and construction sites in the multi-horizon path (evaluating both 6h and 12h cones).
+- Triggers Claude 3 Haiku for institutional advisories (with deterministic fallback matrix if Bedrock model access is in verification).
 - Dispatches alert via Amazon SNS and updates the MapLibre GL UI in **under 2.3 seconds**.
 
 ### 🏫 3. Hyperlocal Institutional Action Plans & Bedrock Inspector
@@ -243,7 +243,7 @@ Unlike generic AQI alerts ("Air is Unhealthy"), VayuSync outputs tailored operat
 
 | KPI Metric | Engineering Target | Observed Performance | Measurement Methodology |
 |---|---|---|---|
-| **Pipeline Latency (`POST /simulate`)** | $< 3,000\text{ ms}$ | **$1,127\text{ ms} - 2,400\text{ ms}$** | Execution duration from API Gateway entry, Bedrock Claude 3 invocation, to DynamoDB persistence and SNS publish |
+| **Pipeline Latency (`POST /simulate`)** | $< 3,000\text{ ms}$ | **$1,127\text{ ms} - 1,350\text{ ms}$ (Fallback) / $< 2,800\text{ ms}$ (Bedrock)** | Execution duration from API Gateway entry, advisory generation (deterministic fallback or Claude 3 Haiku), to DynamoDB persistence and SNS publish |
 | **SNS Multi-Channel Dispatch** | $< 1,000\text{ ms}$ | **$310\text{ ms} - 380\text{ ms}$** | Amazon SNS Topic publish latency over `ap-south-1` network fabric |
 | **Cloud Infrastructure Cost** | Minimal / Low-Cost | **$0.00 Core + Pay-Per-Token** | Lambda, DynamoDB, API Gateway, SNS within AWS Free Tier; Bedrock Claude 3 Haiku billed at ~$0.00025 / 1k tokens (< $0.20 total demo spend) |
 | **Frontend Uptime & Resilience** | $99.9\%$ | **Zero-crash React Error Boundary** | Graceful fallback on API rate-limits or offline states |

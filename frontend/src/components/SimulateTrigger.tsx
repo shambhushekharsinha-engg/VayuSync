@@ -104,6 +104,9 @@ const SimulateTrigger: React.FC<SimulateTriggerProps> = ({ onSimulationComplete,
           <p className="relative text-red-200/80 text-xs font-normal mt-1">
             Live end-to-end pipeline demo · target &lt;3s
           </p>
+          <p className="relative text-red-300/60 text-[10px] font-mono mt-1">
+            Illustrative Demo Scenario: Wind vector calibrated along the historical North-Westerly autumn corridor toward Delhi NCR
+          </p>
         </button>
       )}
 

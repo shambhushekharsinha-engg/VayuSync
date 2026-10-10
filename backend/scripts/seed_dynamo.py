@@ -178,7 +178,7 @@ def main():
 
     print("\n" + "=" * 60)
     if args.dry_run:
-        print(f"[DRY RUN] Would seed: {len(MOCK_INSTITUTIONS)} institutions, {len(MOCK_FIRE_HOTSPOTS)} hotspots")
+        print(f"[DRY RUN] Would seed: {len(MOCK_INSTITUTIONS)} institutions, {len(MOCK_HOTSPOTS)} hotspots")
     else:
         print(f"✅ Seeded: {inst_count} institutions, {hs_count} hotspots")
     print("=" * 60)

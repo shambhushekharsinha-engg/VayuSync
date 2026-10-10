@@ -264,7 +264,6 @@ def selftest():
     assert c18 and not c12
     # direction regression test: a NW wind (from 315 deg) must send smoke SE, never SW
     wnw = Winds(w.lats, w.lons, w.times, full(5.0), full(315.0), full(5.0), full(315.0))
-    r2 = type("R", (), {"lat": 30.9, "lon": 75.85, "t": t0, "frp": 100.0})()
     _ws, _wd = wnw.wind_at(30.9, 75.85, t0, 10)
     cone = calculate_trajectory_cone(30.9, 75.85, -_ws * math.sin(math.radians(_wd)), -_ws * math.cos(math.radians(_wd)), 100.0, hours=6)
     print(f"  NW wind bearing = {cone['properties']['bearing_deg']} deg (expect 135)")

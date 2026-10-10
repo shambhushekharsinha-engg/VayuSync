@@ -7,7 +7,9 @@ import importlib
 import os
 import sys
 import unittest
-from unittest.mock import MagicMock
+import io
+from pyflakes.api import checkPath
+from pyflakes.reporter import Reporter
 
 # Stub AWS and external dependencies if running in minimal CI environment
 os.environ["AWS_DEFAULT_REGION"] = "ap-south-1"
@@ -87,6 +89,34 @@ class TestLambdaHandlersSmoke(unittest.TestCase):
             sys.modules.pop("handler", None)
             sys.path.pop(0)
             sys.path.pop(0)
+
+    def test_pyflakes_no_undefined_names(self):
+        """Run pyflakes on all backend/lambdas files to verify 0 undefined names / syntax errors."""
+        warnings_buf = io.StringIO()
+        errors_buf = io.StringIO()
+        reporter = Reporter(warnings_buf, errors_buf)
+
+        undefined_or_syntax_errors = []
+        for root, _, files in os.walk(self.lambdas_dir):
+            for file in files:
+                if file.endswith(".py"):
+                    file_path = os.path.join(root, file)
+                    w_buf = io.StringIO()
+                    e_buf = io.StringIO()
+                    rep = Reporter(w_buf, e_buf)
+                    checkPath(file_path, reporter=rep)
+                    
+                    err_out = e_buf.getvalue()
+                    warn_out = w_buf.getvalue()
+                    for line in (err_out + warn_out).splitlines():
+                        if "undefined name" in line.lower() or "syntaxerror" in line.lower():
+                            undefined_or_syntax_errors.append(f"{file}: {line}")
+
+        self.assertEqual(
+            len(undefined_or_syntax_errors),
+            0,
+            f"Found undefined names or syntax errors in lambdas:\n" + "\n".join(undefined_or_syntax_errors),
+        )
 
 
 if __name__ == "__main__":

@@ -53,21 +53,21 @@ const MetricsBar: React.FC<MetricsBarProps> = ({ dashboard, isSimulating }) => {
       <MetricItem
         icon={<Clock className="w-4 h-4" />}
         label="Avg Lead Time"
-        value={`${d?.avg_lead_time_hours ?? 5.6}h`}
-        sub="modeled screening lead time"
+        value={d?.avg_lead_time_hours != null ? `${d.avg_lead_time_hours}h` : '—'}
+        sub={d?.is_mock_fallback ? 'demo scenario model' : (d?.avg_lead_time_hours != null ? 'live screening lead time' : 'requires active hotspot')}
         color="text-blue-400"
       />
       <MetricItem
         icon={<Zap className="w-4 h-4" />}
         label="Processing Latency"
-        value={d?.pipeline_latency_ms ? `${d.pipeline_latency_ms}ms` : '1,320ms'}
-        sub="E2E Pipeline · SLA: <3.0s"
+        value={d?.pipeline_latency_ms != null ? `${d.pipeline_latency_ms}ms` : '—'}
+        sub={d?.pipeline_latency_ms != null ? 'E2E Pipeline · SLA: <3.0s' : 'measured on /simulate'}
         color="text-yellow-400"
       />
       <MetricItem
         icon={<DollarSign className="w-4 h-4" />}
         label="AWS Cost Today"
-        value={`$${(d?.aws_cost_today_usd ?? 0.02).toFixed(2)}`}
+        value={d?.aws_cost_today_usd != null ? `$${d.aws_cost_today_usd.toFixed(2)}` : '$0.00'}
         sub="Free Tier Core + Bedrock"
         color="text-green-400"
       />

@@ -98,15 +98,15 @@ const SystemStatus: React.FC<SystemStatusProps> = ({ status, dashboard }) => {
     },
     {
       label: 'Lead Time',
-      value: dashboard?.avg_lead_time_hours ?? 6.4,
-      unit: 'hours avg',
+      value: dashboard?.avg_lead_time_hours != null ? `${dashboard.avg_lead_time_hours}h` : '—',
+      unit: dashboard?.is_mock_fallback ? 'demo scenario model' : (dashboard?.avg_lead_time_hours != null ? 'live screening lead time' : 'requires active hotspot'),
       color: 'text-blue-400',
       icon: '⏱️',
       bg: 'bg-blue-500/10 border-blue-500/20',
     },
     {
       label: 'AWS Cost Today',
-      value: `$${(dashboard?.aws_cost_today_usd ?? 0).toFixed(2)}`,
+      value: dashboard?.aws_cost_today_usd != null ? `$${dashboard.aws_cost_today_usd.toFixed(2)}` : '$0.00',
       unit: 'Free Tier',
       color: 'text-green-400',
       icon: '💰',
@@ -168,25 +168,35 @@ const SystemStatus: React.FC<SystemStatusProps> = ({ status, dashboard }) => {
             <Zap className="w-3.5 h-3.5 text-yellow-400" />
             <span className="text-gray-400 text-xs">Pipeline Latency</span>
           </div>
-          <span className={`text-[10px] px-1.5 py-0.5 rounded ${
-            (dashboard?.pipeline_latency_ms ?? 2300) < 2500
-              ? 'bg-green-500/10 text-green-400 border border-green-500/20'
-              : 'bg-red-500/10 text-red-400 border border-red-500/20'
-          }`}>
-            {(dashboard?.pipeline_latency_ms ?? 2300) < 2500 ? '✓ SLA PASS' : '⚠ SLA MISS'}
-          </span>
+          {dashboard?.pipeline_latency_ms != null ? (
+            <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+              dashboard.pipeline_latency_ms < 2500
+                ? 'bg-green-500/10 text-green-400 border border-green-500/20'
+                : 'bg-red-500/10 text-red-400 border border-red-500/20'
+            }`}>
+              {dashboard.pipeline_latency_ms < 2500 ? '✓ SLA PASS' : '⚠ SLA MISS'}
+            </span>
+          ) : (
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-800 text-gray-400 border border-gray-700">
+              MEASURED ON /simulate
+            </span>
+          )}
         </div>
         <div className="flex items-baseline gap-1">
-          <span className="text-white font-black text-2xl">{dashboard?.pipeline_latency_ms ?? 2300}</span>
-          <span className="text-gray-500 text-xs">ms</span>
+          <span className="text-white font-black text-2xl">
+            {dashboard?.pipeline_latency_ms != null ? dashboard.pipeline_latency_ms : '—'}
+          </span>
+          {dashboard?.pipeline_latency_ms != null && <span className="text-gray-500 text-xs">ms</span>}
           <span className="text-gray-600 text-[10px] ml-1">/ 2500ms target</span>
         </div>
-        <div className="h-1.5 bg-gray-800 rounded-full mt-2 overflow-hidden">
-          <div
-            className="h-full bg-green-500 rounded-full transition-all duration-700"
-            style={{ width: `${Math.min(((dashboard?.pipeline_latency_ms ?? 2300) / 2500) * 100, 100)}%` }}
-          />
-        </div>
+        {dashboard?.pipeline_latency_ms != null && (
+          <div className="h-1.5 bg-gray-800 rounded-full mt-2 overflow-hidden">
+            <div
+              className="h-full bg-green-500 rounded-full transition-all duration-700"
+              style={{ width: `${Math.min((dashboard.pipeline_latency_ms / 2500) * 100, 100)}%` }}
+            />
+          </div>
+        )}
       </div>
 
       {/* AWS Services health */}

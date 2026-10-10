@@ -12,7 +12,6 @@ For each SNS message (alert):
 4. Log success/failure (no retries at this layer -- SNS handles re-delivery).
 """
 
-import json
 import logging
 import os
 from datetime import datetime, timezone
