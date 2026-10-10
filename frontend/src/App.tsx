@@ -36,7 +36,7 @@ type NavTab = 'MAP' | 'ROUTING' | 'IOT_MESH' | 'PROFILES' | 'MATRIX' | 'IMPACT' 
 const INITIAL_LOGS: LogEntry[] = [
   { timestamp: '14:12:04', source: 'EVENTBRIDGE', message: 'Cron trigger rate(6 hours) dispatched execution event', level: 'INFO' },
   { timestamp: '14:12:05', source: 'NASA_FIRMS', message: 'VIIRS Suomi-NPP: 48 Thermal anomalies ingested across Punjab/Haryana', level: 'INFO' },
-  { timestamp: '14:12:05', source: 'OPEN_METEO', message: 'Boundary Layer Wind: 315° (NW) @ 18.4 km/h (u=-3.62 m/s, v=-3.62 m/s)', level: 'INFO' },
+  { timestamp: '14:12:05', source: 'OPEN_METEO', message: 'Boundary Layer Wind: 334° (NNW) @ 21.6 km/h (u=2.60 m/s, v=-5.40 m/s, bearing 154°)', level: 'INFO' },
   { timestamp: '14:12:06', source: 'LAMBDA', message: 'VayuSync-IngestionEngine: Lagrangian dispersion cone calculated (6h lead time)', level: 'SUCCESS' },
   { timestamp: '14:12:06', source: 'DYNAMODB', message: 'VayuSync_Hotspots & VayuSync_Institutions spatial bounding intersection verified', level: 'SUCCESS' },
   { timestamp: '14:12:07', source: 'BEDROCK', message: 'Advisory Engine: Deterministic rule fallback active (Bedrock Claude standby)', level: 'INFO' },
@@ -468,7 +468,7 @@ const App: React.FC = () => {
             Judge Live Demo
           </div>
           <span className="text-xs text-gray-300 font-medium hidden sm:inline">
-            Inject synthetic satellite cluster (Sangrur/Ludhiana) · NW wind vector 315° @ 18 km/h
+            Inject synthetic satellite cluster (Sangrur/Ludhiana) · NW transport corridor 151°–155° @ 15–26 km/h
           </span>
         </div>
 

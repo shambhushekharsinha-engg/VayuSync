@@ -143,7 +143,7 @@ sequenceDiagram
                                 │
                  ┌──────────────▼───────────┐
                  │      Amazon Bedrock      │  Foundation Model:
-                 │      Claude 3 Haiku      │  Strict JSON Actionable Advisory
+                 │      Configurable Claude │  Strict JSON Actionable Advisory
                  └──────────────┬───────────┘
                                 │
                  ┌──────────────┴───────────┬───────────────────────────┐

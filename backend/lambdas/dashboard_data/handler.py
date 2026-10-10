@@ -42,6 +42,10 @@ dynamodb = boto3.resource("dynamodb", region_name=_region)
 HOTSPOTS_TABLE = os.environ.get("HOTSPOTS_TABLE", "VayuSync_Hotspots")
 INSTITUTIONS_TABLE = os.environ.get("INSTITUTIONS_TABLE", "VayuSync_Institutions")
 ALERT_LOGS_TABLE = os.environ.get("ALERT_LOGS_TABLE", "VayuSync_AlertLogs")
+BEDROCK_MODEL_ID = os.environ.get(
+    "BEDROCK_MODEL_ID", "us.anthropic.claude-3-5-haiku-20241022-v1:0"
+)
+BEDROCK_REGION = os.environ.get("BEDROCK_REGION", "us-east-1")
 
 # ── CORS Headers ──────────────────────────────────────────────────────────────
 CORS_HEADERS = {
@@ -196,7 +200,7 @@ def get_dashboard(event, context) -> dict:
         "metadata": {
             "ingestion_schedule": "Every 6 hours (EventBridge)",
             "trajectory_model": "Lagrangian dispersion, 6-12h cone",
-            "advisory_model": "Amazon Bedrock Claude 3 Haiku",
+            "advisory_model": f"Amazon Bedrock ({BEDROCK_MODEL_ID}) / Rule Fallback",
             "region_covered": "Punjab, Haryana, Delhi NCR",
             "bbox": "73.5N, 27.5E, 78.5N, 32.5E",
         },
@@ -432,8 +436,8 @@ def get_status(event, context) -> dict:
                 "memory_mb": 512,
                 "timeout_s": 120,
                 "trigger": "Async Lambda invoke from IngestionEngine",
-                "bedrock_model": "anthropic.claude-3-haiku-20240307-v1:0",
-                "bedrock_region": _region,
+                "bedrock_model": BEDROCK_MODEL_ID,
+                "bedrock_region": BEDROCK_REGION,
                 "fallback": "Rule-based advisory if Bedrock unavailable",
             },
             "webhook_dispatcher": {
