@@ -69,49 +69,50 @@ export const TimelineScrubber: React.FC<TimelineScrubberProps> = ({
   );
 
   return (
-    <div className="bg-gray-900/90 backdrop-blur-md border border-gray-800 rounded-2xl p-3 shadow-2xl space-y-2">
+    <div className="bg-gray-900/95 backdrop-blur-md border border-gray-800 rounded-2xl p-2.5 sm:p-3 shadow-2xl space-y-1.5 sm:space-y-2">
       {/* Top row: controls + status readout */}
-      <div className="flex items-center justify-between text-xs">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-1.5 text-xs">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <button
             onClick={togglePlay}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs transition-all shadow-md ${
+            className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl font-bold text-[11px] sm:text-xs transition-all shadow-md ${
               isPlaying
                 ? 'bg-amber-500 text-black hover:bg-amber-400'
                 : 'bg-orange-500 hover:bg-orange-600 text-white'
             }`}
           >
-            {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-            <span>{isPlaying ? 'PAUSE TIMELINE' : 'SIMULATE DISPERSION (12H)'}</span>
+            {isPlaying ? <Pause className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> : <Play className="w-3 h-3 sm:w-3.5 sm:h-3.5" />}
+            <span className="hidden xs:inline sm:inline">{isPlaying ? 'PAUSE TIMELINE' : 'SIMULATE DISPERSION (12H)'}</span>
+            <span className="xs:hidden sm:hidden">{isPlaying ? 'PAUSE' : 'PLAY 12H'}</span>
           </button>
 
           <button
             onClick={handleReset}
-            className="p-1.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-colors"
+            className="p-1 sm:p-1.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-colors"
             title="Reset to T+0h"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
+            <RotateCcw className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
           </button>
         </div>
 
         {/* Current status badge */}
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 bg-gray-950/70 border border-gray-800 px-2.5 py-1 rounded-lg">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="flex items-center gap-1 bg-gray-950/70 border border-gray-800 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg">
             <Clock className="w-3 h-3 text-orange-400" />
-            <span className="font-mono text-white font-bold">T+{currentHour.toFixed(1)}h</span>
-            <span className="text-gray-500 text-[10px]">projection</span>
+            <span className="font-mono text-white font-bold text-[11px] sm:text-xs">T+{currentHour.toFixed(1)}h</span>
+            <span className="text-gray-500 text-[10px] hidden md:inline">projection</span>
           </div>
 
-          <div className="flex items-center gap-1.5 bg-red-500/10 border border-red-500/30 px-2.5 py-1 rounded-lg">
-            <AlertTriangle className="w-3 h-3 text-red-400" />
-            <span className="text-red-400 font-bold">{activeMilestone.title}</span>
-            <span className="text-gray-400 text-[10px]">· Est. AQI {activeMilestone.aqi}</span>
+          <div className="flex items-center gap-1 bg-red-500/10 border border-red-500/30 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg">
+            <AlertTriangle className="w-3 h-3 text-red-400 flex-shrink-0" />
+            <span className="text-red-400 font-bold text-[11px] sm:text-xs truncate max-w-[90px] sm:max-w-none">{activeMilestone.title}</span>
+            <span className="text-gray-400 text-[10px] hidden sm:inline">· Est. AQI {activeMilestone.aqi}</span>
           </div>
         </div>
       </div>
 
       {/* Scrubber slider track */}
-      <div className="relative pt-1 pb-1">
+      <div className="relative pt-0.5 sm:pt-1 pb-0.5 sm:pb-1">
         <input
           type="range"
           min="0"
@@ -138,17 +139,17 @@ export const TimelineScrubber: React.FC<TimelineScrubberProps> = ({
                 Math.abs(currentHour - m.hour) < 1.0 ? 'text-orange-400 font-bold' : 'text-gray-500'
               }`}
             >
-              <span className="font-mono">{m.label}</span>
-              <span className="text-[8px] opacity-75">{m.title}</span>
+              <span className="font-mono text-[9px] sm:text-[10px]">{m.label}</span>
+              <span className="text-[8px] opacity-75 hidden sm:inline">{m.title}</span>
             </button>
           ))}
         </div>
       </div>
 
       {/* Atmospheric Context ticker */}
-      <div className="flex items-center justify-between text-[10px] text-gray-400 bg-gray-950/40 rounded-xl px-2.5 py-1 border border-gray-800/50">
+      <div className="hidden sm:flex flex-wrap items-center justify-between gap-1 text-[10px] text-gray-400 bg-gray-950/40 rounded-xl px-2.5 py-1 border border-gray-800/50">
         <div className="flex items-center gap-1.5">
-          <Wind className="w-3 h-3 text-blue-400" />
+          <Wind className="w-3 h-3 text-blue-400 flex-shrink-0" />
           {trajectoryCone?.properties ? (
             <>
               <span>
@@ -173,15 +174,15 @@ export const TimelineScrubber: React.FC<TimelineScrubberProps> = ({
                 Modeled Plume Transport:{' '}
                 <strong className="text-gray-200">{PRESET_TRANSPORT_RANGE_LABEL}</strong>
               </span>
-              <span className="text-gray-600">|</span>
-              <span>
+              <span className="text-gray-600 hidden md:inline">|</span>
+              <span className="hidden md:inline">
                 Corridor Bearing:{' '}
                 <strong className="text-gray-200">151° SSE (Punjab → Delhi NCR)</strong>
               </span>
             </>
           )}
         </div>
-        <div className="text-orange-400 font-medium">
+        <div className="text-orange-400 font-medium truncate">
           {currentHour < 3
             ? '🔥 Smoke plume accelerating through rural Punjab'
             : currentHour < 6

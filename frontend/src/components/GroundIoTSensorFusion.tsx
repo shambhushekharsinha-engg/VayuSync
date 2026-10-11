@@ -106,23 +106,23 @@ export const GroundIoTSensorFusion: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-gray-950 p-6 space-y-5 overflow-y-auto">
+    <div className="flex flex-col space-y-4 sm:space-y-5">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-gray-900/80 border border-gray-800 p-4 rounded-3xl shadow-xl">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-2xl bg-gradient-to-br from-green-500/20 to-cyan-500/20 text-green-400 border border-green-500/30">
+      <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4 bg-gray-900/80 border border-gray-800 p-3.5 sm:p-4 rounded-3xl shadow-xl">
+        <div className="flex items-start sm:items-center gap-3">
+          <div className="p-2.5 rounded-2xl bg-gradient-to-br from-green-500/20 to-cyan-500/20 text-green-400 border border-green-500/30 flex-shrink-0">
             <Radio className="w-5 h-5 animate-pulse" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-black text-white">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+              <h2 className="text-base sm:text-lg font-black text-white">
                 Ground IoT Mesh & Mobile Bus Sensor Fusion
               </h2>
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
-                HARDWARE SIMULATION TESTBED · AWS IoT Core Protocol (MQTT)
+              <span className="px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                HARDWARE SIMULATION TESTBED · AWS IoT Core (MQTT)
               </span>
             </div>
-            <p className="text-gray-400 text-xs mt-0.5">
+            <p className="text-gray-400 text-xs mt-1">
               Illustrative synthetic readings from AWS IoT Core testbed (ESP32 / SPS30 sensor models) demonstrating satellite-ground sensor corroboration architecture.
             </p>
           </div>
@@ -131,7 +131,7 @@ export const GroundIoTSensorFusion: React.FC = () => {
         <button
           onClick={handleSimulatePacket}
           disabled={isSimulatingPacket}
-          className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 transition-all active:scale-95 shadow-md shadow-cyan-950/40"
+          className="w-full sm:w-auto justify-center flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 transition-all active:scale-95 shadow-md shadow-cyan-950/40"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${isSimulatingPacket ? 'animate-spin' : ''}`} />
           <span>{isSimulatingPacket ? 'INGESTING TELEMETRY...' : 'INGEST MQTT TELEMETRY PACKET'}</span>
@@ -139,7 +139,7 @@ export const GroundIoTSensorFusion: React.FC = () => {
       </div>
 
       {/* Sensor Node Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {nodes.map(node => {
           const isSelected = selectedNode.id === node.id;
           return (
@@ -186,39 +186,39 @@ export const GroundIoTSensorFusion: React.FC = () => {
       </div>
 
       {/* Selected Node Deep Dive Telemetry Panel */}
-      <div className="bg-gray-900/70 border border-gray-800 rounded-3xl p-5 shadow-2xl">
+      <div className="bg-gray-900/70 border border-gray-800 rounded-3xl p-4 sm:p-5 shadow-2xl">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-800 pb-3 mb-4">
-          <div className="flex items-center gap-2.5">
-            <Cpu className="w-5 h-5 text-cyan-400" />
-            <div>
-              <h3 className="font-black text-sm text-white">{selectedNode.name}</h3>
-              <div className="text-gray-400 text-xs font-mono">{selectedNode.hardware} · Firmware {selectedNode.firmware}</div>
+          <div className="flex items-center gap-2.5 min-w-0">
+            <Cpu className="w-5 h-5 text-cyan-400 flex-shrink-0" />
+            <div className="min-w-0">
+              <h3 className="font-black text-xs sm:text-sm text-white truncate">{selectedNode.name}</h3>
+              <div className="text-gray-400 text-[11px] sm:text-xs font-mono truncate">{selectedNode.hardware} · Firmware {selectedNode.firmware}</div>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 text-xs text-gray-400">
+          <div className="flex flex-wrap items-center gap-3 text-xs text-gray-400">
             <span className="flex items-center gap-1"><Battery className="w-3.5 h-3.5 text-green-400" /> {selectedNode.batteryPct}%</span>
             <span className="flex items-center gap-1"><Wifi className="w-3.5 h-3.5 text-cyan-400" /> MQTT 1883</span>
             <span className="flex items-center gap-1"><Zap className="w-3.5 h-3.5 text-yellow-400" /> {selectedNode.samplingIntervalSec}s Cadence</span>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3 text-center">
           <div className="bg-gray-950 p-3 rounded-2xl border border-gray-800">
-            <div className="text-[10px] text-gray-500 uppercase font-bold">PM2.5 Particle Density</div>
-            <div className="text-red-400 font-mono font-black text-xl mt-1">{selectedNode.currentPm25} µg/m³</div>
+            <div className="text-[9px] sm:text-[10px] text-gray-500 uppercase font-bold">PM2.5 Particle Density</div>
+            <div className="text-red-400 font-mono font-black text-base sm:text-xl mt-1">{selectedNode.currentPm25} µg/m³</div>
           </div>
           <div className="bg-gray-950 p-3 rounded-2xl border border-gray-800">
-            <div className="text-[10px] text-gray-500 uppercase font-bold">PM10 Coarse Fraction</div>
-            <div className="text-orange-400 font-mono font-black text-xl mt-1">{selectedNode.currentPm10} µg/m³</div>
+            <div className="text-[9px] sm:text-[10px] text-gray-500 uppercase font-bold">PM10 Coarse Fraction</div>
+            <div className="text-orange-400 font-mono font-black text-base sm:text-xl mt-1">{selectedNode.currentPm10} µg/m³</div>
           </div>
           <div className="bg-gray-950 p-3 rounded-2xl border border-gray-800">
-            <div className="text-[10px] text-gray-500 uppercase font-bold">Ambient Temperature</div>
-            <div className="text-white font-mono font-black text-xl mt-1">{selectedNode.temperatureC}°C</div>
+            <div className="text-[9px] sm:text-[10px] text-gray-500 uppercase font-bold">Ambient Temperature</div>
+            <div className="text-white font-mono font-black text-base sm:text-xl mt-1">{selectedNode.temperatureC}°C</div>
           </div>
           <div className="bg-gray-950 p-3 rounded-2xl border border-gray-800">
-            <div className="text-[10px] text-gray-500 uppercase font-bold">Relative Humidity</div>
-            <div className="text-blue-400 font-mono font-black text-xl mt-1">{selectedNode.humidityPct}%</div>
+            <div className="text-[9px] sm:text-[10px] text-gray-500 uppercase font-bold">Relative Humidity</div>
+            <div className="text-blue-400 font-mono font-black text-base sm:text-xl mt-1">{selectedNode.humidityPct}%</div>
           </div>
         </div>
       </div>

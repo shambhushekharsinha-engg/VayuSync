@@ -56,9 +56,15 @@ const VayuSyncMap: React.FC<VayuSyncMapProps> = ({
       renderRegionData(map, activeRegion);
     });
 
+    const resizeObserver = new ResizeObserver(() => {
+      map.resize();
+    });
+    resizeObserver.observe(mapRef.current);
+
     mapInstanceRef.current = map;
 
     return () => {
+      resizeObserver.disconnect();
       markersRef.current.forEach(m => m.remove());
       windMarkersRef.current.forEach(m => m.remove());
       map.remove();
@@ -415,10 +421,10 @@ const VayuSyncMap: React.FC<VayuSyncMapProps> = ({
       <div ref={mapRef} className="w-full h-full" />
 
       {/* Floating Tactical Controls */}
-      <div className="absolute top-3 left-3 z-20 flex items-center gap-2">
+      <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-20 flex flex-wrap items-center gap-1.5 sm:gap-2 max-w-[calc(100%-20px)]">
         <button
           onClick={toggle3D}
-          className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all shadow-xl backdrop-blur-md ${
+          className={`flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl border text-[11px] sm:text-xs font-bold transition-all shadow-xl backdrop-blur-md ${
             is3D
               ? 'bg-orange-500 text-white border-orange-400 shadow-orange-500/20'
               : 'bg-gray-900/90 text-gray-300 border-gray-700 hover:text-white hover:bg-gray-800'
@@ -426,14 +432,14 @@ const VayuSyncMap: React.FC<VayuSyncMapProps> = ({
           title="Toggle 3D Perspective Pitch"
         >
           <Layers className="w-3.5 h-3.5 text-orange-400" />
-          <span>{is3D ? '3D TACTICAL (55°)' : '2D PLAN VIEW'}</span>
+          <span>{is3D ? '3D (55°)' : '2D VIEW'}</span>
         </button>
 
         {/* Region Flag & Identifier Badge */}
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gray-900/90 backdrop-blur-md border border-gray-700 text-xs font-bold text-gray-200 shadow-xl">
-          <span className="text-base">{activeRegion.flag}</span>
-          <span className="hidden sm:inline">{activeRegion.name}</span>
-          <span className="text-orange-400 text-[10px]">({activeRegion.category})</span>
+        <div className="flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-gray-900/90 backdrop-blur-md border border-gray-700 text-[11px] sm:text-xs font-bold text-gray-200 shadow-xl truncate">
+          <span className="text-sm sm:text-base">{activeRegion.flag}</span>
+          <span className="truncate max-w-[110px] sm:max-w-none">{activeRegion.name}</span>
+          <span className="text-orange-400 text-[10px] hidden sm:inline">({activeRegion.category})</span>
         </div>
       </div>
 

@@ -79,18 +79,18 @@ export const ImpactCalculator: React.FC = () => {
   ).toFixed(1);
 
   return (
-    <div className="relative overflow-hidden bg-gray-900/90 backdrop-blur-md border border-gray-800 rounded-3xl p-5 shadow-2xl space-y-4">
+    <div className="relative overflow-hidden bg-gray-900/90 backdrop-blur-md border border-gray-800 rounded-3xl p-4 sm:p-5 shadow-2xl space-y-4">
       {/* React Bits WindWaveBackground laminar boundary effect */}
       <WindWaveBackground waveCount={3} speed={0.012} amplitude={20} className="opacity-40" />
 
       {/* Header */}
       <div className="relative z-10 flex flex-wrap items-center justify-between pb-3 border-b border-gray-800 gap-3">
-        <div className="flex items-center gap-2.5">
-          <div className="p-2 bg-green-500/10 border border-green-500/30 rounded-xl">
+        <div className="flex items-start sm:items-center gap-2.5">
+          <div className="p-2 bg-green-500/10 border border-green-500/30 rounded-xl flex-shrink-0">
             <Shield className="w-5 h-5 text-green-400" />
           </div>
           <div>
-            <h3 className="font-black text-sm text-white flex items-center gap-1.5">
+            <h3 className="font-black text-sm text-white flex flex-wrap items-center gap-1.5">
               <span>Preemptive Action Impact Calculator</span>
               <ShinyText
                 text="· Real-Time ROI"
@@ -124,13 +124,13 @@ export const ImpactCalculator: React.FC = () => {
       </div>
 
       {/* Big KPI Metrics Strip */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="relative z-10 grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
         <div className="bg-gray-950/70 border border-gray-800 rounded-2xl p-3.5">
           <div className="flex items-center gap-1.5 text-gray-400 text-xs mb-1">
             <Users className="w-3.5 h-3.5 text-blue-400" />
             <span>Citizens Protected</span>
           </div>
-          <div className="font-black text-2xl text-blue-400">
+          <div className="font-black text-xl sm:text-2xl text-blue-400">
             {totalPeople.toLocaleString()}
           </div>
           <div className="text-[10px] text-gray-500 mt-0.5">Students, workers, patients</div>
@@ -141,7 +141,7 @@ export const ImpactCalculator: React.FC = () => {
             <HeartPulse className="w-3.5 h-3.5 text-red-400" />
             <span>PM2.5 Mass Averted</span>
           </div>
-          <div className="font-black text-2xl text-red-400">
+          <div className="font-black text-xl sm:text-2xl text-red-400">
             {totalPm25Kg.toFixed(2)} <span className="text-xs font-normal text-gray-500">kg</span>
           </div>
           <div className="text-[10px] text-gray-500 mt-0.5">Cumulative lung particulate intake</div>
@@ -152,7 +152,7 @@ export const ImpactCalculator: React.FC = () => {
             <IndianRupee className="w-3.5 h-3.5 text-green-400" />
             <span>Healthcare Savings</span>
           </div>
-          <div className="font-black text-2xl text-green-400">
+          <div className="font-black text-xl sm:text-2xl text-green-400">
             ₹{totalInrLakhs} <span className="text-xs font-normal text-gray-500">Lakhs</span>
           </div>
           <div className="text-[10px] text-gray-500 mt-0.5">Estimated ER & OPD cost averted</div>
@@ -160,7 +160,7 @@ export const ImpactCalculator: React.FC = () => {
       </div>
 
       {/* Interactive Action Checkbox List */}
-      <div className="space-y-2">
+      <div className="relative z-10 space-y-2">
         <div className="text-[10px] uppercase tracking-wider text-gray-400 font-bold px-1">
           Toggle Institutional Protocols:
         </div>
@@ -175,17 +175,17 @@ export const ImpactCalculator: React.FC = () => {
                 : 'bg-gray-950/40 border-gray-800/60 opacity-60 hover:opacity-90'
             }`}
           >
-            <div className="flex items-center gap-2.5 min-w-0 pr-2">
+            <div className="flex items-start sm:items-center gap-2.5 min-w-0 pr-2">
               <div
-                className={`w-4 h-4 rounded-md flex items-center justify-center flex-shrink-0 transition-colors ${
+                className={`w-4 h-4 rounded-md flex items-center justify-center flex-shrink-0 mt-0.5 sm:mt-0 transition-colors ${
                   act.active ? 'bg-green-500 text-black' : 'border border-gray-600'
                 }`}
               >
                 {act.active && <Check className="w-3 h-3 stroke-[3]" />}
               </div>
               <div className="min-w-0">
-                <div className="text-xs font-bold text-gray-200 truncate">{act.name}</div>
-                <div className="text-[10px] text-gray-500">
+                <div className="text-xs font-bold text-gray-200 leading-snug sm:truncate">{act.name}</div>
+                <div className="text-[10px] text-gray-500 mt-0.5">
                   {act.category} · Protecting {act.people.toLocaleString()} citizens
                 </div>
               </div>

@@ -66,11 +66,11 @@ export const ArchitectureModal: React.FC<ArchitectureModalProps> = ({ isOpen, on
 
   return (
     <div
-      className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fade-in-up"
+      className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-2.5 sm:p-4 animate-fade-in-up"
       onClick={onClose}
     >
       <div
-        className="bg-gray-900 border border-gray-700 rounded-3xl max-w-4xl w-full p-6 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]"
+        className="bg-gray-900 border border-gray-700 rounded-3xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl relative overflow-hidden flex flex-col max-h-[92dvh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* React Bits Atmospheric Particles background effect */}
@@ -80,25 +80,25 @@ export const ArchitectureModal: React.FC<ArchitectureModalProps> = ({ isOpen, on
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
 
         {/* Header */}
-        <div className="flex items-start justify-between pb-4 border-b border-gray-800 flex-shrink-0 relative z-10">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <span className="p-2 bg-orange-500/10 border border-orange-500/30 rounded-xl text-orange-400">
+        <div className="flex items-start justify-between gap-2 pb-3 sm:pb-4 border-b border-gray-800 flex-shrink-0 relative z-10">
+          <div className="min-w-0">
+            <div className="flex items-start sm:items-center gap-2.5">
+              <span className="p-2 bg-orange-500/10 border border-orange-500/30 rounded-xl text-orange-400 flex-shrink-0">
                 <Cpu className="w-5 h-5" />
               </span>
-              <div>
-                <h3 className="font-black text-lg text-white flex items-center gap-2">
+              <div className="min-w-0">
+                <h3 className="font-black text-base sm:text-lg text-white flex flex-wrap items-center gap-1.5 sm:gap-2">
                   <span>AWS Serverless Pipeline Architecture</span>
                   <ShinyText
                     text="· Event-Driven"
                     speed={3}
                     className="text-xs text-orange-400 font-bold hidden sm:inline-block"
                   />
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-500/20 text-green-300 font-bold border border-green-500/30">
+                  <span className="text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full bg-green-500/20 text-green-300 font-bold border border-green-500/30">
                     100% Free Tier Compliant
                   </span>
                 </h3>
-                <p className="text-gray-400 text-xs mt-0.5">
+                <p className="text-gray-400 text-[11px] sm:text-xs mt-0.5">
                   End-to-end event-driven workflow verified on AWS Region: <span className="text-orange-300 font-mono">ap-south-1 (Mumbai)</span>
                 </p>
               </div>
@@ -110,20 +110,20 @@ export const ArchitectureModal: React.FC<ArchitectureModalProps> = ({ isOpen, on
               soundEngine.playClick();
               onClose();
             }}
-            className="p-1.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-colors"
+            className="p-1.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-colors flex-shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Pipeline Step Cards Flow */}
-        <div className="mt-5 space-y-4 overflow-y-auto flex-1 pr-1">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+        <div className="mt-4 sm:mt-5 space-y-4 overflow-y-auto flex-1 pr-1 relative z-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
             {PIPELINE_NODES.map((node, i) => {
               const Icon = node.icon;
               return (
                 <div key={node.step} className="relative flex flex-col">
-                  <div className={`flex-1 bg-gradient-to-br ${node.color} p-4 rounded-2xl border flex flex-col justify-between shadow-lg relative group hover:border-white/50 transition-all`}>
+                  <div className={`flex-1 bg-gradient-to-br ${node.color} p-3.5 sm:p-4 rounded-2xl border flex flex-col justify-between shadow-lg relative group hover:border-white/50 transition-all`}>
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <span className="font-mono text-xs font-black text-gray-400">{node.step}</span>
@@ -186,13 +186,13 @@ export const ArchitectureModal: React.FC<ArchitectureModalProps> = ({ isOpen, on
         </div>
 
         {/* Footer */}
-        <div className="mt-4 pt-3 border-t border-gray-800 flex items-center justify-between text-xs flex-shrink-0">
+        <div className="mt-4 pt-3 border-t border-gray-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs flex-shrink-0 relative z-10">
           <div className="text-gray-400 text-[11px]">
             CloudFormation Stack: <strong className="text-white font-mono">VayuSync-Stack</strong> · SAM Managed
           </div>
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl transition-all"
+            className="w-full sm:w-auto px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl transition-all"
           >
             Close Architecture Inspector
           </button>

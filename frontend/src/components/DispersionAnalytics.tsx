@@ -43,31 +43,31 @@ export const DispersionAnalytics: React.FC<DispersionAnalyticsProps> = ({
   ];
 
   return (
-    <div className="flex flex-col h-full bg-gray-950 p-6 space-y-5 overflow-y-auto">
+    <div className="flex flex-col h-full bg-gray-950 p-3 sm:p-6 space-y-4 sm:space-y-5 overflow-y-auto">
       {/* Header */}
-      <div className="flex items-center justify-between bg-gray-900/80 border border-gray-800 p-4 rounded-2xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gray-900/80 border border-gray-800 p-3.5 sm:p-4 rounded-2xl">
         <div>
-          <h2 className="text-lg font-black text-white flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-orange-400" />
-            Atmospheric Dispersion & Cloud Telemetry Analytics
+          <h2 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-orange-400 flex-shrink-0" />
+            <span>Atmospheric Dispersion & Cloud Telemetry Analytics</span>
           </h2>
           <p className="text-gray-400 text-xs mt-0.5">
             Lagrangian plume vector modeling, nocturnal inversion projections & AWS Lambda pipeline telemetry
           </p>
         </div>
-        <span className="px-3 py-1 rounded-xl bg-orange-500/10 border border-orange-500/30 text-orange-400 font-bold text-xs">
+        <span className="self-start sm:self-auto px-3 py-1 rounded-xl bg-orange-500/10 border border-orange-500/30 text-orange-400 font-bold text-[11px] sm:text-xs flex-shrink-0">
           Open-Meteo + NASA FIRMS Validated
         </span>
       </div>
 
       {/* Grid: 12h AQI Forecast Curve + Wind Profile */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
         {/* 12h AQI Projection Chart */}
-        <div className="lg:col-span-2 bg-gray-900/60 border border-gray-800 rounded-3xl p-5 shadow-2xl flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-4">
+        <div className="lg:col-span-2 bg-gray-900/60 border border-gray-800 rounded-3xl p-4 sm:p-5 shadow-2xl flex flex-col justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
             <div className="flex items-center gap-2">
-              <Gauge className="w-4 h-4 text-red-400" />
-              <h3 className="font-bold text-sm text-white">12-Hour Delhi NCR AQI Projection Curve</h3>
+              <Gauge className="w-4 h-4 text-red-400 flex-shrink-0" />
+              <h3 className="font-bold text-xs sm:text-sm text-white">12-Hour Delhi NCR AQI Projection Curve</h3>
             </div>
             <span className="text-[10px] text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full font-bold">
               PEAK HAZARD: 472 AQI at T+10h
@@ -75,7 +75,7 @@ export const DispersionAnalytics: React.FC<DispersionAnalyticsProps> = ({
           </div>
 
           {/* Bar / Column visual representation */}
-          <div className="h-44 flex items-end gap-3 pt-4 pb-2 border-b border-gray-800 px-2">
+          <div className="h-44 flex items-end gap-2 sm:gap-3 pt-4 pb-2 border-b border-gray-800 px-1 sm:px-2">
             {FORECAST_HOURS.map((item) => {
               const heightPct = Math.min((item.aqi / 500) * 100, 100);
               const color =
@@ -85,32 +85,32 @@ export const DispersionAnalytics: React.FC<DispersionAnalyticsProps> = ({
 
               return (
                 <div key={item.time} className="flex-1 flex flex-col items-center h-full justify-end group">
-                  <div className="text-[10px] font-mono font-bold text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity mb-1">
+                  <div className="text-[9px] sm:text-[10px] font-mono font-bold text-gray-300 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity mb-1">
                     {item.aqi}
                   </div>
                   <div
                     className={`w-full rounded-t-xl bg-gradient-to-t ${color} transition-all duration-700 shadow-lg`}
                     style={{ height: `${heightPct}%` }}
                   />
-                  <div className="text-[10px] font-bold text-gray-400 mt-2">{item.label}</div>
-                  <div className="text-[9px] text-gray-600">{item.time}</div>
+                  <div className="text-[9px] sm:text-[10px] font-bold text-gray-400 mt-2">{item.label}</div>
+                  <div className="text-[8px] sm:text-[9px] text-gray-600">{item.time}</div>
                 </div>
               );
             })}
           </div>
 
-          <div className="flex items-center justify-between text-[10px] text-gray-500 pt-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[10px] text-gray-500 pt-3">
             <span>Severe Inversion Risk Window: 08:00 - 15:00 IST</span>
             <span>Boundary Layer Height: 620m (Thermal Compression)</span>
           </div>
         </div>
 
         {/* Wind Profile Widget */}
-        <div className="bg-gray-900/60 border border-gray-800 rounded-3xl p-5 shadow-2xl flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-3">
+        <div className="bg-gray-900/60 border border-gray-800 rounded-3xl p-4 sm:p-5 shadow-2xl flex flex-col justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
             <div className="flex items-center gap-2">
-              <Wind className="w-4 h-4 text-blue-400" />
-              <h3 className="font-bold text-sm text-white">Atmospheric Wind Profile</h3>
+              <Wind className="w-4 h-4 text-blue-400 flex-shrink-0" />
+              <h3 className="font-bold text-xs sm:text-sm text-white">Atmospheric Wind Profile</h3>
             </div>
             {(wind?.is_illustrative || trajectoryCone?.properties?.is_illustrative || (!wind && !trajectoryCone)) && (
               <span className="text-[9px] px-2 py-0.5 rounded font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">
@@ -128,26 +128,26 @@ export const DispersionAnalytics: React.FC<DispersionAnalyticsProps> = ({
             const halfAngle = trajectoryCone?.properties?.cone_half_angle_deg ?? 15.0;
 
             return (
-              <div className="space-y-3 bg-gray-950/60 p-4 rounded-2xl border border-gray-800/80">
-                <div className="flex justify-between items-center text-xs">
+              <div className="space-y-3 bg-gray-950/60 p-3.5 sm:p-4 rounded-2xl border border-gray-800/80">
+                <div className="flex justify-between items-center gap-2 text-xs">
                   <span className="text-gray-400">10m Vector Velocity</span>
-                  <span className="text-white font-mono font-bold">
+                  <span className="text-white font-mono font-bold text-right">
                     {speedKmh.toFixed(1)} km/h ({speedMs.toFixed(1)} m/s)
                   </span>
                 </div>
-                <div className="flex justify-between items-center text-xs">
+                <div className="flex justify-between items-center gap-2 text-xs">
                   <span className="text-gray-400">Plume Transport Bearing</span>
-                  <span className="text-blue-400 font-mono font-bold">
-                    {bearingDeg.toFixed(0)}° ({cardinal} Transport Vector)
+                  <span className="text-blue-400 font-mono font-bold text-right">
+                    {bearingDeg.toFixed(0)}° ({cardinal} Vector)
                   </span>
                 </div>
-                <div className="flex justify-between items-center text-xs">
+                <div className="flex justify-between items-center gap-2 text-xs">
                   <span className="text-gray-400">Pasquill Stability Class</span>
-                  <span className="text-orange-400 font-bold">Class D (Neutral / Moderate)</span>
+                  <span className="text-orange-400 font-bold text-right">Class D (Neutral / Moderate)</span>
                 </div>
-                <div className="flex justify-between items-center text-xs">
+                <div className="flex justify-between items-center gap-2 text-xs">
                   <span className="text-gray-400">Dispersion Half-Angle</span>
-                  <span className="text-white font-mono font-bold">{halfAngle.toFixed(1)}° Cone Spread</span>
+                  <span className="text-white font-mono font-bold text-right">{halfAngle.toFixed(1)}° Cone Spread</span>
                 </div>
               </div>
             );
@@ -160,15 +160,15 @@ export const DispersionAnalytics: React.FC<DispersionAnalyticsProps> = ({
       </div>
 
       {/* Grid: FRP Radiative Power + End-to-End Latency */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
         {/* FRP Hotspots by District */}
-        <div className="bg-gray-900/60 border border-gray-800 rounded-3xl p-5 shadow-2xl space-y-3">
-          <div className="flex items-center justify-between">
+        <div className="bg-gray-900/60 border border-gray-800 rounded-3xl p-4 sm:p-5 shadow-2xl space-y-3">
+          <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <Flame className="w-4 h-4 text-orange-400" />
-              <h3 className="font-bold text-sm text-white">Thermal Radiative Power (FRP) by District</h3>
+              <Flame className="w-4 h-4 text-orange-400 flex-shrink-0" />
+              <h3 className="font-bold text-xs sm:text-sm text-white">Thermal Radiative Power (FRP) by District</h3>
             </div>
-            <span className="text-[10px] text-gray-500 font-mono">Total: 3,674 MW</span>
+            <span className="text-[10px] text-gray-500 font-mono flex-shrink-0">Total: 3,674 MW</span>
           </div>
 
           <div className="space-y-2.5 pt-1">
@@ -190,13 +190,13 @@ export const DispersionAnalytics: React.FC<DispersionAnalyticsProps> = ({
         </div>
 
         {/* End-to-End Lambda Processing Latency */}
-        <div className="bg-gray-900/60 border border-gray-800 rounded-3xl p-5 shadow-2xl space-y-3">
-          <div className="flex items-center justify-between">
+        <div className="bg-gray-900/60 border border-gray-800 rounded-3xl p-4 sm:p-5 shadow-2xl space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4 text-yellow-400" />
-              <h3 className="font-bold text-sm text-white">AWS End-to-End Pipeline Latency</h3>
+              <Zap className="w-4 h-4 text-yellow-400 flex-shrink-0" />
+              <h3 className="font-bold text-xs sm:text-sm text-white">AWS End-to-End Pipeline Latency</h3>
             </div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex flex-wrap items-center gap-1.5">
               <span className="text-[9px] px-1.5 py-0.5 rounded font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">
                 ILLUSTRATIVE BREAKDOWN
               </span>

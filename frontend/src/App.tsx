@@ -62,6 +62,7 @@ const App: React.FC = () => {
   const [activeRegion, setActiveRegion] = useState<GlobalRegion>(GLOBAL_REGIONS[0]);
   const [isGlobeView, setIsGlobeView] = useState(false);
   const [terminalLogs, setTerminalLogs] = useState<LogEntry[]>(INITIAL_LOGS);
+  const [mobileMapPanel, setMobileMapPanel] = useState<'RADAR' | 'ALERTS' | 'STATUS'>('RADAR');
 
   const addLog = useCallback((source: LogEntry['source'], message: string, level: LogEntry['level'] = 'INFO') => {
     const now = new Date();
@@ -256,30 +257,30 @@ const App: React.FC = () => {
   );
 
   return (
-    <div className={`flex flex-col h-screen bg-gray-950 text-white overflow-hidden font-sans transition-colors duration-500 ${
+    <div className={`flex flex-col h-screen supports-[height:100dvh]:h-[100dvh] bg-gray-950 text-white overflow-hidden font-sans transition-colors duration-500 ${
       crisisMode ? 'ring-2 ring-red-500/50 shadow-[inset_0_0_80px_rgba(239,68,68,0.15)]' : ''
     }`}>
 
       {/* ─── CRISIS BANNER ───────────────────────────────────────────────────── */}
       {crisisMode && (
-        <div className="bg-gradient-to-r from-red-600 via-orange-600 to-red-600 text-white px-4 py-1 text-center font-black text-[11px] tracking-widest flex items-center justify-center gap-2 animate-pulse z-30">
-          <AlertOctagon className="w-3.5 h-3.5" />
-          <span>CRISIS MODE ACTIVE · HAZARDOUS INVERSION EVENT DETECTED ACROSS DELHI NCR</span>
-          <AlertOctagon className="w-3.5 h-3.5" />
+        <div className="bg-gradient-to-r from-red-600 via-orange-600 to-red-600 text-white px-3 py-1 text-center font-black text-[10px] sm:text-[11px] tracking-widest flex items-center justify-center gap-1.5 sm:gap-2 animate-pulse z-30 flex-shrink-0">
+          <AlertOctagon className="w-3.5 h-3.5 flex-shrink-0" />
+          <span className="truncate">CRISIS MODE ACTIVE · HAZARDOUS INVERSION EVENT DETECTED ACROSS DELHI NCR</span>
+          <AlertOctagon className="w-3.5 h-3.5 flex-shrink-0 hidden sm:inline" />
         </div>
       )}
 
       {/* ─── MISSION CONTROL HEADER ─────────────────────────────────────────── */}
-      <header className="flex-shrink-0 flex items-center justify-between px-4 py-2.5 bg-gray-900/90 backdrop-blur-md border-b border-gray-800 z-20">
+      <header className="flex-shrink-0 flex items-center justify-between gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 bg-gray-900/90 backdrop-blur-md border-b border-gray-800 z-30">
         {/* Left: Brand Identity */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <div className="relative flex-shrink-0">
-            <img src="/assets/vayusync-icon.svg" alt="VayuSync Logo" className="w-8 h-8 rounded-lg shadow-md shadow-orange-950/40" />
+            <img src="/assets/vayusync-icon.svg" alt="VayuSync Logo" className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg shadow-md shadow-orange-950/40" />
             <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-green-400 rounded-full animate-pulse" />
           </div>
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <h1 className="font-black text-base text-white tracking-tight leading-none flex items-center">
+              <h1 className="font-black text-sm sm:text-base text-white tracking-tight leading-none flex items-center">
                 <span>Vayu</span>
                 <span className="text-orange-400">Sync</span>
                 <ShinyText
@@ -289,24 +290,29 @@ const App: React.FC = () => {
                   shimmerColor="#fed7aa"
                 />
               </h1>
-              <span className="text-[9px] px-1.5 py-0.2 rounded font-bold bg-orange-500/20 text-orange-300 border border-orange-500/30">
+              <span className="text-[8px] sm:text-[9px] px-1 sm:px-1.5 py-0.2 rounded font-bold bg-orange-500/20 text-orange-300 border border-orange-500/30">
                 PROD
               </span>
+              {/* LIVE badge on mobile inline */}
+              <div className="flex sm:hidden items-center gap-1 px-1.5 py-0.2 bg-red-500/10 border border-red-500/30 rounded-full">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-ping" />
+                <span className="text-red-400 text-[8px] font-bold tracking-wide">LIVE</span>
+              </div>
             </div>
-            <p className="text-gray-400 text-[9px] leading-none mt-0.5 flex items-center gap-1">
-              <span>Hyperlocal Fire & Stubble Exposure Engine ·</span>
+            <p className="text-gray-400 text-[9px] leading-none mt-0.5 flex items-center gap-1 truncate">
+              <span className="hidden xs:inline sm:inline">Hyperlocal Fire & Stubble Exposure Engine ·</span>
               <DecryptedText
                 text={activeRegion.name}
                 speed={30}
                 maxIterations={8}
-                className="text-cyan-300 font-semibold"
+                className="text-cyan-300 font-semibold truncate"
                 encryptedClassName="text-orange-400 font-mono"
                 animateOn="mount"
               />
             </p>
           </div>
 
-          {/* Globe & Multi-Location Selector */}
+          {/* Globe & Multi-Location Selector (Desktop/Tablet in Header) */}
           <div className="hidden sm:block ml-1">
             <GlobeLocationSelector
               currentRegionId={activeRegion.id}
@@ -316,21 +322,21 @@ const App: React.FC = () => {
             />
           </div>
 
-          {/* LIVE badge */}
-          <div className="flex items-center gap-1.5 ml-2 px-2 py-0.5 bg-red-500/10 border border-red-500/30 rounded-full">
+          {/* LIVE badge (sm+) */}
+          <div className="hidden sm:flex items-center gap-1.5 ml-1 px-2 py-0.5 bg-red-500/10 border border-red-500/30 rounded-full flex-shrink-0">
             <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-ping" />
             <span className="text-red-400 text-[9px] font-bold tracking-wide">LIVE</span>
           </div>
 
           {/* Simulation executing banner */}
           {isSimulating && (
-            <div className="flex items-center gap-1.5 px-2 py-0.5 bg-orange-500/10 border border-orange-500/40 rounded-full animate-pulse">
+            <div className="hidden md:flex items-center gap-1.5 px-2 py-0.5 bg-orange-500/10 border border-orange-500/40 rounded-full animate-pulse flex-shrink-0">
               <span className="text-orange-400 text-[9px] font-bold">⚡ PIPELINE EXECUTING</span>
             </div>
           )}
         </div>
 
-        {/* Center: Command Navigation Tabs */}
+        {/* Center: Command Navigation Tabs (Desktop lg+) */}
         <nav className="hidden lg:flex items-center gap-1 bg-gray-950 p-1 border border-gray-800 rounded-2xl shadow-inner">
           {[
             { id: 'MAP', label: 'Tactical Radar', icon: Map },
@@ -360,23 +366,24 @@ const App: React.FC = () => {
         </nav>
 
         {/* Right: Tactical Controls, Architecture & Audio */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
           {/* AWS Architecture Transparency Modal Button */}
           <button
             onClick={() => {
               soundEngine.playClick();
               setShowArchModal(true);
             }}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-bold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 transition-all shadow-sm shadow-cyan-500/10"
+            className="flex items-center gap-1.5 p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl text-xs font-bold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 transition-all shadow-sm shadow-cyan-500/10"
             title="Inspect AWS Serverless Architecture Pipeline"
           >
             <Network className="w-3.5 h-3.5 text-cyan-400" />
             <span className="text-[11px] font-mono hidden md:inline">AWS Architecture</span>
           </button>
+
           {/* Audio FX Toggle */}
           <button
             onClick={toggleSound}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold border transition-all ${
+            className={`flex items-center gap-1.5 p-1.5 sm:px-2.5 sm:py-1 rounded-xl text-xs font-bold border transition-all ${
               soundOn
                 ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
                 : 'bg-gray-800/80 text-gray-400 border-gray-700 hover:text-white'
@@ -390,14 +397,14 @@ const App: React.FC = () => {
           {/* Crisis DEFCON Toggle */}
           <button
             onClick={toggleCrisisMode}
-            className={`flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-bold border transition-all ${
+            className={`flex items-center gap-1 p-1.5 sm:px-2.5 sm:py-1 rounded-xl text-xs font-bold border transition-all ${
               crisisMode
                 ? 'bg-red-600 text-white border-red-400 shadow-lg shadow-red-600/30'
                 : 'bg-gray-800/80 text-gray-400 border-gray-700 hover:text-red-400'
             }`}
             title="Toggle Crisis Defense Protocol View"
           >
-            <AlertOctagon className="w-3.5 h-3.5 text-red-400" />
+            <AlertOctagon className={`w-3.5 h-3.5 ${crisisMode ? 'text-white' : 'text-red-400'}`} />
             <span className="text-[10px] hidden sm:inline">{crisisMode ? 'DEFCON 1' : 'CRISIS MODE'}</span>
           </button>
 
@@ -419,7 +426,7 @@ const App: React.FC = () => {
             className="p-1.5 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800 transition-colors border border-gray-800"
             title="GitHub Repository"
           >
-            <Github className="w-4 h-4" />
+            <Github className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </a>
 
           {/* Mission Brief info */}
@@ -431,17 +438,17 @@ const App: React.FC = () => {
             className="p-1.5 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800 transition-colors border border-gray-800"
             title="Mission Brief & Architecture"
           >
-            <Info className="w-4 h-4" />
+            <Info className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
         </div>
       </header>
 
-      {/* ─── MOBILE TAB BAR (Only on small screens) ───────────────────────────── */}
-      <div className="lg:hidden flex items-center justify-around bg-gray-900 border-b border-gray-800 p-1 text-xs overflow-x-auto">
+      {/* ─── MOBILE TAB BAR (Only on < lg screens) ───────────────────────────── */}
+      <div className="lg:hidden flex-shrink-0 flex items-center justify-start sm:justify-around gap-1 bg-gray-900 border-b border-gray-800 px-2 py-1.5 text-xs overflow-x-auto no-scrollbar">
         {[
           { id: 'MAP', label: 'Radar', icon: Map },
           { id: 'ROUTING', label: 'Routes', icon: Navigation },
-          { id: 'IOT_MESH', label: 'IoT', icon: Radio },
+          { id: 'IOT_MESH', label: 'IoT Mesh', icon: Radio },
           { id: 'PROFILES', label: 'Directives', icon: FileText },
           { id: 'MATRIX', label: 'Facilities', icon: Building2 },
           { id: 'IMPACT', label: 'ROI', icon: ShieldCheck },
@@ -449,40 +456,53 @@ const App: React.FC = () => {
         ].map(({ id, label, icon: Icon }) => (
           <button
             key={id}
-            onClick={() => setNavTab(id as NavTab)}
-            className={`flex items-center gap-1 py-1.5 px-2 rounded-lg text-[10px] font-bold flex-shrink-0 ${
-              navTab === id ? 'bg-orange-500 text-black' : 'text-gray-400'
+            onClick={() => {
+              soundEngine.playClick();
+              setNavTab(id as NavTab);
+            }}
+            className={`flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl text-[11px] font-bold flex-shrink-0 transition-all ${
+              navTab === id
+                ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-black shadow-sm'
+                : 'text-gray-400 hover:text-white bg-gray-950/50 border border-gray-800/60'
             }`}
           >
-            <Icon className="w-3 h-3" />
+            <Icon className="w-3.5 h-3.5" />
             <span>{label}</span>
           </button>
         ))}
       </div>
 
       {/* ─── TOP INTERACTIVE DEMO BAR (Visible Demo Bar for Hackathon Judges) ───────────── */}
-      <div className="bg-gradient-to-r from-orange-950/80 via-red-950/80 to-gray-950 border-b border-orange-500/30 px-4 py-2 flex flex-wrap items-center justify-between gap-3 z-10">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/40 text-[10px] font-black uppercase tracking-wider">
+      <div className="flex-shrink-0 bg-gradient-to-r from-orange-950/80 via-red-950/80 to-gray-950 border-b border-orange-500/30 px-2.5 sm:px-4 py-1.5 sm:py-2 flex items-center justify-between gap-2 z-20">
+        <div className="flex items-center gap-2 min-w-0">
+          {/* Mobile Globe & Region Selector (visible on < sm) */}
+          <div className="sm:hidden">
+            <GlobeLocationSelector
+              currentRegionId={activeRegion.id}
+              onSelectRegion={handleSelectRegion}
+              onFlyToGlobalView={handleFlyToGlobalView}
+              isGlobeView={isGlobeView}
+            />
+          </div>
+
+          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/40 text-[10px] font-black uppercase tracking-wider flex-shrink-0">
             <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-ping" />
             Judge Live Demo
           </div>
-          <span className="text-xs text-gray-300 font-medium hidden sm:inline">
+          <span className="text-xs text-gray-300 font-medium hidden md:inline truncate">
             Inject synthetic satellite cluster (Sangrur/Ludhiana) · Transport corridor to SSE (151°–155°) from NNW winds @ 15–26 km/h
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
           {/* Quick Simulate Trigger */}
           <button
             onClick={() => {
               soundEngine.playClick();
-              // Trigger simulation via wrapper or direct call
               const simButton = document.querySelector<HTMLButtonElement>('[data-tour="simulate-button"]');
               if (simButton) {
                 simButton.click();
               } else {
-                // If on other tab, switch to MAP
                 setNavTab('MAP');
                 setTimeout(() => {
                   const btn = document.querySelector<HTMLButtonElement>('[data-tour="simulate-button"]');
@@ -491,10 +511,11 @@ const App: React.FC = () => {
               }
             }}
             disabled={isSimulating}
-            className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white shadow-md shadow-red-950/60 active:scale-95 transition-all"
+            className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white shadow-md shadow-red-950/60 active:scale-95 transition-all whitespace-nowrap"
           >
-            <Flame className="w-3.5 h-3.5 text-yellow-300 animate-bounce" />
-            <span>{isSimulating ? 'SIMULATING...' : '🔴 SIMULATE STUBBLE SURGE'}</span>
+            <Flame className="w-3.5 h-3.5 text-yellow-300 animate-bounce flex-shrink-0" />
+            <span className="hidden xs:inline sm:inline">{isSimulating ? 'SIMULATING...' : '🔴 SIMULATE STUBBLE SURGE'}</span>
+            <span className="xs:hidden sm:hidden">{isSimulating ? 'SIMULATING...' : '🔴 SIMULATE SURGE'}</span>
           </button>
 
           {/* Quick Institutional Action Tab Switcher */}
@@ -503,7 +524,7 @@ const App: React.FC = () => {
               soundEngine.playClick();
               setNavTab('PROFILES');
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-gray-800/90 hover:bg-gray-700/90 text-gray-200 border border-gray-700 transition-all"
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-gray-800/90 hover:bg-gray-700/90 text-gray-200 border border-gray-700 transition-all"
           >
             <FileText className="w-3.5 h-3.5 text-orange-400" />
             <span className="hidden md:inline">View Facility Directives</span>
@@ -515,14 +536,62 @@ const App: React.FC = () => {
       <MetricsBar dashboard={dashboard} isSimulating={isSimulating} />
 
       {/* ─── MAIN CONTENT VIEW SWITCHER ──────────────────────────────────────── */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-col lg:flex-row flex-1 overflow-hidden relative">
 
         {/* VIEW 1: TACTICAL RADAR (Map-Centric with Scrubbers & Sidebars) */}
         {navTab === 'MAP' && (
           <>
-            {/* LEFT SIDEBAR: Alerts + Simulate */}
-            <aside className="w-80 flex-shrink-0 flex flex-col bg-gray-950 border-r border-gray-800 overflow-hidden">
-              {/* Simulate trigger (top, pinned) */}
+            {/* MOBILE SUB-VIEW SWITCHER (Only visible on < lg inside MAP tab) */}
+            <div className="lg:hidden flex-shrink-0 grid grid-cols-3 gap-1 bg-gray-900/95 border-b border-gray-800 p-1.5 z-20">
+              <button
+                onClick={() => {
+                  soundEngine.playClick();
+                  setMobileMapPanel('RADAR');
+                }}
+                className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xl text-[11px] font-bold transition-all ${
+                  mobileMapPanel === 'RADAR'
+                    ? 'bg-orange-500/20 text-orange-300 border border-orange-500/40 shadow-sm'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                <span>🗺️</span>
+                <span>Radar Map</span>
+              </button>
+              <button
+                onClick={() => {
+                  soundEngine.playClick();
+                  setMobileMapPanel('ALERTS');
+                }}
+                className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xl text-[11px] font-bold transition-all ${
+                  mobileMapPanel === 'ALERTS'
+                    ? 'bg-orange-500/20 text-orange-300 border border-orange-500/40 shadow-sm'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                <span>🚨</span>
+                <span>Alerts ({alerts.length})</span>
+              </button>
+              <button
+                onClick={() => {
+                  soundEngine.playClick();
+                  setMobileMapPanel('STATUS');
+                }}
+                className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xl text-[11px] font-bold transition-all ${
+                  mobileMapPanel === 'STATUS'
+                    ? 'bg-orange-500/20 text-orange-300 border border-orange-500/40 shadow-sm'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                <span>📊</span>
+                <span>Cloud Status</span>
+              </button>
+            </div>
+
+            {/* LEFT SIDEBAR: Alerts + Simulate (Full panel on mobile when ALERTS selected; Left sidebar on lg+) */}
+            <aside className={`${
+              mobileMapPanel === 'ALERTS' ? 'flex flex-1 w-full' : 'hidden'
+            } lg:flex lg:flex-initial lg:w-80 flex-shrink-0 flex-col bg-gray-950 lg:border-r border-gray-800 overflow-y-auto lg:overflow-hidden`}>
+              {/* Simulate trigger (top, pinned on desktop) */}
               <div className="p-3 border-b border-gray-800 flex-shrink-0 bg-gray-900/60 backdrop-blur-sm">
                 <div className="text-gray-400 text-[9px] uppercase tracking-widest font-black mb-2 flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-ping" />
@@ -532,7 +601,7 @@ const App: React.FC = () => {
               </div>
 
               {/* Alert feed (scrollable) */}
-              <div className="flex-1 overflow-hidden p-3">
+              <div className="flex-1 lg:overflow-hidden p-3 min-h-[320px]">
                 <AlertSidebar
                   alerts={alerts}
                   isSimulating={isSimulating}
@@ -541,8 +610,10 @@ const App: React.FC = () => {
               </div>
             </aside>
 
-            {/* CENTER: Geospatial Map Canvas */}
-            <main className="flex-1 relative bg-gray-950 overflow-hidden flex flex-col">
+            {/* CENTER: Geospatial Map Canvas (Full panel on mobile when RADAR selected; Center column on lg+) */}
+            <main className={`${
+              mobileMapPanel === 'RADAR' ? 'flex flex-1' : 'hidden'
+            } lg:flex flex-1 relative bg-gray-950 overflow-hidden flex-col`}>
               {/* Map takes full space */}
               <div className="flex-1 relative">
                 <div className="absolute inset-0">
@@ -557,7 +628,7 @@ const App: React.FC = () => {
                 </div>
 
                 {/* Interactive Timeline Scrubber (Bottom Floating Widget) */}
-                <div className="absolute bottom-16 left-1/2 -translate-x-1/2 w-11/12 max-w-2xl z-20 animate-fade-in-up">
+                <div className="absolute bottom-2.5 sm:bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-16px)] sm:w-11/12 max-w-2xl z-20 animate-fade-in-up">
                   <TimelineScrubber
                     currentHour={timelineHour}
                     onHourChange={setTimelineHour}
@@ -566,8 +637,8 @@ const App: React.FC = () => {
                   />
                 </div>
 
-                {/* Map overlays: Legend */}
-                <div className="absolute bottom-16 left-3 hidden md:block bg-gray-900/90 backdrop-blur-md border border-gray-800 rounded-2xl p-3 text-xs space-y-2 z-10 shadow-2xl">
+                {/* Map overlays: Legend (Placed at top-left below controls on xl screens to never collide with scrubber) */}
+                <div className="absolute top-14 left-3 hidden xl:block bg-gray-900/90 backdrop-blur-md border border-gray-800 rounded-2xl p-3 text-xs space-y-2 z-10 shadow-2xl">
                   <div className="text-gray-400 text-[9px] uppercase tracking-widest font-bold mb-1">Radar Legend</div>
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.9)]" />
@@ -593,10 +664,10 @@ const App: React.FC = () => {
 
                 {/* Simulation active overlay banner */}
                 {simulatedCone && !isSimulating && (
-                  <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20">
-                    <div className="bg-orange-500/20 border border-orange-500/50 backdrop-blur-md rounded-2xl px-5 py-2 text-center shadow-2xl">
-                      <div className="text-orange-300 font-black text-xs">🔴 1,200 MW SIMULATED HOTSPOT ACTIVE</div>
-                      <div className="text-gray-300 text-[10px] mt-0.5">
+                  <div className="absolute top-12 sm:top-3 left-1/2 -translate-x-1/2 w-[calc(100%-24px)] sm:w-auto max-w-md z-20">
+                    <div className="bg-orange-500/20 border border-orange-500/50 backdrop-blur-md rounded-2xl px-3.5 py-1.5 sm:px-5 sm:py-2 text-center shadow-2xl">
+                      <div className="text-orange-300 font-black text-[11px] sm:text-xs">🔴 1,200 MW SIMULATED HOTSPOT ACTIVE</div>
+                      <div className="text-gray-300 text-[9px] sm:text-[10px] mt-0.5">
                         Sangrur / Ludhiana → Delhi NCR · Dispersion Cone Expanded
                       </div>
                     </div>
@@ -605,21 +676,21 @@ const App: React.FC = () => {
 
                 {/* Institution detail card */}
                 {selectedInstitution && (
-                  <div className="absolute top-3 right-3 w-72 bg-gray-900/95 backdrop-blur-md border border-gray-700 rounded-3xl p-4 z-20 animate-fade-in-up shadow-2xl">
+                  <div className="absolute top-12 left-2.5 right-2.5 sm:top-3 sm:left-auto sm:right-3 sm:w-72 bg-gray-900/95 backdrop-blur-md border border-gray-700 rounded-3xl p-3.5 sm:p-4 z-30 animate-fade-in-up shadow-2xl">
                     <button
                       onClick={() => setSelectedInstitution(null)}
-                      className="absolute top-3 right-3 text-gray-500 hover:text-gray-300 text-lg leading-none p-1"
+                      className="absolute top-3 right-3 text-gray-400 hover:text-white text-lg leading-none p-1"
                     >
                       ×
                     </button>
-                    <div className="text-sm mb-1">
+                    <div className="text-sm mb-1 pr-6">
                       {selectedInstitution.facility_type === 'School' ? '🏫' :
                        selectedInstitution.facility_type === 'Hospital' ? '🏥' :
                        selectedInstitution.facility_type === 'Construction' ? '🏗️' : '🏛️'}
                       {' '}<span className="font-black text-white">{selectedInstitution.name}</span>
                     </div>
-                    <div className="text-gray-400 text-[10px] mb-3">{selectedInstitution.district}</div>
-                    <div className="space-y-1.5 text-xs bg-gray-950/70 p-3 rounded-2xl border border-gray-800">
+                    <div className="text-gray-400 text-[10px] mb-2.5">{selectedInstitution.district}</div>
+                    <div className="space-y-1.5 text-xs bg-gray-950/70 p-2.5 sm:p-3 rounded-2xl border border-gray-800">
                       <div className="flex justify-between">
                         <span className="text-gray-500">Risk Severity</span>
                         <span className={`font-black ${
@@ -646,7 +717,7 @@ const App: React.FC = () => {
                         const matched = alerts.find(a => a.institution_id === selectedInstitution.institution_id) || alerts[0];
                         if (matched) setInspectedAlert(matched);
                       }}
-                      className="w-full mt-3 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-md"
+                      className="w-full mt-2.5 sm:mt-3 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-md"
                     >
                       <span>View Claude 3 Advisory</span>
                     </button>
@@ -655,13 +726,15 @@ const App: React.FC = () => {
               </div>
 
               {/* Bottom Pipeline Execution Terminal Log Widget */}
-              <div className="p-2 bg-gray-950 border-t border-gray-800/80 z-20">
+              <div className="p-1.5 sm:p-2 bg-gray-950 border-t border-gray-800/80 z-20 flex-shrink-0">
                 <TerminalLog logs={terminalLogs} onClear={() => setTerminalLogs([])} />
               </div>
             </main>
 
-            {/* RIGHT SIDEBAR: System Status */}
-            <aside className="w-72 flex-shrink-0 bg-gray-950 border-l border-gray-800 overflow-hidden">
+            {/* RIGHT SIDEBAR: System Status (Full panel on mobile when STATUS selected; Right sidebar on lg+) */}
+            <aside className={`${
+              mobileMapPanel === 'STATUS' ? 'block flex-1 w-full' : 'hidden'
+            } lg:block lg:flex-initial lg:w-72 flex-shrink-0 bg-gray-950 lg:border-l border-gray-800 overflow-hidden`}>
               <div className="h-full overflow-y-auto p-3">
                 <div className="text-gray-400 text-[9px] uppercase tracking-widest font-black mb-3 flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
@@ -675,26 +748,26 @@ const App: React.FC = () => {
 
         {/* VIEW 2: CITIZEN EXPOSURE ROUTE OPTIMIZER (AERO-ROUTING) */}
         {navTab === 'ROUTING' && (
-          <div className="flex-1 overflow-y-auto p-6 max-w-5xl mx-auto w-full">
+          <div className="flex-1 overflow-y-auto p-3 sm:p-6 max-w-5xl mx-auto w-full">
             <CitizenExposureRouteOptimizer wind={dashboard?.wind} />
           </div>
         )}
 
         {/* VIEW 3: GROUND IOT MESH & BUS SENSOR FUSION */}
         {navTab === 'IOT_MESH' && (
-          <div className="flex-1 overflow-y-auto p-6 max-w-5xl mx-auto w-full">
+          <div className="flex-1 overflow-y-auto p-3 sm:p-6 max-w-5xl mx-auto w-full">
             <GroundIoTSensorFusion />
           </div>
         )}
 
         {/* VIEW 4: INSTITUTIONAL ACTION PROFILES */}
         {navTab === 'PROFILES' && (
-          <div className="flex-1 overflow-y-auto p-6 max-w-5xl mx-auto w-full">
+          <div className="flex-1 overflow-y-auto p-3 sm:p-6 max-w-5xl mx-auto w-full">
             <InstitutionalActionProfiles />
           </div>
         )}
 
-        {/* VIEW 3: INSTITUTIONAL READINESS MATRIX */}
+        {/* VIEW 5: INSTITUTIONAL READINESS MATRIX */}
         {navTab === 'MATRIX' && (
           <div className="flex-1 overflow-hidden">
             <InstitutionalMatrix
@@ -705,14 +778,14 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {/* VIEW 4: PREEMPTIVE ACTION ROI CALCULATOR */}
+        {/* VIEW 6: PREEMPTIVE ACTION ROI CALCULATOR */}
         {navTab === 'IMPACT' && (
-          <div className="flex-1 overflow-y-auto p-6 max-w-5xl mx-auto w-full">
+          <div className="flex-1 overflow-y-auto p-3 sm:p-6 max-w-5xl mx-auto w-full">
             <ImpactCalculator />
           </div>
         )}
 
-        {/* VIEW 5: ATMOSPHERIC DISPERSION ANALYTICS */}
+        {/* VIEW 7: ATMOSPHERIC DISPERSION ANALYTICS */}
         {navTab === 'ANALYTICS' && (
           <div className="flex-1 overflow-hidden">
             <DispersionAnalytics
@@ -733,11 +806,11 @@ const App: React.FC = () => {
       {/* ─── ABOUT / MISSION BRIEF MODAL ────────────────────────────────────── */}
       {showAbout && (
         <div
-          className="fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fade-in-up"
+          className="fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-4 animate-fade-in-up"
           onClick={() => setShowAbout(false)}
         >
           <div
-            className="bg-gray-900 border border-gray-700 rounded-3xl p-6 max-w-xl w-full shadow-2xl relative"
+            className="bg-gray-900 border border-gray-700 rounded-3xl p-4 sm:p-6 max-w-xl w-full max-h-[90dvh] overflow-y-auto shadow-2xl relative"
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center gap-3 mb-4">
@@ -752,7 +825,7 @@ const App: React.FC = () => {
               <span className="text-green-400 font-bold">preemptive institutional automation</span> — alerting schools, hospitals,
               and construction sites <strong>6–12 hours before</strong> toxic smoke arrives across Delhi NCR.
             </p>
-            <div className="grid grid-cols-2 gap-2.5 mb-4 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4 text-xs">
               {[
                 { icon: '🛰️', label: 'NASA FIRMS', desc: 'Live VIIRS thermal hotspots' },
                 { icon: '🌊', label: 'Open-Meteo', desc: 'Real-time 10m wind vectors' },
