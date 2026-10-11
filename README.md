@@ -1,12 +1,14 @@
 <div align="center">
 
+<img src="assets/youtube_thumbnail.jpg" alt="VayuSync — 6-Hour Advance Smoke Warning Engine on AWS" width="100%" />
+
 # 🌬️ VayuSync
 ### *Hyperlocal Stubble Smoke Exposure & Institutional Preemptive Action Engine*
 
 **Bharat Builds 2026 · Track 1: Air (Environmental Innovations)**
 
 [![AWS Serverless](https://img.shields.io/badge/AWS-Serverless_Architecture-FF9900?style=for-the-badge&logo=amazon-aws&logoColor=white)](https://aws.amazon.com)
-[![Amazon Bedrock](https://img.shields.io/badge/Amazon_Bedrock-Claude_3_Haiku-232F3E?style=for-the-badge&logo=anthropic&logoColor=white)](https://aws.amazon.com/bedrock/)
+[![Amazon Bedrock](https://img.shields.io/badge/Amazon_Bedrock-Claude_Haiku_4.5-232F3E?style=for-the-badge&logo=anthropic&logoColor=white)](https://aws.amazon.com/bedrock/)
 [![React 18](https://img.shields.io/badge/Frontend-React_18_+_Vite_+_TS-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
 [![MapLibre GL](https://img.shields.io/badge/GeoSpatial-MapLibre_GL-396B94?style=for-the-badge&logo=maplibre&logoColor=white)](https://maplibre.org)
 [![Python 3.12](https://img.shields.io/badge/Backend-Python_3.12_Lambda-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
@@ -21,6 +23,23 @@
 **🎥 YouTube Video Demo (2:42):** [https://www.youtube.com/watch?v=krykkju2xq4](https://www.youtube.com/watch?v=krykkju2xq4)  
 **Backup Static S3 Mirror:** [http://vayusync-dashboard-946877383361.s3-website.ap-south-1.amazonaws.com](http://vayusync-dashboard-946877383361.s3-website.ap-south-1.amazonaws.com)  
 **Live REST API Gateway:** `https://s9rfowqwof.execute-api.ap-south-1.amazonaws.com/prod/dashboard`
+
+---
+
+### 🎬 **2:42 Video Walkthrough (Click Below to Play on YouTube)**
+[![Watch VayuSync 2:42 Demo Video on YouTube](assets/youtube_video_card.jpg)](https://www.youtube.com/watch?v=krykkju2xq4)
+
+---
+
+### 🖥️ **Live Production Interface Gallery**
+
+| **1. Tactical Radar & Downwind Plume Cone** | **2. AI Institutional Directives & Impact ROI** |
+| :---: | :---: |
+| <img src="assets/screen_1_tactical_radar.jpg" alt="Tactical Radar & Plume Cone" width="100%" /> | <img src="assets/screen_2_directives_impact.jpg" alt="Institutional Directives & Impact Calculator" width="100%" /> |
+| *NASA VIIRS hotspots, 6-hour trajectory cone & live AWS execution trace* | *Facility-specific advisories, geofence matrix & healthcare cost calculator* |
+| **3. AWS Serverless Architecture & Latency Telemetry** | **4. Ground IoT Mesh & Mobile E-Bus Sensor Fusion** |
+| <img src="assets/screen_3_aws_architecture.jpg" alt="AWS Serverless Pipeline Architecture" width="100%" /> | <img src="assets/screen_4_iot_mesh.jpg" alt="Ground IoT Mesh & Mobile E-Bus Telemetry" width="100%" /> |
+| *5-stage AWS pipeline modal & N=30 CloudWatch REPORT benchmark (771 ms median)* | *Stationary & mobile MQTT telemetry verifying orbital plume predictions* |
 
 ---
 
