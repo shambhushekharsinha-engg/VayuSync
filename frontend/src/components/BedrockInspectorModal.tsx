@@ -150,7 +150,7 @@ export const BedrockInspectorModal: React.FC<BedrockInspectorModalProps> = ({
               <span>{alert.advisory_source === 'rule_fallback' ? 'Fallback Trigger:' : 'Inference Latency:'}</span>
               <span className={alert.advisory_source === 'rule_fallback' ? 'text-amber-400 font-bold' : 'text-yellow-400 font-bold'}>
                 {alert.advisory_source === 'rule_fallback'
-                  ? 'AWS Account Bedrock Inactive / Cold Verification'
+                  ? 'Bedrock unavailable (paid access or model not enabled)'
                   : (alert.bedrock_latency_ms != null ? `${alert.bedrock_latency_ms} ms` : 'Unmeasured')}
               </span>
             </div>
