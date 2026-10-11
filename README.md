@@ -12,11 +12,13 @@
 [![Python 3.12](https://img.shields.io/badge/Backend-Python_3.12_Lambda-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![AWS Free Tier](https://img.shields.io/badge/AWS_Cost-$0.00_(100%25_Free_Tier)-22C55E?style=for-the-badge&logo=amazon&logoColor=white)](https://aws.amazon.com/free/)
 [![Live Status](https://img.shields.io/badge/Live_Deployment-HEALTHY_✓-success?style=for-the-badge&logo=checkmarx&logoColor=white)](https://main.d38reumk2s9v29.amplifyapp.com)
+[![YouTube Demo](https://img.shields.io/badge/YouTube-Watch_2:42_Demo_Video-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/watch?v=krykkju2xq4)
 
 ---
 
 ### 🌐 **LIVE PRODUCTION SYSTEM (ZERO SETUP REQUIRED)**
 ## 🔗 [https://main.d38reumk2s9v29.amplifyapp.com](https://main.d38reumk2s9v29.amplifyapp.com)
+**🎥 YouTube Video Demo (2:42):** [https://www.youtube.com/watch?v=krykkju2xq4](https://www.youtube.com/watch?v=krykkju2xq4)  
 **Backup Static S3 Mirror:** [http://vayusync-dashboard-946877383361.s3-website.ap-south-1.amazonaws.com](http://vayusync-dashboard-946877383361.s3-website.ap-south-1.amazonaws.com)  
 **Live REST API Gateway:** `https://s9rfowqwof.execute-api.ap-south-1.amazonaws.com/prod/dashboard`
 
