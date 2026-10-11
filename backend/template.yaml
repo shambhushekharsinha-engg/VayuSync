@@ -39,7 +39,7 @@ Parameters:
     Description: Email address for SNS alert notifications
   BedrockModelId:
     Type: String
-    Default: "us.anthropic.claude-3-5-haiku-20241022-v1:0"
+    Default: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
     Description: Amazon Bedrock Foundation Model ID or Cross-Region Inference Profile ID
   BedrockRegion:
     Type: String

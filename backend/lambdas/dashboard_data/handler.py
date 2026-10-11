@@ -43,7 +43,7 @@ HOTSPOTS_TABLE = os.environ.get("HOTSPOTS_TABLE", "VayuSync_Hotspots")
 INSTITUTIONS_TABLE = os.environ.get("INSTITUTIONS_TABLE", "VayuSync_Institutions")
 ALERT_LOGS_TABLE = os.environ.get("ALERT_LOGS_TABLE", "VayuSync_AlertLogs")
 BEDROCK_MODEL_ID = os.environ.get(
-    "BEDROCK_MODEL_ID", "us.anthropic.claude-3-5-haiku-20241022-v1:0"
+    "BEDROCK_MODEL_ID", "us.anthropic.claude-haiku-4-5-20251001-v1:0"
 )
 BEDROCK_REGION = os.environ.get("BEDROCK_REGION", "us-east-1")
 

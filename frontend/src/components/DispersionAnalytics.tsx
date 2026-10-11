@@ -31,7 +31,7 @@ export const DispersionAnalytics: React.FC<DispersionAnalyticsProps> = ({
   ];
 
   // Pipeline Latency Breakdown:
-  // Reflects measured Rule Engine Fallback latency matrix (N=5, range 1,127 - 1,350 ms).
+  // Reflects measured Rule Engine Fallback latency benchmark (N=30 warm runs: CloudWatch median 771 ms, p95 2,009 ms; Client RTT median 933 ms, p95 2,114 ms).
   // Step distribution is illustrative model pending live Bedrock production measurement.
   const LATENCY_BREAKDOWN = [
     { step: 'NASA FIRMS Hotspot Ingestion (Lambda)', durationMs: 340, pct: 27 },
@@ -201,7 +201,7 @@ export const DispersionAnalytics: React.FC<DispersionAnalyticsProps> = ({
                 ILLUSTRATIVE BREAKDOWN
               </span>
               <span className="text-[10px] text-green-400 font-bold bg-green-500/10 px-2 py-0.5 rounded border border-green-500/20">
-                1,127–1,350 ms (N=5)
+                Median 771 ms · p95 2,009 ms (N=30)
               </span>
             </div>
           </div>

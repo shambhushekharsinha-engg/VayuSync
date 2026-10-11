@@ -1,0 +1,111 @@
+{
+  "timestamp_utc": "2026-10-11T13:18:10.764193+00:00",
+  "endpoint": "https://s9rfowqwof.execute-api.ap-south-1.amazonaws.com/prod/simulate",
+  "total_calls": 31,
+  "n_warm": 30,
+  "advisory_source_observed": [
+    "rule_fallback"
+  ],
+  "cold_start_call_1": {
+    "client_rtt_ms": 3245.5,
+    "server_elapsed_ms": 2313.0
+  },
+  "warm_client_rtt_ms": {
+    "n": 30,
+    "min": 385.4,
+    "median": 932.8,
+    "p95": 2114.2,
+    "max": 2188.4,
+    "raw": [
+      1180.2,
+      1382.4,
+      630.2,
+      1128.3,
+      639.4,
+      879.3,
+      1578.4,
+      657.4,
+      2188.4,
+      875.1,
+      385.4,
+      625.0,
+      659.3,
+      2122.4,
+      986.4,
+      1385.0,
+      1114.7,
+      645.7,
+      627.4,
+      606.6,
+      642.8,
+      1673.9,
+      1592.2,
+      615.2,
+      1595.5,
+      686.9,
+      1390.7,
+      863.0,
+      2104.1,
+      1356.2
+    ]
+  },
+  "warm_server_elapsed_ms": {
+    "n": 30,
+    "min": 280.0,
+    "median": 826.0,
+    "p95": 2005.9,
+    "max": 2067.0,
+    "raw": [
+      1036.0,
+      1264.0,
+      536.0,
+      1015.0,
+      542.0,
+      769.0,
+      1516.0,
+      538.0,
+      2067.0,
+      766.0,
+      280.0,
+      525.0,
+      527.0,
+      2014.0,
+      883.0,
+      1269.0,
+      1006.0,
+      529.0,
+      524.0,
+      513.0,
+      533.0,
+      1553.0,
+      1501.0,
+      519.0,
+      1502.0,
+      553.0,
+      1263.0,
+      745.0,
+      1996.0,
+      1255.0
+    ]
+  },
+  "cloudwatch_report": {
+    "VayuSync-SimulateTrigger": {
+      "n_reports": 29,
+      "init_durations_ms": [],
+      "warm_n": 29,
+      "warm_min_ms": 281.9,
+      "warm_median_ms": 771.1,
+      "warm_p95_ms": 2009.2,
+      "warm_max_ms": 2068.8
+    },
+    "VayuSync-EvaluatorEngine": {
+      "n_reports": 29,
+      "init_durations_ms": [],
+      "warm_n": 29,
+      "warm_min_ms": 256.8,
+      "warm_median_ms": 748.9,
+      "warm_p95_ms": 1977.9,
+      "warm_max_ms": 2028.9
+    }
+  }
+}

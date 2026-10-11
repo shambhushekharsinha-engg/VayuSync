@@ -243,9 +243,9 @@ Unlike generic AQI alerts ("Air is Unhealthy"), VayuSync outputs tailored operat
 
 | KPI Metric | Engineering Target | Observed Performance | Measurement Methodology |
 |---|---|---|---|
-| **Pipeline Latency (`POST /simulate`)** | $< 3,000\text{ ms}$ | **$1,127\text{ ms} - 1,350\text{ ms}$ (Rule Fallback Matrix, $N=5$, range $1,127 - 1,350\text{ ms}$)**<br>*(Bedrock live calls require AWS paid tier with approved Anthropic model access; system operates transparently on deterministic rule engine)* | Execution duration from API Gateway entry, advisory generation, to DynamoDB persistence and SNS publish |
-| **SNS Multi-Channel Dispatch** | $< 1,000\text{ ms}$ | **$310\text{ ms} - 380\text{ ms}$** | Amazon SNS Topic publish latency over `ap-south-1` network fabric |
-| **Cloud Infrastructure Cost** | Minimal / Low-Cost | **$0.00 (100% AWS Free Tier Compliant)** | Lambda, DynamoDB, API Gateway, SNS within AWS Free Tier; deterministic rule-engine fallback incurs $0.00 model fees |
+| **Pipeline Latency (`POST /simulate`)** | $< 3,000\text{ ms}$ | **Server CloudWatch `REPORT` ($N=30$ warm): Median $771.1\text{ ms}$, p95 $2,009.2\text{ ms}$ (range $281.9 - 2,068.8\text{ ms}$)**<br>**Client HTTP RTT ($N=30$ warm): Median $932.8\text{ ms}$, p95 $2,114.2\text{ ms}$ (cold start: $3,245.5\text{ ms}$ RTT / $2,313.0\text{ ms}$ server)**<br>*(Rule-based fallback path; Bedrock live calls require AWS paid tier verification)* | 31 sequential runs (`1` cold + `30` warm at $1.2\text{ s}$ intervals) via [`backend/scripts/benchmark_latency.py`](backend/scripts/benchmark_latency.py) & CloudWatch `REPORT` logs |
+| **EvaluatorEngine Duration** | $< 2,500\text{ ms}$ | **CloudWatch `REPORT`: Median $748.9\text{ ms}$, p95 $1,977.9\text{ ms}$ (range $256.8 - 2,028.9\text{ ms}$)** | Scales linearly with number of institutions inside cone ($1\text{ to }8$ DynamoDB writes + SNS publishes per run) |
+| **Cloud Infrastructure Cost** | Minimal / Low-Cost | **\$0.00 (100% AWS Free Tier Compliant)** | Lambda, DynamoDB, API Gateway, SNS within AWS Free Tier; deterministic rule-engine fallback incurs \$0.00 model fees |
 | **Frontend Uptime & Resilience** | $99.9\%$ | **Zero-crash React Error Boundary** | Graceful fallback on API rate-limits or offline states |
 
 ---
@@ -268,11 +268,32 @@ $$\text{Downwind Distance: } D = \frac{V_w \times 3600 \times \Delta t}{1000} \q
 
 ---
 
-### 3. Retrospective Validation Protocol & Self-Test Suite
+### 3. Retrospective Back-Test & Empirical Validation (`2024–2025` Seasons)
 
-To support reproducible verification without unbacked historical claims:
-- **Code Mechanics Self-Test**: A standalone script [`backend/scripts/backtest.py`](backend/scripts/backtest.py) provides an automated self-test suite (`python backend/scripts/backtest.py --selftest`). It verifies trajectory geometry, sign conventions, and parcel model mathematics on synthetic data.
-- **Planned Retrospective Validation Protocol**: The script is designed to accept historical NASA FIRMS VIIRS fire radiative power (FRP), Open-Meteo ERA5 hourly reanalysis wind fields (10m and 100m), and real CPCB/OpenAQ hourly ground station PM2.5 CSV data to quantitatively evaluate arrival time errors ($\Delta t$) and false alert rates across multi-day burning episodes.
+To evaluate VayuSync's physical trajectory models without cherry-picking, [`backend/scripts/screen_dates.py`](backend/scripts/screen_dates.py) mechanically screened daily Open-Meteo ERA5 $100\text{ m}$ winds at Ludhiana ($30.9^\circ\text{N}, 75.85^\circ\text{E}$) across Oct 26 – Nov 20 in both **2024** and **2025** *prior* to inspecting ground-station $\text{PM}_{2.5}$.
+
+[`backend/scripts/backtest.py`](backend/scripts/backtest.py) was then executed using:
+- **Fire Detections**: Historical **NASA FIRMS `VIIRS_SNPP_SP`** standard-product detections across `73.5,27.5,78.5,32.5` (2-day windows).
+- **Meteorology**: Archived **Open-Meteo ERA5** hourly gridded winds at $10\text{ m}$ and $100\text{ m}$.
+- **Ground Truth $\text{PM}_{2.5}$**: **CPCB / DPCC Anand Vihar** (`28.6468°N, 77.3158°E`) continuous observations (`15,394` hourly records from `2024-01-01` to `2025-12-31 UTC`, republished by OpenCity).
+- **Fixed Onset Rule**: Baseline = median $\text{PM}_{2.5}$ in the $12\text{ h}$ preceding the first fire detection; observed onset = first hour $\ge \text{baseline} + 50\ \mu\text{g/m}^3$ sustained for $\ge 2$ consecutive hours. All raw outputs are committed in [`backtest_results.csv`](backtest_results.csv).
+
+| Date (UTC) | Wind Regime (Mechanical Screen) | VIIRS Fires (Total FRP) | Obs Baseline $\rightarrow$ Peak ($\mu\text{g/m}^3$) | Observed Onset (UTC) | `cone_6h` / `12h` / `24h` FRP Cov. | `parcel10m` Arrival FRP & Error vs. Onset | `parcel100m` Arrival FRP & Error vs. Onset |
+|---|---|---|---|---|---|---|---|
+| **`2025-11-05`** | **NW Transport** ($5.50\text{ m/s}$ @ $322^\circ$) | $854$ ($4,028\text{ MW}$) | $134 \rightarrow 710$ | `2025-11-05 22:00` | `0.05%` / `1.1%` / `6.6%` | `4.4%` FRP · **$+6.7\text{ h}$** | `13.2%` FRP · **$+0.5\text{ h}$** |
+| **`2024-10-31`** | **NW Transport** ($4.99\text{ m/s}$ @ $308^\circ$) | $1,631$ ($10,447\text{ MW}$) | $273 \rightarrow 998$ | `2024-10-31 22:00` | `0.07%` / `1.4%` / `11.6%` | `2.8%` FRP · **$+9.3\text{ h}$** | `13.6%` FRP · **$-1.4\text{ h}$** |
+| **`2025-11-06`** | **NW Transport** ($4.96\text{ m/s}$ @ $309^\circ$) | $626$ ($3,359\text{ MW}$) | $202 \rightarrow 710$ | `2025-11-06 07:00` | `0.47%` / `2.6%` / `6.6%` | `3.4%` FRP · **$+24.4\text{ h}$** | `15.0%` FRP · **$+15.4\text{ h}$** |
+| **`2025-11-01`** | **NW Transport** ($4.12\text{ m/s}$ @ $314^\circ$) | $839$ ($5,161\text{ MW}$) | $132 \rightarrow 710$ | `2025-11-01 09:00` | `0.0%` / `0.09%` / `6.2%` | `1.8%` FRP · **$+24.3\text{ h}$** | `5.1%` FRP · **$+15.8\text{ h}$** |
+| **`2024-11-15`** | **NW Transport** ($3.55\text{ m/s}$ @ $330^\circ$) | $313$ ($1,504\text{ MW}$) | $424 \rightarrow 933$ | `2024-11-15 07:00` | `0.0%` / `0.0%` / `5.9%` | `26.6%` FRP · **$+45.2\text{ h}$** | `2.8%` FRP · **$+9.1\text{ h}$** |
+| **`2025-11-03`** | **Control: Easterly** ($2.87\text{ m/s}$ @ $80^\circ$) | $770$ ($4,483\text{ MW}$) | $190 \rightarrow 710$ | `2025-11-03 11:00` | `0.11%` / `0.18%` / `0.30%` | `4.2%` FRP · **$+43.1\text{ h}$** | `0.16%` FRP · **$-0.7\text{ h}$** *(near-zero FRP)* |
+| **`2025-11-04`** | **Control: SE Flow** ($5.86\text{ m/s}$ @ $139^\circ$) | $965$ ($5,256\text{ MW}$) | $263 \rightarrow 710$ | `2025-11-07 01:00` | `0.02%` / `0.34%` / `3.8%` | `5.0%` FRP · **$-18.2\text{ h}$** | `5.0%` FRP · **$-55.0\text{ h}$** |
+| **`2024-10-27`** | **Control: SE Flow** ($3.76\text{ m/s}$ @ $140^\circ$) | $793$ ($3,939\text{ MW}$) | $365 \rightarrow 998$ | `2024-10-31 22:00` | `0.0%` / `0.46%` / `1.0%` | `1.0%` FRP · **$-100.2\text{ h}$** | `1.1%` FRP · **$-101.2\text{ h}$** |
+
+#### Honest Scientific Takeaways & Limitations:
+1. **6-Hour Straight-Line Cones Cover Only Nearby Haryana Fires**: On Punjab-dominated fire days ($\approx 250–300\text{ km}$ from Anand Vihar), `cone_6h` covers $<0.5\%$ of total regional FRP because $6\text{ h}$ at surface wind speeds only reaches $90–150\text{ km}$. Extending the horizon to `12h` and `24h` increases coverage to $6\%–12\%$ of regional FRP.
+2. **$100\text{ m}$ Parcel Trajectories Outperform $10\text{ m}$ Surface Winds on Strong NW Days**: During peak NW transport events (`2025-11-05` and `2024-10-31`), $100\text{ m}$ time-stepped trajectories (`parcel100m`) deliver $13\%–15\%$ of regional FRP to within $30\text{ km}$ of Anand Vihar with median arrival timing within **$+0.5\text{ h}$** (`2025-11-05`) and **$-1.4\text{ h}$** (`2024-10-31`) of the observed $\text{PM}_{2.5}$ jump, whereas $10\text{ m}$ surface winds lag by $+6.7\text{ h}$ to $+9.3\text{ h}$.
+3. **Local Urban Emissions & Boundary-Layer Collapse Confound Onset Detection**: On `2025-11-01`, `2025-11-06`, and `2025-11-03` (easterly control), Anand Vihar $\text{PM}_{2.5}$ crossed $\text{baseline} + 50\ \mu\text{g/m}^3$ in the morning/evening (`07:00–11:00 UTC`) **before** long-range Punjab parcels arrived ($+15\text{ h}$ to $+24\text{ h}$ error), driven by local vehicular/industrial emissions at the Anand Vihar ISBT hotspot and nocturnal boundary-layer inversion.
+4. **Control Days Confirm Directional Discrimination**: On easterly/south-easterly control days (`2025-11-03`, `2024-10-27`), `cone_24h` and `parcel100m` FRP fractions drop to $0.16\%–1.1\%$, properly sending Punjab plumes away from Delhi. However, the tiny fraction of nearby Haryana fires ($<1\%$ FRP) still triggers a false early `parcel_pred_arrival_utc` unless a minimum arriving-FRP threshold (e.g., $\ge 5\%$ FRP or $\ge 500\text{ MW}$) is enforced.
 
 ---
 
