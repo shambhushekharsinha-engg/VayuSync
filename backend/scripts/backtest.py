@@ -131,14 +131,31 @@ def load_fires(args, bbox_s):
 
 
 # ───────────────────────── observations ──────────────────────────
-def load_obs(path, tz):
+def load_obs(path, tz, dayfirst="auto"):
+    """Read an hourly PM2.5 CSV. CPCB exports use day-first dates (03-11-2025 14:00 = 3 Nov); ISO dates are year-first.
+    dayfirst: 'auto' (ISO -> year-first, anything else -> day-first), 'yes' or 'no'."""
     df = pd.read_csv(path)
-    tcol = next((c for c in df.columns if c.lower() in ("timestamp", "datetime", "date", "time", "from date")), df.columns[0])
-    pcol = next(c for c in df.columns if "pm2" in c.lower().replace(" ", ""))
-    ts = pd.to_datetime(df[tcol], dayfirst=False)
-    ts = ts.dt.tz_localize(tz, ambiguous="NaT", nonexistent="NaT") if ts.dt.tz is None else ts
-    s = pd.Series(pd.to_numeric(df[pcol], errors="coerce").values, index=ts.dt.tz_convert("UTC").dt.tz_localize(None))
-    return s.dropna().sort_index().resample("1h").mean()
+    tcol = next((c for c in df.columns if c.lower() in ("timestamp", "datetime", "date", "time", "from date", "datetimelocal", "datetime_local")), df.columns[0])
+    pcol = next((c for c in df.columns if "pm2" in c.lower().replace(" ", "").replace("_", "")), None)
+    if pcol is None:
+        sys.exit(f"No PM2.5 column found. Columns are: {list(df.columns)}")
+    raw = df[tcol].astype(str)
+    if dayfirst == "auto":
+        dayfirst = "no" if raw.str.match(r"^\s*\d{4}-\d{2}-\d{2}").mean() > 0.5 else "yes"
+    ts = pd.to_datetime(raw, dayfirst=(dayfirst == "yes"), errors="coerce")
+    if ts.isna().mean() > 0.2:
+        sys.exit(f"Could not parse {ts.isna().mean():.0%} of the timestamps in column '{tcol}'. Try --obs-dayfirst yes|no.")
+    if getattr(ts.dt, "tz", None) is None:
+        ts = ts.dt.tz_localize(tz, ambiguous="NaT", nonexistent="NaT")
+    vals = pd.to_numeric(df[pcol], errors="coerce")
+    s = pd.Series(vals.values, index=ts.dt.tz_convert("UTC").dt.tz_localize(None))
+    s = s[~s.index.isna()].dropna().sort_index().resample("1h").mean()
+    print(f"Observations: {s.dropna().shape[0]} hourly values, {s.index.min()} to {s.index.max()} UTC "
+          f"(date order read as {'day-first' if dayfirst == 'yes' else 'year-first'}); PM2.5 min/median/max = "
+          f"{s.min():.0f}/{s.median():.0f}/{s.max():.0f}. Check units are ug/m3.")
+    if s.max() > 2000 or s.min() < 0:
+        sys.exit("PM2.5 values look wrong for ug/m3 (negative or > 2000). Check the column and units.")
+    return s
 
 
 def observed_onset(obs, first_release, jump=50.0, consecutive=2, baseline_h=12):
@@ -289,6 +306,7 @@ def main():
     ap.add_argument("--fires-csv", help="pre-downloaded FIRMS CSV instead of API")
     ap.add_argument("--obs-csv", help="hourly PM2.5 CSV with a timestamp column and a column containing 'pm2'")
     ap.add_argument("--obs-tz", default="Asia/Kolkata", help="timezone of timestamps in --obs-csv")
+    ap.add_argument("--obs-dayfirst", choices=("auto", "yes", "no"), default="auto", help="date order in --obs-csv (CPCB: day-first)")
     ap.add_argument("--station", nargs=3, metavar=("NAME", "LAT", "LON"))
     ap.add_argument("--bbox", default=DEFAULT_BBOX)
     ap.add_argument("--radius-km", type=float, default=30.0, help="parcel 'arrival' radius around the station")
@@ -307,7 +325,7 @@ def main():
     start = pd.Timestamp(args.date)
     end = start + timedelta(days=args.fire_days + 2)
     w = fetch_winds(make_grid(bbox), str(start.date()), str(end.date()), Path(args.cache_dir))
-    obs = load_obs(args.obs_csv, args.obs_tz)
+    obs = load_obs(args.obs_csv, args.obs_tz, args.obs_dayfirst)
     res = run(fires, w, station, args.radius_km, obs)
     res["date"] = args.date
     print(json.dumps(res, indent=2, default=str))
