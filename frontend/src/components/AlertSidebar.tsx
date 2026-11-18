@@ -77,11 +77,24 @@ const AlertCard: React.FC<{
               soundEngine.playClick();
               onInspect();
             }}
-            className="flex items-center gap-1 text-[10px] text-purple-400 hover:text-purple-300 font-bold bg-purple-500/10 hover:bg-purple-500/20 px-2 py-0.5 rounded-lg border border-purple-500/20 transition-all"
-            title="Inspect AI Advisory Protocol & Telemetry"
+            className={`flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-lg border transition-all ${
+              alert.advisory_source === 'bedrock'
+                ? 'text-purple-300 bg-purple-500/15 hover:bg-purple-500/25 border-purple-500/30'
+                : 'text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/20'
+            }`}
+            title={alert.advisory_source === 'bedrock' ? 'Inspect Live Bedrock Claude Advisory & Raw Payload' : 'Inspect Rule Engine Fallback Matrix & Telemetry'}
           >
-            <Sparkles className="w-3 h-3" />
-            <span>AI Protocol</span>
+            {alert.advisory_source === 'bedrock' ? (
+              <>
+                <Sparkles className="w-3 h-3 text-purple-400" />
+                <span>Bedrock Claude</span>
+              </>
+            ) : (
+              <>
+                <span className="text-amber-400 font-bold text-xs">⚡</span>
+                <span>Rule Fallback</span>
+              </>
+            )}
           </button>
         )}
       </div>

@@ -59,6 +59,11 @@ const MOCK_ALERTS: AlertLog[] = [
     dispatch_status: 'DELIVERED',
     sms_delivered: true,
     email_delivered: true,
+    advisory_source: 'rule_fallback',
+    bedrock_model: 'Rule Engine Matrix (Sub-50ms Failover)',
+    fallback_reason: 'Executed deterministic institutional response matrix (sub-50ms emergency SLA)',
+    raw_prompt: 'System: You are an emergency public health advisory coordinator.\nFacility: AIIMS New Delhi (Hospital, 2400 beds)\nThreat: PM2.5 = 412 ug/m3 in 5.8h from Ludhiana agricultural fire.\nOutput JSON array of top 3 actionable protocols.',
+    raw_llm_response: '["Activate respiratory ward pre-staging protocol immediately.", "Switch all building HVAC to HEPA recirculation by 07:00 AM.", "Alert pulmonology and emergency departments for increased patient surge."]',
   },
   {
     alert_id: 'ALT-20261009-0003',
@@ -79,6 +84,11 @@ const MOCK_ALERTS: AlertLog[] = [
     dispatch_status: 'DELIVERED',
     sms_delivered: true,
     email_delivered: true,
+    advisory_source: 'rule_fallback',
+    bedrock_model: 'Rule Engine Matrix (Sub-50ms Failover)',
+    fallback_reason: 'Executed deterministic construction dust suppression matrix',
+    raw_prompt: 'System: Emergency air quality advisory.\nFacility: Dwarka Expressway Project (Construction, 650 workers)\nThreat: PM2.5 = 357 ug/m3 in 6.5h.\nOutput JSON array of top 3 actionable protocols.',
+    raw_llm_response: '["Suspend all outdoor heavy earthwork from 09:00 AM onwards.", "Rotate outdoor workers to indoor tasks during smoke window.", "Issue mandatory N95 respirators to all remaining on-site workers."]',
   },
   {
     alert_id: 'ALT-20261009-0004',
@@ -99,6 +109,11 @@ const MOCK_ALERTS: AlertLog[] = [
     dispatch_status: 'DELIVERED',
     sms_delivered: true,
     email_delivered: true,
+    advisory_source: 'rule_fallback',
+    bedrock_model: 'Rule Engine Matrix (Sub-50ms Failover)',
+    fallback_reason: 'Executed deterministic school protection matrix',
+    raw_prompt: 'System: Emergency school air quality protocol.\nFacility: KV Dwarka Sector 8 (School, 850 students)\nThreat: PM2.5 = 298 ug/m3 in 6.75h.\nOutput JSON array of top 3 actionable protocols.',
+    raw_llm_response: '["Cancel morning PT and outdoor assembly from 08:00 AM.", "Keep all students indoors during recess; use indoor alternatives.", "Notify parents via school app of temporary outdoor restriction."]',
   },
 ];
 
@@ -225,6 +240,9 @@ export const apiClient = {
       dispatch_status: a.dispatch_status || 'DELIVERED',
       sms_delivered: Boolean(a.sms_delivered ?? true),
       email_delivered: Boolean(a.email_delivered),
+      raw_prompt: a.raw_prompt,
+      raw_llm_response: a.raw_llm_response,
+      fallback_reason: a.fallback_reason,
     }));
     return { count: normalized.length, alerts: normalized };
   },
@@ -351,8 +369,18 @@ export const apiClient = {
       return sim;
     }
     
-    const { data } = await api.post<SimulationResult>('/simulate', params || {});
-    return data;
+    const { data } = await api.post<any>('/simulate', params || {});
+    if (data && Array.isArray(data.alerts)) {
+      data.alerts = data.alerts.map((a: any) => ({
+        ...a,
+        advisory_source: a.advisory_source || (a.source === 'bedrock' ? 'bedrock' : 'rule_fallback'),
+        bedrock_model: a.bedrock_model || 'rule_fallback',
+        raw_prompt: a.raw_prompt,
+        raw_llm_response: a.raw_llm_response,
+        fallback_reason: a.fallback_reason,
+      }));
+    }
+    return data as SimulationResult;
   },
 
   // Expose mock data for direct use

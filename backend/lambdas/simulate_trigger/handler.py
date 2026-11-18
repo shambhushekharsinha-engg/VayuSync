@@ -471,6 +471,11 @@ def _inline_evaluation_fallback(hotspot: dict) -> dict:
             ]),
             "confidence_score": "0.65",
             "source": "inline_fallback",
+            "advisory_source": "rule_fallback",
+            "bedrock_model": "rule_fallback",
+            "fallback_reason": "Evaluator Lambda unavailable; executed inline deterministic fallback rule matrix",
+            "raw_prompt": "N/A (Evaluator bypass; evaluated via deterministic protocol matrix)",
+            "raw_llm_response": "N/A (Deterministic fallback protocol rules applied)",
         })
 
     return {
@@ -512,6 +517,9 @@ def _serialize_alert(alert: dict) -> dict:
             else None
         ),
         "impact_horizon": alert.get("impact_horizon", "6H_IMMINENT"),
+        "raw_prompt": alert.get("raw_prompt"),
+        "raw_llm_response": alert.get("raw_llm_response"),
+        "fallback_reason": alert.get("fallback_reason"),
     }
 
 

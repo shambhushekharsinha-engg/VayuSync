@@ -82,6 +82,9 @@ export interface AlertLog {
   dispatch_status?: string;
   sms_delivered?: boolean;
   email_delivered?: boolean;
+  raw_prompt?: string;
+  raw_llm_response?: string;
+  fallback_reason?: string;
 }
 
 export interface DashboardData {

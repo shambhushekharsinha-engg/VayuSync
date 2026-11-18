@@ -137,10 +137,19 @@ export const InstitutionalMatrix: React.FC<InstitutionalMatrixProps> = ({
                     soundEngine.playClick();
                     onSelectAlert(activeAlert);
                   }}
-                  className="w-full py-2 rounded-xl bg-orange-500/20 hover:bg-orange-500 text-orange-300 hover:text-white border border-orange-500/40 text-xs font-bold transition-all flex items-center justify-center gap-1.5"
+                  className="w-full py-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 text-xs font-bold transition-all flex items-center justify-center gap-1.5"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                  <span>View AI Action Protocol</span>
+                  {activeAlert.advisory_source === 'bedrock' ? (
+                    <>
+                      <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                      <span>Bedrock LLM Protocol</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-amber-400 font-bold text-xs">⚡</span>
+                      <span>Rule Matrix Protocol</span>
+                    </>
+                  )}
                 </button>
               ) : (
                 <div className="text-center text-gray-500 text-[10px] py-1">Standby · No Active Alert</div>
@@ -163,7 +172,7 @@ export const InstitutionalMatrix: React.FC<InstitutionalMatrixProps> = ({
                 <th className="py-3 px-3">Threat Level</th>
                 <th className="py-3 px-3">Est. PM2.5</th>
                 <th className="py-3 px-3">HVAC / HEPA</th>
-                <th className="py-3 px-4 text-right">Bedrock Action Plan</th>
+                <th className="py-3 px-4 text-right">Advisory Protocol</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800/60 text-gray-300">
@@ -236,10 +245,23 @@ export const InstitutionalMatrix: React.FC<InstitutionalMatrixProps> = ({
                             soundEngine.playClick();
                             onSelectAlert(activeAlert);
                           }}
-                          className="px-3 py-1.5 rounded-xl bg-orange-500/20 hover:bg-orange-500 text-orange-300 hover:text-white border border-orange-500/40 text-[11px] font-bold transition-all shadow-md active:scale-95 flex items-center gap-1.5 ml-auto"
+                          className={`px-3 py-1.5 rounded-xl border text-[11px] font-bold transition-all shadow-md active:scale-95 flex items-center gap-1.5 ml-auto ${
+                            activeAlert.advisory_source === 'bedrock'
+                              ? 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border-purple-500/40'
+                              : 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border-amber-500/30'
+                          }`}
                         >
-                          <Sparkles className="w-3 h-3 text-amber-400" />
-                          <span>View Protocol</span>
+                          {activeAlert.advisory_source === 'bedrock' ? (
+                            <>
+                              <Sparkles className="w-3 h-3 text-purple-400" />
+                              <span>Bedrock AI</span>
+                            </>
+                          ) : (
+                            <>
+                              <span className="text-amber-400 font-bold text-xs">⚡</span>
+                              <span>Rule Matrix</span>
+                            </>
+                          )}
                         </button>
                       ) : (
                         <span className="text-gray-500 text-[10px]">Standby · No Alert</span>

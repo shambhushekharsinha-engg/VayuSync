@@ -15,6 +15,7 @@ import { InstitutionalActionProfiles } from './components/InstitutionalActionPro
 import { GlobeLocationSelector } from './components/GlobeLocationSelector';
 import { CitizenExposureRouteOptimizer } from './components/CitizenExposureRouteOptimizer';
 import { GroundIoTSensorFusion } from './components/GroundIoTSensorFusion';
+import { ExecutiveView } from './components/ExecutiveView';
 import { GLOBAL_REGIONS, type GlobalRegion } from './data/globalRegions';
 import type {
   AlertLog, DashboardData, Institution,
@@ -44,6 +45,7 @@ const INITIAL_LOGS: LogEntry[] = [
 ];
 
 const App: React.FC = () => {
+  const [viewMode, setViewMode] = useState<'EXECUTIVE' | 'TACTICAL'>('EXECUTIVE');
   const [navTab, setNavTab] = useState<NavTab>('MAP');
   const [alerts, setAlerts] = useState<AlertLog[]>([]);
   const [institutions, setInstitutions] = useState<Institution[]>([]);
@@ -336,34 +338,73 @@ const App: React.FC = () => {
           )}
         </div>
 
-        {/* Center: Command Navigation Tabs (Desktop lg+) */}
-        <nav className="hidden lg:flex items-center gap-1 bg-gray-950 p-1 border border-gray-800 rounded-2xl shadow-inner">
-          {[
-            { id: 'MAP', label: 'Tactical Radar', icon: Map },
-            { id: 'ROUTING', label: 'Aero-Routing', icon: Navigation },
-            { id: 'IOT_MESH', label: 'IoT Sensor Mesh', icon: Radio },
-            { id: 'PROFILES', label: 'Directives', icon: FileText },
-            { id: 'MATRIX', label: 'Facilities', icon: Building2 },
-            { id: 'IMPACT', label: 'Preemptive ROI', icon: ShieldCheck },
-            { id: 'ANALYTICS', label: 'Analytics', icon: TrendingUp },
-          ].map(({ id, label, icon: Icon }) => (
+        {/* Center: Mode Switcher (Executive 30s View vs Full Tactical Ops) + Nav Tabs */}
+        <div className="flex items-center gap-2">
+          {/* Executive vs Tactical Cockpit Toggle */}
+          <div className="flex items-center bg-gray-950 p-0.5 border border-gray-800 rounded-2xl shadow-inner flex-shrink-0">
             <button
-              key={id}
               onClick={() => {
                 soundEngine.playClick();
-                setNavTab(id as NavTab);
+                setViewMode('EXECUTIVE');
               }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs transition-all ${
-                navTab === id
-                  ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-black shadow-md shadow-orange-500/20'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-800/60'
+              className={`px-2.5 sm:px-3 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                viewMode === 'EXECUTIVE'
+                  ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-black shadow-md font-black'
+                  : 'text-gray-400 hover:text-white'
               }`}
+              title="Clean 30-second presentation view for judges and leadership"
             >
-              <Icon className="w-3.5 h-3.5" />
-              <span>{label}</span>
+              <span>🎯</span>
+              <span>Executive</span>
             </button>
-          ))}
-        </nav>
+            <button
+              onClick={() => {
+                soundEngine.playClick();
+                setViewMode('TACTICAL');
+              }}
+              className={`px-2.5 sm:px-3 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                viewMode === 'TACTICAL'
+                  ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-black shadow-md font-black'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+              title="Full mission control with all 7 deep-dive engineering modules"
+            >
+              <span>⚙️</span>
+              <span>Tactical Ops</span>
+            </button>
+          </div>
+
+          {/* Tactical Tabs (Only rendered when in TACTICAL mode on lg+) */}
+          {viewMode === 'TACTICAL' && (
+            <nav className="hidden lg:flex items-center gap-1 bg-gray-950 p-1 border border-gray-800 rounded-2xl shadow-inner">
+              {[
+                { id: 'MAP', label: 'Radar', icon: Map },
+                { id: 'ROUTING', label: 'Aero-Routing', icon: Navigation },
+                { id: 'IOT_MESH', label: 'IoT Mesh', icon: Radio },
+                { id: 'PROFILES', label: 'Directives', icon: FileText },
+                { id: 'MATRIX', label: 'Facilities', icon: Building2 },
+                { id: 'IMPACT', label: 'ROI', icon: ShieldCheck },
+                { id: 'ANALYTICS', label: 'Analytics', icon: TrendingUp },
+              ].map(({ id, label, icon: Icon }) => (
+                <button
+                  key={id}
+                  onClick={() => {
+                    soundEngine.playClick();
+                    setNavTab(id as NavTab);
+                  }}
+                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl font-bold text-xs transition-all ${
+                    navTab === id
+                      ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-black shadow-md shadow-orange-500/20'
+                      : 'text-gray-400 hover:text-white hover:bg-gray-800/60'
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  <span>{label}</span>
+                </button>
+              ))}
+            </nav>
+          )}
+        </div>
 
         {/* Right: Tactical Controls, Architecture & Audio */}
         <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
@@ -443,100 +484,131 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      {/* ─── MOBILE TAB BAR (Only on < lg screens) ───────────────────────────── */}
-      <div className="lg:hidden flex-shrink-0 flex items-center justify-start sm:justify-around gap-1 bg-gray-900 border-b border-gray-800 px-2 py-1.5 text-xs overflow-x-auto no-scrollbar">
-        {[
-          { id: 'MAP', label: 'Radar', icon: Map },
-          { id: 'ROUTING', label: 'Routes', icon: Navigation },
-          { id: 'IOT_MESH', label: 'IoT Mesh', icon: Radio },
-          { id: 'PROFILES', label: 'Directives', icon: FileText },
-          { id: 'MATRIX', label: 'Facilities', icon: Building2 },
-          { id: 'IMPACT', label: 'ROI', icon: ShieldCheck },
-          { id: 'ANALYTICS', label: 'Analytics', icon: TrendingUp },
-        ].map(({ id, label, icon: Icon }) => (
-          <button
-            key={id}
-            onClick={() => {
-              soundEngine.playClick();
-              setNavTab(id as NavTab);
-            }}
-            className={`flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl text-[11px] font-bold flex-shrink-0 transition-all ${
-              navTab === id
-                ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-black shadow-sm'
-                : 'text-gray-400 hover:text-white bg-gray-950/50 border border-gray-800/60'
-            }`}
-          >
-            <Icon className="w-3.5 h-3.5" />
-            <span>{label}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* ─── TOP INTERACTIVE DEMO BAR (Visible Demo Bar for Hackathon Judges) ───────────── */}
-      <div className="flex-shrink-0 bg-gradient-to-r from-orange-950/80 via-red-950/80 to-gray-950 border-b border-orange-500/30 px-2.5 sm:px-4 py-1.5 sm:py-2 flex items-center justify-between gap-2 z-20">
-        <div className="flex items-center gap-2 min-w-0">
-          {/* Mobile Globe & Region Selector (visible on < sm) */}
-          <div className="sm:hidden">
-            <GlobeLocationSelector
-              currentRegionId={activeRegion.id}
-              onSelectRegion={handleSelectRegion}
-              onFlyToGlobalView={handleFlyToGlobalView}
-              isGlobeView={isGlobeView}
-            />
+      {/* ─── TACTICAL-ONLY HEADER STRIPS (Mobile Tab Bar, Demo Bar, Metrics Bar) ── */}
+      {viewMode === 'TACTICAL' && (
+        <>
+          {/* ─── MOBILE TAB BAR (Only on < lg screens) ───────────────────────────── */}
+          <div className="lg:hidden flex-shrink-0 flex items-center justify-start sm:justify-around gap-1 bg-gray-900 border-b border-gray-800 px-2 py-1.5 text-xs overflow-x-auto no-scrollbar">
+            {[
+              { id: 'MAP', label: 'Radar', icon: Map },
+              { id: 'ROUTING', label: 'Routes', icon: Navigation },
+              { id: 'IOT_MESH', label: 'IoT Mesh', icon: Radio },
+              { id: 'PROFILES', label: 'Directives', icon: FileText },
+              { id: 'MATRIX', label: 'Facilities', icon: Building2 },
+              { id: 'IMPACT', label: 'ROI', icon: ShieldCheck },
+              { id: 'ANALYTICS', label: 'Analytics', icon: TrendingUp },
+            ].map(({ id, label, icon: Icon }) => (
+              <button
+                key={id}
+                onClick={() => {
+                  soundEngine.playClick();
+                  setNavTab(id as NavTab);
+                }}
+                className={`flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl text-[11px] font-bold flex-shrink-0 transition-all ${
+                  navTab === id
+                    ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-black shadow-sm'
+                    : 'text-gray-400 hover:text-white bg-gray-950/50 border border-gray-800/60'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                <span>{label}</span>
+              </button>
+            ))}
           </div>
 
-          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/40 text-[10px] font-black uppercase tracking-wider flex-shrink-0">
-            <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-ping" />
-            Judge Live Demo
+          {/* ─── TOP INTERACTIVE DEMO BAR (Visible Demo Bar for Hackathon Judges) ───────────── */}
+          <div className="flex-shrink-0 bg-gradient-to-r from-orange-950/80 via-red-950/80 to-gray-950 border-b border-orange-500/30 px-2.5 sm:px-4 py-1.5 sm:py-2 flex items-center justify-between gap-2 z-20">
+            <div className="flex items-center gap-2 min-w-0">
+              {/* Mobile Globe & Region Selector (visible on < sm) */}
+              <div className="sm:hidden">
+                <GlobeLocationSelector
+                  currentRegionId={activeRegion.id}
+                  onSelectRegion={handleSelectRegion}
+                  onFlyToGlobalView={handleFlyToGlobalView}
+                  isGlobeView={isGlobeView}
+                />
+              </div>
+
+              <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/40 text-[10px] font-black uppercase tracking-wider flex-shrink-0">
+                <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-ping" />
+                Judge Live Demo
+              </div>
+              <span className="text-xs text-gray-300 font-medium hidden md:inline truncate">
+                Inject synthetic satellite cluster (Sangrur/Ludhiana) · Transport corridor to SSE (151°–155°) from NNW winds @ 15–26 km/h
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+              {/* Quick Simulate Trigger */}
+              <button
+                onClick={() => {
+                  soundEngine.playClick();
+                  const simButton = document.querySelector<HTMLButtonElement>('[data-tour="simulate-button"]');
+                  if (simButton) {
+                    simButton.click();
+                  } else {
+                    setNavTab('MAP');
+                    setTimeout(() => {
+                      const btn = document.querySelector<HTMLButtonElement>('[data-tour="simulate-button"]');
+                      btn?.click();
+                    }, 100);
+                  }
+                }}
+                disabled={isSimulating}
+                className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white shadow-md shadow-red-950/60 active:scale-95 transition-all whitespace-nowrap"
+              >
+                <Flame className="w-3.5 h-3.5 text-yellow-300 animate-bounce flex-shrink-0" />
+                <span className="hidden xs:inline sm:inline">{isSimulating ? 'SIMULATING...' : '🔴 SIMULATE STUBBLE SURGE'}</span>
+                <span className="xs:hidden sm:hidden">{isSimulating ? 'SIMULATING...' : '🔴 SIMULATE SURGE'}</span>
+              </button>
+
+              {/* Quick Institutional Action Tab Switcher */}
+              <button
+                onClick={() => {
+                  soundEngine.playClick();
+                  setNavTab('PROFILES');
+                }}
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-gray-800/90 hover:bg-gray-700/90 text-gray-200 border border-gray-700 transition-all"
+              >
+                <FileText className="w-3.5 h-3.5 text-orange-400" />
+                <span className="hidden md:inline">View Facility Directives</span>
+              </button>
+            </div>
           </div>
-          <span className="text-xs text-gray-300 font-medium hidden md:inline truncate">
-            Inject synthetic satellite cluster (Sangrur/Ludhiana) · Transport corridor to SSE (151°–155°) from NNW winds @ 15–26 km/h
-          </span>
-        </div>
 
-        <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-          {/* Quick Simulate Trigger */}
-          <button
-            onClick={() => {
-              soundEngine.playClick();
-              const simButton = document.querySelector<HTMLButtonElement>('[data-tour="simulate-button"]');
-              if (simButton) {
-                simButton.click();
-              } else {
-                setNavTab('MAP');
-                setTimeout(() => {
-                  const btn = document.querySelector<HTMLButtonElement>('[data-tour="simulate-button"]');
-                  btn?.click();
-                }, 100);
-              }
-            }}
-            disabled={isSimulating}
-            className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white shadow-md shadow-red-950/60 active:scale-95 transition-all whitespace-nowrap"
-          >
-            <Flame className="w-3.5 h-3.5 text-yellow-300 animate-bounce flex-shrink-0" />
-            <span className="hidden xs:inline sm:inline">{isSimulating ? 'SIMULATING...' : '🔴 SIMULATE STUBBLE SURGE'}</span>
-            <span className="xs:hidden sm:hidden">{isSimulating ? 'SIMULATING...' : '🔴 SIMULATE SURGE'}</span>
-          </button>
-
-          {/* Quick Institutional Action Tab Switcher */}
-          <button
-            onClick={() => {
-              soundEngine.playClick();
-              setNavTab('PROFILES');
-            }}
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-gray-800/90 hover:bg-gray-700/90 text-gray-200 border border-gray-700 transition-all"
-          >
-            <FileText className="w-3.5 h-3.5 text-orange-400" />
-            <span className="hidden md:inline">View Facility Directives</span>
-          </button>
-        </div>
-      </div>
-
-      {/* ─── METRICS BAR ────────────────────────────────────────────────────── */}
-      <MetricsBar dashboard={dashboard} isSimulating={isSimulating} />
+          {/* ─── METRICS BAR ────────────────────────────────────────────────────── */}
+          <MetricsBar dashboard={dashboard} isSimulating={isSimulating} />
+        </>
+      )}
 
       {/* ─── MAIN CONTENT VIEW SWITCHER ──────────────────────────────────────── */}
-      <div className="flex flex-col lg:flex-row flex-1 overflow-hidden relative">
+      {viewMode === 'EXECUTIVE' ? (
+        <ExecutiveView
+          activeRegion={activeRegion}
+          simulatedCone={simulatedCone}
+          simulatedHotspot={simulatedHotspot}
+          timelineHour={timelineHour}
+          onHourChange={setTimelineHour}
+          alerts={alerts}
+          institutions={institutions}
+          dashboard={dashboard}
+          isSimulating={isSimulating}
+          onSimulate={async () => {
+            setIsSimulating(true);
+            try {
+              const res = await apiClient.simulate();
+              handleSimulationComplete(res);
+            } catch (err) {
+              console.error('Simulation failed:', err);
+              setIsSimulating(false);
+            }
+          }}
+          onReset={handleReset}
+          onSelectAlert={(a) => setInspectedAlert(a)}
+          onSwitchToTactical={() => setViewMode('TACTICAL')}
+        />
+      ) : (
+        <div className="flex flex-col lg:flex-row flex-1 overflow-hidden relative">
 
         {/* VIEW 1: TACTICAL RADAR (Map-Centric with Scrubbers & Sidebars) */}
         {navTab === 'MAP' && (
@@ -719,7 +791,11 @@ const App: React.FC = () => {
                       }}
                       className="w-full mt-2.5 sm:mt-3 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-md"
                     >
-                      <span>View Claude 3 Advisory</span>
+                      <span>
+                        {(alerts.find(a => a.institution_id === selectedInstitution.institution_id) || alerts[0])?.advisory_source === 'bedrock'
+                          ? 'View Bedrock AI Advisory'
+                          : 'View Facility Rule Protocol'}
+                      </span>
                     </button>
                   </div>
                 )}
@@ -796,6 +872,7 @@ const App: React.FC = () => {
         )}
 
       </div>
+      )}
 
       {/* ─── BEDROCK AI INSPECTOR MODAL ─────────────────────────────────────── */}
       <BedrockInspectorModal

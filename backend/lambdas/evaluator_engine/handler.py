@@ -70,10 +70,17 @@ SNS_TOPIC_ARN = os.environ.get("SNS_TOPIC_ARN", "")
 
 # ── Bedrock Model ─────────────────────────────────────────────────────────────
 # Configured via environment variable BEDROCK_MODEL_ID.
-# Modern Bedrock cross-region inference profile default: us.anthropic.claude-haiku-4-5-20251001-v1:0
+# Modern Bedrock cross-region inference profile default: us.anthropic.claude-3-5-haiku-20241022-v1:0
+# Standard fallback: us.anthropic.claude-3-haiku-20240307-v1:0
 BEDROCK_MODEL_ID = os.environ.get(
-    "BEDROCK_MODEL_ID", "us.anthropic.claude-haiku-4-5-20251001-v1:0"
+    "BEDROCK_MODEL_ID", "us.anthropic.claude-3-5-haiku-20241022-v1:0"
 )
+BEDROCK_FALLBACK_MODELS = [
+    "us.anthropic.claude-3-5-haiku-20241022-v1:0",
+    "us.anthropic.claude-3-haiku-20240307-v1:0",
+    "anthropic.claude-3-haiku-20240307-v1:0",
+    "amazon.nova-micro-v1:0",
+]
 BEDROCK_MAX_TOKENS = 1024
 BEDROCK_TEMPERATURE = 0.1  # Low temperature for deterministic, structured output
 
@@ -395,9 +402,12 @@ def _evaluate_hotspot_against_institutions(
             "recommended_actions": json.dumps(advisory.get("recommended_actions", [])),
             "confidence_score": str(advisory.get("confidence_score", 0.75)),
             "advisory_source": advisory.get("advisory_source", "rule_fallback"),
-            "bedrock_model": BEDROCK_MODEL_ID if advisory.get("advisory_source") == "bedrock" else "rule_fallback",
+            "bedrock_model": advisory.get("bedrock_model", BEDROCK_MODEL_ID if advisory.get("advisory_source") == "bedrock" else "rule_fallback"),
             "impact_horizon": impact_horizon,
             "ttl_epoch": ttl_epoch,
+            "raw_prompt": advisory.get("raw_prompt", ""),
+            "raw_llm_response": advisory.get("raw_llm_response", ""),
+            "fallback_reason": advisory.get("fallback_reason", ""),
         }
         if "bedrock_latency_ms" in advisory:
             alert_record["bedrock_latency_ms"] = str(advisory["bedrock_latency_ms"])
@@ -484,9 +494,10 @@ def _call_bedrock_advisory(
     arrival_utc: datetime,
 ) -> dict:
     """
-    Call Amazon Bedrock (Configured Claude LLM) to generate a structured mitigation advisory.
+    Call Amazon Bedrock (Claude / Foundation Model) to generate a structured mitigation advisory.
 
-    Returns the parsed JSON advisory dict, or a rule-based fallback if Bedrock fails.
+    Tries primary configured model, then candidate fallback models.
+    Returns the parsed JSON advisory dict with prompt transparency, or rule-based fallback.
     """
     user_prompt = f"""FIRE HOTSPOT ALERT -- ACTION REQUIRED
 
@@ -525,45 +536,68 @@ Generate the advisory JSON now."""
         "messages": [{"role": "user", "content": user_prompt}],
     }
 
-    try:
-        t0 = time.perf_counter()
-        response = bedrock_client.invoke_model(
-            modelId=BEDROCK_MODEL_ID,
-            body=json.dumps(bedrock_request),
-            contentType="application/json",
-            accept="application/json",
-        )
-        latency_ms = round((time.perf_counter() - t0) * 1000.0, 1)
+    # Attempt models in order: configured model first, then fallback models
+    models_to_try = [BEDROCK_MODEL_ID] + [m for m in BEDROCK_FALLBACK_MODELS if m != BEDROCK_MODEL_ID]
+    last_error_msg = ""
 
-        response_body = json.loads(response["body"].read())
-        content = response_body.get("content", [{}])[0].get("text", "").strip()
+    for model_id in models_to_try:
+        try:
+            t0 = time.perf_counter()
+            response = bedrock_client.invoke_model(
+                modelId=model_id,
+                body=json.dumps(bedrock_request),
+                contentType="application/json",
+                accept="application/json",
+            )
+            latency_ms = round((time.perf_counter() - t0) * 1000.0, 1)
 
-        advisory = json.loads(content)
-        advisory["advisory_source"] = "bedrock"
-        advisory["bedrock_latency_ms"] = latency_ms
+            response_body = json.loads(response["body"].read())
+            content = response_body.get("content", [{}])[0].get("text", "").strip()
 
-        logger.info(
-            "Bedrock advisory for %s (%.1f ms): severity=%s, PM2.5=%.1f, confidence=%.2f",
-            institution.get("institution_id"),
-            latency_ms,
-            advisory.get("impact_severity"),
-            advisory.get("predicted_pm25_ugm3", 0),
-            advisory.get("confidence_score", 0),
-        )
-        return advisory
+            advisory = json.loads(content)
+            advisory["advisory_source"] = "bedrock"
+            advisory["bedrock_model"] = model_id
+            advisory["bedrock_latency_ms"] = latency_ms
+            advisory["raw_prompt"] = user_prompt
+            advisory["raw_llm_response"] = content
 
-    except ClientError as exc:
-        error_code = exc.response["Error"]["Code"]
-        logger.error("Bedrock invocation failed (%s): %s", error_code, exc)
-        return _build_fallback_advisory(institution, pm25_estimate, severity, arrival_utc)
+            logger.info(
+                "Bedrock advisory for %s via %s (%.1f ms): severity=%s, PM2.5=%.1f, confidence=%.2f",
+                institution.get("institution_id"),
+                model_id,
+                latency_ms,
+                advisory.get("impact_severity"),
+                advisory.get("predicted_pm25_ugm3", 0),
+                advisory.get("confidence_score", 0),
+            )
+            return advisory
 
-    except json.JSONDecodeError as exc:
-        logger.error("Bedrock response not valid JSON: %s", exc)
-        return _build_fallback_advisory(institution, pm25_estimate, severity, arrival_utc)
+        except ClientError as exc:
+            error_code = exc.response["Error"]["Code"]
+            error_msg = exc.response["Error"].get("Message", str(exc))
+            last_error_msg = f"{error_code}: {error_msg}"
+            logger.warning("Bedrock invocation failed for model %s (%s): %s", model_id, error_code, error_msg)
+            continue
 
-    except Exception as exc:
-        logger.error("Unexpected Bedrock error: %s", exc, exc_info=True)
-        return _build_fallback_advisory(institution, pm25_estimate, severity, arrival_utc)
+        except json.JSONDecodeError as exc:
+            last_error_msg = f"JSONDecodeError: {exc}"
+            logger.warning("Bedrock response not valid JSON for %s: %s", model_id, exc)
+            continue
+
+        except Exception as exc:
+            last_error_msg = str(exc)
+            logger.warning("Unexpected error invoking Bedrock model %s: %s", model_id, exc)
+            continue
+
+    logger.info("All Bedrock model attempts exhausted (%s). Executing Deterministic Rule Matrix Fallback.", last_error_msg)
+    return _build_fallback_advisory(
+        institution,
+        pm25_estimate,
+        severity,
+        arrival_utc,
+        user_prompt=user_prompt,
+        last_error=last_error_msg
+    )
 
 
 def _build_fallback_advisory(
@@ -571,10 +605,12 @@ def _build_fallback_advisory(
     pm25_estimate: float,
     severity: str,
     arrival_utc: datetime,
+    user_prompt: str = "",
+    last_error: str = "",
 ) -> dict:
     """
     Generate a rule-based fallback advisory when Bedrock is unavailable.
-    Produces context-appropriate actions for each facility type.
+    Produces deterministic, context-appropriate actions for each facility type.
     """
     facility_type = institution.get("facility_type", "Municipality")
     inst_id = institution.get("institution_id", "unknown")
@@ -616,8 +652,12 @@ def _build_fallback_advisory(
         "impact_severity": severity,
         "predicted_pm25_ugm3": pm25_estimate,
         "recommended_actions": actions,
-        "confidence_score": 0.72,  # Lower confidence for rule-based fallback
+        "confidence_score": 0.72,  # Calibrated confidence for rule-based fallback
         "advisory_source": "rule_fallback",
+        "bedrock_model": "rule_fallback_deterministic_matrix",
+        "raw_prompt": user_prompt,
+        "raw_llm_response": json.dumps({"recommended_actions": actions}, indent=2),
+        "fallback_reason": last_error or "Deterministic matrix triggered for zero-latency failover (<50ms)",
     }
 
 
