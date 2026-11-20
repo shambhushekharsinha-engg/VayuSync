@@ -26,6 +26,7 @@ interface CitizenExposureRouteOptimizerProps {
 }
 
 export const CitizenExposureRouteOptimizer: React.FC<CitizenExposureRouteOptimizerProps> = ({ wind }) => {
+  const activeWind = wind || { speed_kmh: 21.6, direction_deg: 334, is_illustrative: true };
   const [startPoint, setStartPoint] = useState('Connaught Place (Central Delhi)');
   const [destination, setDestination] = useState('Dwarka Expressway / IGI Aerocity');
   const [commuteMode, setCommuteMode] = useState<'CAR' | 'TWO_WHEELER' | 'WALK'>('TWO_WHEELER');
@@ -84,23 +85,17 @@ export const CitizenExposureRouteOptimizer: React.FC<CitizenExposureRouteOptimiz
 
         <div className="flex items-center gap-2 bg-gray-950 px-3 py-1.5 rounded-2xl border border-gray-800 text-xs text-gray-300 w-full sm:w-auto">
           <Wind className="w-4 h-4 text-blue-400 flex-shrink-0" />
-          {wind ? (
-            <span className="truncate">
-              {wind.is_illustrative ? 'Modeled' : 'Dynamic'} Wind Vector Shielding:{' '}
-              <strong className="text-white">
-                {wind.direction_deg}° {degreesToCardinal(wind.direction_deg)} ({wind.speed_kmh.toFixed(0)} km/h)
-              </strong>
-              {wind.is_illustrative && (
-                <span className="ml-1.5 text-[9px] px-1 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/30">
-                  ILLUSTRATIVE
-                </span>
-              )}
-            </span>
-          ) : (
-            <span className="text-gray-400">
-              Wind Vector Shielding: <span className="text-gray-500">Awaiting atmospheric feed</span>
-            </span>
-          )}
+          <span className="truncate">
+            {activeWind.is_illustrative ? 'Modeled' : 'Dynamic'} Wind Vector Shielding:{' '}
+            <strong className="text-white">
+              {activeWind.direction_deg}° {degreesToCardinal(activeWind.direction_deg)} ({activeWind.speed_kmh.toFixed(0)} km/h)
+            </strong>
+            {activeWind.is_illustrative && (
+              <span className="ml-1.5 text-[9px] px-1 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/30">
+                ILLUSTRATIVE
+              </span>
+            )}
+          </span>
         </div>
       </div>
 
@@ -242,7 +237,7 @@ export const CitizenExposureRouteOptimizer: React.FC<CitizenExposureRouteOptimiz
             <div>
               <div className="text-[9px] sm:text-[10px] text-gray-500">Commute Time</div>
               <div className="text-white font-mono font-bold text-xs sm:text-sm mt-0.5">
-                {ROUTES.shielded.durationMin}m <span className="text-gray-500 text-[9px] sm:text-[10px]">(+5m)</span>
+                {ROUTES.shielded.durationMin} mins <span className="text-gray-500 text-[9px] sm:text-[10px]">(+5 mins)</span>
               </div>
             </div>
             <div>

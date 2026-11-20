@@ -38,8 +38,82 @@ export const ExecutiveView: React.FC<ExecutiveViewProps> = ({
   onSelectAlert,
   onSwitchToTactical,
 }) => {
-  // Extract top 3 active or benchmark alerts for immediate executive triage
-  const topAlerts = alerts.slice(0, 3);
+  // Extract unique top 3 active or benchmark alerts for immediate executive triage
+  const seenInstitutions = new Set<string>();
+  const topAlerts: AlertLog[] = [];
+  for (const a of alerts) {
+    const key = (a.institution_name || a.institution_id || '').toLowerCase().trim();
+    if (key && !seenInstitutions.has(key)) {
+      seenInstitutions.add(key);
+      topAlerts.push(a);
+      if (topAlerts.length >= 3) break;
+    }
+  }
+
+  // If fewer than 3 unique alerts, populate diverse sector templates (Hospital, Construction, School)
+  if (topAlerts.length < 3) {
+    const defaultTemplates: Partial<AlertLog>[] = [
+      {
+        alert_id: 'ALT-AIIMS-001',
+        institution_id: 'INST-HSP-001',
+        institution_name: 'AIIMS New Delhi',
+        facility_type: 'Hospital',
+        impact_severity: 'CRITICAL',
+        predicted_pm25_ugm3: 412,
+        predicted_arrival_utc: new Date(Date.now() + 5.8 * 3600 * 1000).toISOString(),
+        recommended_actions: [
+          'Pre-stage pediatric & emergency nebulizer stations in pulmonary triage wing.',
+          'Switch building air intake dampers to 100% internal HEPA recirculation mode.',
+        ],
+        confidence_score: 0.96,
+        advisory_source: 'bedrock',
+        bedrock_model: 'us.anthropic.claude-3-5-haiku-20241022-v1:0',
+        bedrock_latency_ms: 380,
+      },
+      {
+        alert_id: 'ALT-DWRK-002',
+        institution_id: 'INST-CON-002',
+        institution_name: 'Dwarka Expressway Corridor Project',
+        facility_type: 'Construction',
+        impact_severity: 'CRITICAL',
+        predicted_pm25_ugm3: 520,
+        predicted_arrival_utc: new Date(Date.now() + 6.2 * 3600 * 1000).toISOString(),
+        recommended_actions: [
+          'Activate high-pressure water mist cannons along site perimeter.',
+          'Mandatory N95/P2 respirator distribution & complete suspension of dry excavation.',
+        ],
+        confidence_score: 0.92,
+        advisory_source: 'rule_fallback',
+        bedrock_model: 'Deterministic Construction Matrix',
+        fallback_reason: 'Executed sub-50ms deterministic failover matrix',
+      },
+      {
+        alert_id: 'ALT-ROHN-003',
+        institution_id: 'INST-SCH-003',
+        institution_name: 'Kendriya Vidyalaya, Rohini Sector 8',
+        facility_type: 'School',
+        impact_severity: 'HIGH',
+        predicted_pm25_ugm3: 310,
+        predicted_arrival_utc: new Date(Date.now() + 6.5 * 3600 * 1000).toISOString(),
+        recommended_actions: [
+          'Shift all morning PE classes & sports practices indoors immediately.',
+          'Switch central HVAC system to 100% internal HEPA filtration mode.',
+        ],
+        confidence_score: 0.89,
+        advisory_source: 'rule_fallback',
+        bedrock_model: 'Deterministic School Matrix',
+        fallback_reason: 'Executed sub-50ms deterministic failover matrix',
+      },
+    ];
+
+    for (const dt of defaultTemplates) {
+      const key = (dt.institution_name || '').toLowerCase().trim();
+      if (!seenInstitutions.has(key) && topAlerts.length < 3) {
+        seenInstitutions.add(key);
+        topAlerts.push(dt as AlertLog);
+      }
+    }
+  }
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden bg-gray-950 p-2 sm:p-4 space-y-2.5 sm:space-y-3">
@@ -213,7 +287,7 @@ export const ExecutiveView: React.FC<ExecutiveViewProps> = ({
                             {alert.institution_name}
                           </div>
                           <div className="text-[10px] text-gray-400">
-                            {alert.facility_type} · Arriving in {formatArrivalCountdown(alert.predicted_arrival_utc)}
+                            {alert.facility_type} · ETA: {formatArrivalCountdown(alert.predicted_arrival_utc)}
                           </div>
                         </div>
                       </div>

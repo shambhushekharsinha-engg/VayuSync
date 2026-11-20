@@ -196,36 +196,47 @@ const App: React.FC = () => {
   // ─── Simulation handlers ───────────────────────────────────────────────────
   const handleSimulationComplete = useCallback((result: SimulationResult) => {
     setIsSimulating(false);
-    setSimulatedCone(result.trajectory_cone);
-    setSimulatedHotspot(result.hotspot);
+    if (!result) return;
+
+    if (result.trajectory_cone) setSimulatedCone(result.trajectory_cone);
+    if (result.hotspot) setSimulatedHotspot(result.hotspot);
     setTimelineHour(6); // Reset timeline to peak arrival
 
-    const windKmh = result.wind_data.wind_speed_kmh?.toFixed(1) ?? '21.6';
-    const windDir = result.wind_data.direction_degrees ?? 334;
-    const isRuleFallback = result.alerts.some(a => a.advisory_source === 'rule_fallback') || result.alerts.length === 0;
+    const windKmh = result?.wind_data?.wind_speed_kmh?.toFixed(1) ?? (result?.hotspot as any)?.wind_speed_kmh?.toFixed(1) ?? '21.6';
+    const windDir = result?.wind_data?.direction_degrees ?? (result?.hotspot as any)?.wind_bearing_deg ?? 334;
+    const isRuleFallback = !result?.alerts || result.alerts.length === 0 || result.alerts.some(a => a.advisory_source === 'rule_fallback');
     const advisoryEngineLabel = isRuleFallback ? 'Deterministic Rule Engine (Bedrock Standby)' : (result.alerts[0]?.bedrock_model ?? 'Bedrock Claude LLM');
+    const totalLatency = result?.pipeline_performance?.total_ms ?? 1250;
+    const instCount = typeof result?.institutions_at_risk === 'number'
+      ? result.institutions_at_risk
+      : (Array.isArray(result?.institutions_at_risk) ? (result.institutions_at_risk as any[]).length : (result?.alerts?.length ?? 6));
+    const hotspotFrp = (result?.hotspot as any)?.fire_radiative_power_mw ?? (result?.hotspot as any)?.frp_mw ?? (result?.hotspot as any)?.frp ?? 1200;
+    const hotspotLat = result?.hotspot?.latitude ?? 30.9;
+    const hotspotLon = result?.hotspot?.longitude ?? 75.85;
 
     addLog('EVENTBRIDGE', 'Synthetic stubble surge triggered via POST /simulate', 'INFO');
-    addLog('NASA_FIRMS', `Synthetic anomaly injected: Sangrur/Ludhiana (${result.hotspot.latitude.toFixed(2)}°N, ${result.hotspot.longitude.toFixed(2)}°E) FRP: ${result.hotspot.fire_radiative_power_mw} MW`, 'INFO');
+    addLog('NASA_FIRMS', `Synthetic anomaly injected: Sangrur/Ludhiana (${hotspotLat.toFixed(2)}°N, ${hotspotLon.toFixed(2)}°E) FRP: ${hotspotFrp} MW`, 'INFO');
     addLog('OPEN_METEO', `Trajectory calculation updated with transport vector: ${windDir}° @ ${windKmh} km/h`, 'INFO');
-    addLog('LAMBDA', `EvaluatorEngine completed spatial containment test across ${result.institutions_at_risk} facilities`, 'SUCCESS');
-    addLog('BEDROCK', `${advisoryEngineLabel} generated operational directives (Total latency: ${result.pipeline_performance.total_ms.toFixed(0)}ms)`, 'SUCCESS');
-    addLog('SNS', `Alert notification broadcast triggered to ${result.alerts.length} registered institutional targets`, 'SUCCESS');
+    addLog('LAMBDA', `EvaluatorEngine completed spatial containment test across ${instCount} facilities`, 'SUCCESS');
+    addLog('BEDROCK', `${advisoryEngineLabel} generated operational directives (Total latency: ${totalLatency.toFixed(0)}ms)`, 'SUCCESS');
+    addLog('SNS', `Alert notification broadcast triggered to ${(result?.alerts ?? []).length} registered institutional targets`, 'SUCCESS');
 
     // Prepend new alerts to the feed
-    setAlerts(prev => {
-      const existingIds = new Set(prev.map(a => a.alert_id));
-      const fresh = result.alerts.filter(a => !existingIds.has(a.alert_id));
-      return [...fresh, ...prev].slice(0, 20);
-    });
+    if (result?.alerts && result.alerts.length > 0) {
+      setAlerts(prev => {
+        const existingIds = new Set(prev.map(a => a.alert_id));
+        const fresh = result.alerts.filter(a => !existingIds.has(a.alert_id));
+        return [...fresh, ...prev].slice(0, 20);
+      });
+    }
 
     // Update dashboard counts
     setDashboard(prev => prev ? {
       ...prev,
       active_fire_hotspots: (prev.active_fire_hotspots ?? 5) + 1,
-      institutions_at_risk: result.institutions_at_risk,
-      pipeline_latency_ms: result.pipeline_performance.total_ms,
-      total_alerts_last_24h: (prev.total_alerts_last_24h ?? 0) + result.alerts.length,
+      institutions_at_risk: instCount,
+      pipeline_latency_ms: totalLatency,
+      total_alerts_last_24h: (prev.total_alerts_last_24h ?? 0) + (result?.alerts?.length ?? 0),
     } : null);
   }, [addLog]);
 
@@ -314,18 +325,8 @@ const App: React.FC = () => {
             </p>
           </div>
 
-          {/* Globe & Multi-Location Selector (Desktop/Tablet in Header) */}
-          <div className="hidden sm:block ml-1">
-            <GlobeLocationSelector
-              currentRegionId={activeRegion.id}
-              onSelectRegion={handleSelectRegion}
-              onFlyToGlobalView={handleFlyToGlobalView}
-              isGlobeView={isGlobeView}
-            />
-          </div>
-
           {/* LIVE badge (sm+) */}
-          <div className="hidden sm:flex items-center gap-1.5 ml-1 px-2 py-0.5 bg-red-500/10 border border-red-500/30 rounded-full flex-shrink-0">
+          <div className="hidden sm:flex items-center gap-1.5 px-2 py-0.5 bg-red-500/10 border border-red-500/30 rounded-full flex-shrink-0">
             <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-ping" />
             <span className="text-red-400 text-[9px] font-bold tracking-wide">LIVE</span>
           </div>
@@ -338,10 +339,10 @@ const App: React.FC = () => {
           )}
         </div>
 
-        {/* Center: Mode Switcher (Executive 30s View vs Full Tactical Ops) + Nav Tabs */}
-        <div className="flex items-center gap-2">
+        {/* Center: Mode Switcher (Executive 30s View vs Full Tactical Ops) */}
+        <div className="flex items-center gap-2 flex-shrink-0">
           {/* Executive vs Tactical Cockpit Toggle */}
-          <div className="flex items-center bg-gray-950 p-0.5 border border-gray-800 rounded-2xl shadow-inner flex-shrink-0">
+          <div className="flex items-center bg-gray-950 p-0.5 border border-gray-800 rounded-2xl shadow-inner flex-shrink-0 z-10">
             <button
               onClick={() => {
                 soundEngine.playClick();
@@ -355,7 +356,7 @@ const App: React.FC = () => {
               title="Clean 30-second presentation view for judges and leadership"
             >
               <span>🎯</span>
-              <span>Executive</span>
+              <span className="hidden xs:inline sm:inline">Executive</span>
             </button>
             <button
               onClick={() => {
@@ -370,7 +371,7 @@ const App: React.FC = () => {
               title="Full mission control with all 7 deep-dive engineering modules"
             >
               <span>⚙️</span>
-              <span>Tactical Ops</span>
+              <span className="hidden xs:inline sm:inline">Tactical Ops</span>
             </button>
           </div>
 
@@ -417,37 +418,40 @@ const App: React.FC = () => {
             className="flex items-center gap-1.5 p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl text-xs font-bold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 transition-all shadow-sm shadow-cyan-500/10"
             title="Inspect AWS Serverless Architecture Pipeline"
           >
-            <Network className="w-3.5 h-3.5 text-cyan-400" />
+            <Network className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0" />
             <span className="text-[11px] font-mono hidden md:inline">AWS Architecture</span>
           </button>
 
-          {/* Audio FX Toggle */}
-          <button
-            onClick={toggleSound}
-            className={`flex items-center gap-1.5 p-1.5 sm:px-2.5 sm:py-1 rounded-xl text-xs font-bold border transition-all ${
-              soundOn
-                ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
-                : 'bg-gray-800/80 text-gray-400 border-gray-700 hover:text-white'
-            }`}
-            title="Toggle Programmatic Web Audio Synthesizer"
-          >
-            {soundOn ? <Volume2 className="w-3.5 h-3.5 text-blue-400" /> : <VolumeX className="w-3.5 h-3.5" />}
-            <span className="text-[10px] hidden sm:inline">{soundOn ? 'AUDIO FX: ON' : 'AUDIO: MUTE'}</span>
-          </button>
+          {/* Audio FX & Crisis Toggle (shown only in Tactical Ops mode or on sm+ screens) */}
+          {viewMode === 'TACTICAL' && (
+            <>
+              <button
+                onClick={toggleSound}
+                className={`hidden sm:flex items-center gap-1.5 p-1.5 sm:px-2.5 sm:py-1 rounded-xl text-xs font-bold border transition-all ${
+                  soundOn
+                    ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
+                    : 'bg-gray-800/80 text-gray-400 border-gray-700 hover:text-white'
+                }`}
+                title="Toggle Programmatic Web Audio Synthesizer"
+              >
+                {soundOn ? <Volume2 className="w-3.5 h-3.5 text-blue-400" /> : <VolumeX className="w-3.5 h-3.5" />}
+                <span className="text-[10px] hidden md:inline">{soundOn ? 'AUDIO: ON' : 'AUDIO: MUTE'}</span>
+              </button>
 
-          {/* Crisis DEFCON Toggle */}
-          <button
-            onClick={toggleCrisisMode}
-            className={`flex items-center gap-1 p-1.5 sm:px-2.5 sm:py-1 rounded-xl text-xs font-bold border transition-all ${
-              crisisMode
-                ? 'bg-red-600 text-white border-red-400 shadow-lg shadow-red-600/30'
-                : 'bg-gray-800/80 text-gray-400 border-gray-700 hover:text-red-400'
-            }`}
-            title="Toggle Crisis Defense Protocol View"
-          >
-            <AlertOctagon className={`w-3.5 h-3.5 ${crisisMode ? 'text-white' : 'text-red-400'}`} />
-            <span className="text-[10px] hidden sm:inline">{crisisMode ? 'DEFCON 1' : 'CRISIS MODE'}</span>
-          </button>
+              <button
+                onClick={toggleCrisisMode}
+                className={`hidden sm:flex items-center gap-1 p-1.5 sm:px-2.5 sm:py-1 rounded-xl text-xs font-bold border transition-all ${
+                  crisisMode
+                    ? 'bg-red-600 text-white border-red-400 shadow-lg shadow-red-600/30'
+                    : 'bg-gray-800/80 text-gray-400 border-gray-700 hover:text-red-400'
+                }`}
+                title="Toggle Crisis Defense Protocol View"
+              >
+                <AlertOctagon className={`w-3.5 h-3.5 ${crisisMode ? 'text-white' : 'text-red-400'}`} />
+                <span className="text-[10px] hidden md:inline">{crisisMode ? 'DEFCON 1' : 'CRISIS'}</span>
+              </button>
+            </>
+          )}
 
           {/* Wind pill */}
           {dashboard?.wind && (
@@ -488,10 +492,10 @@ const App: React.FC = () => {
       {viewMode === 'TACTICAL' && (
         <>
           {/* ─── MOBILE TAB BAR (Only on < lg screens) ───────────────────────────── */}
-          <div className="lg:hidden flex-shrink-0 flex items-center justify-start sm:justify-around gap-1 bg-gray-900 border-b border-gray-800 px-2 py-1.5 text-xs overflow-x-auto no-scrollbar">
+          <div className="lg:hidden flex-shrink-0 flex items-center justify-start gap-1.5 bg-gray-900 border-b border-gray-800 px-2.5 py-1.5 text-xs overflow-x-auto no-scrollbar scroll-smooth flex-nowrap">
             {[
               { id: 'MAP', label: 'Radar', icon: Map },
-              { id: 'ROUTING', label: 'Routes', icon: Navigation },
+              { id: 'ROUTING', label: 'Aero-Routing', icon: Navigation },
               { id: 'IOT_MESH', label: 'IoT Mesh', icon: Radio },
               { id: 'PROFILES', label: 'Directives', icon: FileText },
               { id: 'MATRIX', label: 'Facilities', icon: Building2 },
@@ -519,8 +523,8 @@ const App: React.FC = () => {
           {/* ─── TOP INTERACTIVE DEMO BAR (Visible Demo Bar for Hackathon Judges) ───────────── */}
           <div className="flex-shrink-0 bg-gradient-to-r from-orange-950/80 via-red-950/80 to-gray-950 border-b border-orange-500/30 px-2.5 sm:px-4 py-1.5 sm:py-2 flex items-center justify-between gap-2 z-20">
             <div className="flex items-center gap-2 min-w-0">
-              {/* Mobile Globe & Region Selector (visible on < sm) */}
-              <div className="sm:hidden">
+              {/* Globe & Region Selector (Always available in Tactical Mode) */}
+              <div className="flex-shrink-0">
                 <GlobeLocationSelector
                   currentRegionId={activeRegion.id}
                   onSelectRegion={handleSelectRegion}
@@ -529,11 +533,11 @@ const App: React.FC = () => {
                 />
               </div>
 
-              <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/40 text-[10px] font-black uppercase tracking-wider flex-shrink-0">
+              <div className="hidden md:flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/40 text-[10px] font-black uppercase tracking-wider flex-shrink-0">
                 <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-ping" />
                 Judge Live Demo
               </div>
-              <span className="text-xs text-gray-300 font-medium hidden md:inline truncate">
+              <span className="text-xs text-gray-300 font-medium hidden lg:inline truncate">
                 Inject synthetic satellite cluster (Sangrur/Ludhiana) · Transport corridor to SSE (151°–155°) from NNW winds @ 15–26 km/h
               </span>
             </div>

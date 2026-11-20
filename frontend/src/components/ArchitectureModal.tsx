@@ -66,11 +66,11 @@ export const ArchitectureModal: React.FC<ArchitectureModalProps> = ({ isOpen, on
 
   return (
     <div
-      className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-2.5 sm:p-4 animate-fade-in-up"
+      className="fixed inset-0 bg-black/90 backdrop-blur-xl z-[100] flex items-center justify-center p-2.5 sm:p-4 animate-fade-in-up"
       onClick={onClose}
     >
       <div
-        className="bg-gray-900 border border-gray-700 rounded-3xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl relative overflow-hidden flex flex-col max-h-[92dvh]"
+        className="bg-slate-900 border border-slate-700 rounded-3xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl relative overflow-hidden flex flex-col max-h-[92dvh] z-10"
         onClick={(e) => e.stopPropagation()}
       >
         {/* React Bits Atmospheric Particles background effect */}
@@ -123,7 +123,7 @@ export const ArchitectureModal: React.FC<ArchitectureModalProps> = ({ isOpen, on
               const Icon = node.icon;
               return (
                 <div key={node.step} className="relative flex flex-col">
-                  <div className={`flex-1 bg-gradient-to-br ${node.color} p-3.5 sm:p-4 rounded-2xl border flex flex-col justify-between shadow-lg relative group hover:border-white/50 transition-all`}>
+                  <div className={`flex-1 bg-slate-950/95 bg-gradient-to-br ${node.color} p-3.5 sm:p-4 rounded-2xl border flex flex-col justify-between shadow-xl relative group hover:border-white/50 transition-all`}>
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <span className="font-mono text-xs font-black text-gray-400">{node.step}</span>
@@ -153,7 +153,7 @@ export const ArchitectureModal: React.FC<ArchitectureModalProps> = ({ isOpen, on
 
           {/* Architecture verification grid */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-            <div className="bg-gray-950/70 border border-gray-800 p-3 rounded-2xl">
+            <div className="bg-slate-950/90 border border-slate-800 p-3 rounded-2xl">
               <div className="flex items-center gap-1.5 text-xs font-bold text-white mb-1">
                 <ShieldCheck className="w-4 h-4 text-green-400" />
                 <span>Least-Privilege IAM</span>
@@ -163,7 +163,7 @@ export const ArchitectureModal: React.FC<ArchitectureModalProps> = ({ isOpen, on
               </p>
             </div>
 
-            <div className="bg-gray-950/70 border border-gray-800 p-3 rounded-2xl">
+            <div className="bg-slate-950/90 border border-slate-800 p-3 rounded-2xl">
               <div className="flex items-center gap-1.5 text-xs font-bold text-white mb-1">
                 <CheckCircle2 className="w-4 h-4 text-blue-400" />
                 <span>Resilient Fallback Mode</span>
@@ -173,7 +173,7 @@ export const ArchitectureModal: React.FC<ArchitectureModalProps> = ({ isOpen, on
               </p>
             </div>
 
-            <div className="bg-gray-950/70 border border-gray-800 p-3 rounded-2xl">
+            <div className="bg-slate-950/90 border border-slate-800 p-3 rounded-2xl">
               <div className="flex items-center gap-1.5 text-xs font-bold text-white mb-1">
                 <Bot className="w-4 h-4 text-purple-400" />
                 <span>Claude 3 Guardrails</span>

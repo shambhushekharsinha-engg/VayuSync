@@ -180,10 +180,10 @@ Dispatched via Amazon SNS to ${activeProfile.contactPerson}.
         </div>
 
         {/* Category Toggles */}
-        <div className="flex items-center gap-1.5 bg-gray-950 p-1 border border-gray-800 rounded-2xl overflow-x-auto no-scrollbar">
+        <div className="flex flex-wrap items-center gap-1.5 bg-gray-950 p-1 border border-gray-800 rounded-2xl">
           {[
             { id: 'SCHOOL', label: 'Schools', icon: School },
-            { id: 'CONSTRUCTION', label: 'Outdoor Construction', icon: HardHat },
+            { id: 'CONSTRUCTION', label: 'Construction', icon: HardHat },
             { id: 'HOSPITAL', label: 'Hospitals', icon: Building },
           ].map(({ id, label, icon: Icon }) => (
             <button
